@@ -118,4 +118,45 @@ describe('cancelBooking', () => {
     expect(result.error).toBeUndefined()
     expect(result.success).toBe(true)
   })
+
+  it('promotes first waitlisted booking after cancel', async () => {
+    // Mock: cancel succeeds, returns session_id
+    const cancelChain = {
+      update: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      select: vi.fn().mockResolvedValue({ data: [{ id: 'b-1', session_id: 'sess-1' }], error: null }),
+    }
+    // Mock: find first waitlisted
+    const waitlistChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { id: 'w-1', waitlist_position: 1 }, error: null }),
+    }
+    // Mock: promote waitlisted (update to confirmed)
+    const promoteChain = {
+      update: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ error: null }),
+    }
+    // Mock: get remaining waitlisted
+    const remainingChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gt: vi.fn().mockResolvedValue({ data: [], error: null }),
+    }
+
+    let callCount = 0
+    mockSupabase.from.mockImplementation(() => {
+      callCount++
+      if (callCount === 1) return cancelChain
+      if (callCount === 2) return waitlistChain
+      if (callCount === 3) return promoteChain
+      return remainingChain
+    })
+
+    const result = await cancelBooking('b-1')
+    expect(result.success).toBe(true)
+    expect(promoteChain.update).toHaveBeenCalledWith({ status: 'confirmed', waitlist_position: null })
+  })
 })

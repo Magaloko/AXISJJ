@@ -68,10 +68,48 @@ export async function cancelBooking(bookingId: string): Promise<{ success?: bool
     .update({ status: 'cancelled', waitlist_position: null })
     .eq('id', bookingId)
     .eq('profile_id', user.id)
-    .select('id')
+    .select('id, session_id')
 
   if (error) return { error: 'Stornierung fehlgeschlagen. Bitte versuche es erneut.' }
   if (!cancelled || cancelled.length === 0) return { error: 'Buchung nicht gefunden.' }
+
+  // Promote first waitlisted booking for this session
+  const sessionId = (cancelled[0] as { id: string; session_id: string }).session_id
+  if (sessionId) {
+    const { data: firstWaitlisted } = await supabase
+      .from('bookings')
+      .select('id, waitlist_position')
+      .eq('session_id', sessionId)
+      .eq('status', 'waitlisted')
+      .order('waitlist_position', { ascending: true })
+      .limit(1)
+      .single()
+
+    if (firstWaitlisted) {
+      await supabase
+        .from('bookings')
+        .update({ status: 'confirmed', waitlist_position: null })
+        .eq('id', firstWaitlisted.id)
+
+      // Decrement remaining waitlist positions
+      // NOTE: N+1 loop acceptable at gym scale (< 20 waitlisted per session)
+      const { data: remaining } = await supabase
+        .from('bookings')
+        .select('id, waitlist_position')
+        .eq('session_id', sessionId)
+        .eq('status', 'waitlisted')
+        .gt('waitlist_position', 0)
+
+      if (remaining) {
+        for (const b of remaining) {
+          await supabase
+            .from('bookings')
+            .update({ waitlist_position: (b.waitlist_position ?? 1) - 1 })
+            .eq('id', b.id)
+        }
+      }
+    }
+  }
 
   revalidatePath('/members/buchen')
   revalidatePath('/members/dashboard')
