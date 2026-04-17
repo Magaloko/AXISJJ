@@ -74,7 +74,7 @@ export async function cancelBooking(bookingId: string): Promise<{ success?: bool
   if (!cancelled || cancelled.length === 0) return { error: 'Buchung nicht gefunden.' }
 
   // Promote first waitlisted booking for this session
-  const sessionId = (cancelled[0] as { id: string; session_id: string }).session_id
+  const sessionId = cancelled[0].session_id
   if (sessionId) {
     const { data: firstWaitlisted } = await supabase
       .from('bookings')
@@ -86,10 +86,14 @@ export async function cancelBooking(bookingId: string): Promise<{ success?: bool
       .single()
 
     if (firstWaitlisted) {
-      await supabase
+      const { error: promoteError } = await supabase
         .from('bookings')
         .update({ status: 'confirmed', waitlist_position: null })
         .eq('id', firstWaitlisted.id)
+
+      if (promoteError) {
+        console.error('Waitlist promotion failed:', promoteError)
+      }
 
       // Decrement remaining waitlist positions
       // NOTE: N+1 loop acceptable at gym scale (< 20 waitlisted per session)

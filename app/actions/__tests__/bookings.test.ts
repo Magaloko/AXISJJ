@@ -158,5 +158,6 @@ describe('cancelBooking', () => {
     const result = await cancelBooking('b-1')
     expect(result.success).toBe(true)
     expect(promoteChain.update).toHaveBeenCalledWith({ status: 'confirmed', waitlist_position: null })
+    expect(promoteChain.eq).toHaveBeenCalledWith('id', 'w-1')
   })
 })
