@@ -11,11 +11,11 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: {
     default: 'AXIS Jiu-Jitsu Vienna — Brazilian Jiu-Jitsu in Wien',
-    template: '%s | AXIS JJJ Vienna',
+    template: '%s | AXIS JJ Vienna',
   },
   description:
     'Trainiere Brazilian Jiu-Jitsu in Wien bei Österreichs erstem tschetschenischen Schwarzgurt. Gi, No-Gi, Kids. Jetzt 1 Woche kostenlos testen.',
-  keywords: ['BJJ Wien', 'Brazilian Jiu-Jitsu Vienna', 'AXIS JJJ', 'Grappling Wien'],
+  keywords: ['BJJ Wien', 'Brazilian Jiu-Jitsu Vienna', 'AXIS JJ', 'Grappling Wien'],
   openGraph: {
     siteName: 'AXIS Jiu-Jitsu Vienna',
     locale: 'de_AT',
