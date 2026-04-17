@@ -5,9 +5,14 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard' }
 
+interface ClassType { name: string; gi: boolean; level: string }
+interface BookingRow { id: string }
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
+  // user is non-null here: layout redirects unauthenticated requests before rendering pages
+  const userId = (user as NonNullable<typeof user>).id
 
   const now = new Date().toISOString()
 
@@ -19,29 +24,37 @@ export default async function DashboardPage() {
       class_types(name, gi, level),
       bookings!inner(id, profile_id, status)
     `)
-    .eq('bookings.profile_id', user!.id)
+    .eq('bookings.profile_id', userId)
     .eq('bookings.status', 'confirmed')
     .eq('cancelled', false)
     .gte('starts_at', now)
     .order('starts_at', { ascending: true })
     .limit(1)
 
-  const nextSession = nextSessions?.[0] ?? null
-  const bookingId = nextSession
-    ? (nextSession.bookings as Array<{ id: string }>)?.[0]?.id ?? null
+  const raw = nextSessions?.[0] ?? null
+  const rawBookings = raw?.bookings as BookingRow[] | BookingRow | null | undefined
+  const bookingId = (Array.isArray(rawBookings) ? rawBookings[0] : rawBookings)?.id ?? null
+
+  const rawClassTypes = raw?.class_types as ClassType[] | ClassType | null | undefined
+  const classType: ClassType | null = Array.isArray(rawClassTypes)
+    ? (rawClassTypes[0] ?? null)
+    : (rawClassTypes ?? null)
+
+  const nextSession = raw
+    ? { id: raw.id, starts_at: raw.starts_at, ends_at: raw.ends_at, location: raw.location, class_types: classType }
     : null
 
   // Total sessions attended
   const { count: attendanceCount } = await supabase
     .from('attendances')
     .select('*', { count: 'exact', head: true })
-    .eq('profile_id', user!.id)
+    .eq('profile_id', userId)
 
   // Total confirmed upcoming bookings
   const { count: bookingCount } = await supabase
     .from('bookings')
     .select('*', { count: 'exact', head: true })
-    .eq('profile_id', user!.id)
+    .eq('profile_id', userId)
     .eq('status', 'confirmed')
 
   return (
@@ -51,7 +64,7 @@ export default async function DashboardPage() {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {/* Next class — spans 2 columns */}
         <div className="sm:col-span-2">
-          <NextClassCard session={nextSession as never} bookingId={bookingId} />
+          <NextClassCard session={nextSession} bookingId={bookingId} />
         </div>
 
         {/* Stats */}
