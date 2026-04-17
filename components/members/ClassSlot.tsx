@@ -29,28 +29,35 @@ export function ClassSlot({ session, userBooking, confirmedCount }: Props) {
   const [pending, setPending] = useState(false)
   const [booking, setBooking] = useState<UserBooking | null>(userBooking)
   const [count, setCount] = useState(confirmedCount)
+  const [error, setError] = useState<string | null>(null)
 
   const typeName = session.class_types?.name ?? 'Kurs'
   const isGi = session.class_types?.gi ?? true
   const isFull = count >= session.capacity
 
   const handleBook = async () => {
+    setError(null)
     setPending(true)
     const result = await bookClass(session.id)
     if (result.success) {
       setBooking({ id: 'pending', status: result.status === 'confirmed' ? 'confirmed' : 'waitlisted' })
       if (result.status === 'confirmed') setCount(c => c + 1)
+    } else {
+      setError(result.error ?? 'Fehler beim Buchen.')
     }
     setPending(false)
   }
 
   const handleCancel = async () => {
     if (!booking) return
+    setError(null)
     setPending(true)
     const result = await cancelBooking(booking.id)
     if (result.success) {
       if (booking.status === 'confirmed') setCount(c => c - 1)
       setBooking(null)
+    } else {
+      setError(result.error ?? 'Fehler beim Stornieren.')
     }
     setPending(false)
   }
@@ -87,7 +94,8 @@ export function ClassSlot({ session, userBooking, confirmedCount }: Props) {
         {booking?.status === 'confirmed' || booking?.status === 'waitlisted' ? (
           <button
             onClick={handleCancel}
-            disabled={pending}
+            disabled={pending || booking.id === 'pending'}
+            aria-label={`${typeName} stornieren`}
             className="border border-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 transition-colors hover:border-red-600 hover:text-red-500 disabled:opacity-40"
           >
             {pending ? '...' : 'Stornieren'}
@@ -98,12 +106,16 @@ export function ClassSlot({ session, userBooking, confirmedCount }: Props) {
           <button
             onClick={handleBook}
             disabled={pending}
+            aria-label={`${typeName} buchen`}
             className="bg-red-600 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-white transition-colors hover:bg-red-700 disabled:opacity-40"
           >
             {pending ? '...' : 'Buchen'}
           </button>
         )}
       </div>
+      {error && (
+        <p className="mt-1 text-xs text-red-500">{error}</p>
+      )}
     </div>
   )
 }

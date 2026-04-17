@@ -22,8 +22,8 @@ interface SessionRow {
 export default async function BuchenPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  // user is non-null: layout redirects unauthenticated requests
-  const userId = (user as NonNullable<typeof user>).id
+  if (!user) return null
+  const userId = user.id
 
   const now = new Date()
   const weekStart = startOfDay(now)
