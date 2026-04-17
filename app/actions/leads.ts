@@ -2,14 +2,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
-import { z } from 'zod'
-
-const LeadSchema = z.object({
-  full_name: z.string().min(2, 'Mindestens 2 Zeichen'),
-  email: z.string().email('Ungültige E-Mail-Adresse'),
-  phone: z.string().optional(),
-  message: z.string().optional(),
-})
+import { LeadSchema } from './leads.schema'
 
 export async function createLead(data: unknown): Promise<{ success?: boolean; error?: string }> {
   const parsed = LeadSchema.safeParse(data)

@@ -4,17 +4,8 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 import { createLead } from '@/app/actions/leads'
-
-const schema = z.object({
-  full_name: z.string().min(2, 'Mindestens 2 Zeichen'),
-  email: z.string().email('Ungültige E-Mail-Adresse'),
-  phone: z.string().optional(),
-  message: z.string().optional(),
-})
-
-type FormData = z.infer<typeof schema>
+import { LeadSchema, type LeadFormData } from '@/app/actions/leads.schema'
 
 export default function TrialPage() {
   const [submitted, setSubmitted] = useState(false)
@@ -24,9 +15,9 @@ export default function TrialPage() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) })
+  } = useForm<LeadFormData>({ resolver: zodResolver(LeadSchema) })
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: LeadFormData) => {
     setServerError('')
     const result = await createLead(data)
     if (result.error) {
