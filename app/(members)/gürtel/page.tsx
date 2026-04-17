@@ -32,7 +32,7 @@ export default async function GuertelPage() {
     ? (rawBeltRank[0] ?? null)
     : (rawBeltRank as BeltRankRow | null) ?? null
 
-  const monthsInGrade = latestRow
+  const monthsInGrade = latestRow?.promoted_at
     ? differenceInMonths(new Date(), new Date(latestRow.promoted_at))
     : 0
 

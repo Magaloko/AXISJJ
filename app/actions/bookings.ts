@@ -108,7 +108,7 @@ export async function cancelBooking(bookingId: string): Promise<{ success?: bool
         for (const b of remaining) {
           await supabase
             .from('bookings')
-            .update({ waitlist_position: (b.waitlist_position ?? 1) - 1 })
+            .update({ waitlist_position: b.waitlist_position! - 1 })
             .eq('id', b.id)
         }
       }

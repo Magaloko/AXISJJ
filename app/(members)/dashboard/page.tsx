@@ -78,7 +78,7 @@ export default async function DashboardPage() {
     ? (rawBeltRank[0] ?? null)
     : (rawBeltRank as BeltRankRow | null) ?? null
 
-  const monthsInGrade = latestRankRow
+  const monthsInGrade = latestRankRow?.promoted_at
     ? differenceInMonths(new Date(), new Date(latestRankRow.promoted_at))
     : 0
 
