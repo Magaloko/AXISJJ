@@ -28,7 +28,7 @@ export default function LoginPage() {
       },
     })
     if (error) {
-      setErrorMsg(error.message)
+      setErrorMsg('Falls diese E-Mail registriert ist, erhältst du einen Magic Link.')
       setStatus('error')
     } else {
       setStatus('success')

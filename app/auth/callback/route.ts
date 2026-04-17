@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/members/dashboard'
+  const safePath = next.startsWith('/') ? next : '/members/dashboard'
 
   if (code) {
     const cookieStore = await cookies()
@@ -17,16 +18,20 @@ export async function GET(request: NextRequest) {
         cookies: {
           getAll() { return cookieStore.getAll() },
           setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
+            try {
+              cookiesToSet.forEach(({ name, value, options }) =>
+                cookieStore.set(name, value, options)
+              )
+            } catch {
+              // Cookie setting may fail in middleware context — safe to ignore
+            }
           },
         },
       }
     )
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      return NextResponse.redirect(new URL(next, origin))
+      return NextResponse.redirect(new URL(safePath, origin))
     }
   }
 
