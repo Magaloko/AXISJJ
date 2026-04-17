@@ -9,7 +9,7 @@ describe('calcReadiness', () => {
 
   it('returns 50 when half the sessions done and no time requirement', () => {
     // minTimeMonths null → time component = 50 (fully met)
-    // sessions: 25/100 → 25/100 * 50 = 12.5 → total = 62 (rounded)
+    // sessions: 25/100 → 25/100 * 50 = 12.5 → total = 62.5 → 63
     expect(calcReadiness(25, 100, 0, null)).toBe(63)
   })
 
@@ -29,5 +29,23 @@ describe('calcReadiness', () => {
   it('handles only time requirement', () => {
     // minSessions null → sessions = 50, months 6/12 = 25, total = 75
     expect(calcReadiness(0, null, 6, 12)).toBe(75)
+  })
+
+  it('returns 50 when sessions are 0 and no time requirement', () => {
+    // s = 0/100 * 50 = 0, t = 50, total = 50
+    expect(calcReadiness(0, 100, 0, null)).toBe(50)
+  })
+
+  it('rounds down for fractional result', () => {
+    // s = 40/100 * 50 = 20, t = 50, total = 70
+    expect(calcReadiness(40, 100, 0, null)).toBe(70)
+  })
+
+  it('throws for minSessions = 0', () => {
+    expect(() => calcReadiness(50, 0, 6, null)).toThrow(RangeError)
+  })
+
+  it('throws for minTimeMonths = 0', () => {
+    expect(() => calcReadiness(50, null, 6, 0)).toThrow(RangeError)
   })
 })

@@ -12,8 +12,10 @@ export function calcReadiness(
   monthsInGrade: number,
   minTimeMonths: number | null
 ): number {
-  if (!minSessions && !minTimeMonths) return 0
-  const s = minSessions ? Math.min(50, (sessionsAttended / minSessions) * 50) : 50
-  const t = minTimeMonths ? Math.min(50, (monthsInGrade / minTimeMonths) * 50) : 50
+  if (minSessions === null && minTimeMonths === null) return 0
+  if (minSessions !== null && minSessions <= 0) throw new RangeError('minSessions must be > 0')
+  if (minTimeMonths !== null && minTimeMonths <= 0) throw new RangeError('minTimeMonths must be > 0')
+  const s = minSessions !== null ? Math.min(50, (sessionsAttended / minSessions) * 50) : 50
+  const t = minTimeMonths !== null ? Math.min(50, (monthsInGrade / minTimeMonths) * 50) : 50
   return Math.min(100, Math.round(s + t))
 }
