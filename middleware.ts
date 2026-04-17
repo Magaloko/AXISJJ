@@ -27,8 +27,20 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/members') && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
-  if (pathname.startsWith('/admin') && !user) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  if (pathname.startsWith('/admin')) {
+    if (!user) {
+      return NextResponse.redirect(new URL('/login', request.url))
+    }
+    // Fetch role — single lightweight query, cached by Supabase connection pooler
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile || !['coach', 'owner'].includes(profile.role)) {
+      return NextResponse.redirect(new URL('/members/dashboard', request.url))
+    }
   }
   if (pathname === '/login' && user) {
     return NextResponse.redirect(new URL('/members/dashboard', request.url))

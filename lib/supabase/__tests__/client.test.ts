@@ -6,9 +6,11 @@ vi.mock('@supabase/ssr', () => ({
 
 describe('createClient (browser)', () => {
   beforeEach(() => {
+    vi.resetModules()
     process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key'
   })
+
   it('returns a Supabase client object', async () => {
     const { createClient } = await import('../client')
     const client = createClient()
