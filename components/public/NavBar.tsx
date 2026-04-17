@@ -19,7 +19,7 @@ export function NavBar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <Link href="/" aria-label="AXIS JIU JITSU — Zur Startseite">
           <Image
-            src="/images/logo.png"
+            src="/images/logo.jpg"
             alt="AXIS JIU JITSU"
             width={48}
             height={48}

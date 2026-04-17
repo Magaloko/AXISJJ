@@ -12,7 +12,7 @@ export function Footer() {
 
           <div>
             <Image
-              src="/images/logo.png"
+              src="/images/logo.jpg"
               alt="AXIS JIU JITSU"
               width={56}
               height={56}

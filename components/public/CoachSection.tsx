@@ -68,7 +68,7 @@ export function CoachSection() {
             <div className="absolute -right-4 -top-4 h-full w-3/4 bg-red-600/10 blur-2xl" />
             <div className="relative overflow-hidden">
               <Image
-                src="/images/coach-banner.jpg"
+                src="/images/Artboard-2-2-1170x536.png"
                 alt="Shamsudin Baisarov — Head Coach AXIS Jiu-Jitsu Vienna"
                 width={600}
                 height={500}
