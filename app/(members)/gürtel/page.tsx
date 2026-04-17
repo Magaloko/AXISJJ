@@ -80,14 +80,14 @@ export default async function GuertelPage() {
                 const rank = Array.isArray(raw) ? raw[0] : raw as { name: string; stripes: number; color_hex: string | null } | null
                 if (!rank) return null
                 return (
-                  <div key={i} className="flex items-center gap-3">
+                  <div key={row.promoted_at ?? i} className="flex items-center gap-3">
                     <div
                       className="h-2 w-10 flex-shrink-0 rounded-sm"
                       style={{ backgroundColor: rank.color_hex ?? '#e5e7eb', border: rank.color_hex === '#111111' ? '1px solid #dc2626' : undefined }}
                     />
                     <span className="text-sm text-white">{rank.name} · {rank.stripes} Stripes</span>
                     <span className="ml-auto text-xs text-gray-600">
-                      {new Date(row.promoted_at).toLocaleDateString('de-AT', { year: 'numeric', month: 'long' })}
+                      {row.promoted_at ? new Date(row.promoted_at).toLocaleDateString('de-AT', { year: 'numeric', month: 'long' }) : '—'}
                     </span>
                   </div>
                 )
