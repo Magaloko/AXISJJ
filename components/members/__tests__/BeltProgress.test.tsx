@@ -20,7 +20,7 @@ describe('BeltProgress', () => {
 
   it('renders readiness percentage', () => {
     render(<BeltProgress {...mockRank} />)
-    expect(screen.getByText('72%')).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: /72%/ })).toBeInTheDocument()
   })
 
   it('renders stripe count', () => {

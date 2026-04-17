@@ -21,8 +21,9 @@ export function BeltProgress({ beltName, stripes, colorHex, readiness, sessionsA
 
   const radius = 28
   const circumference = 2 * Math.PI * radius
-  const offset = circumference - (readiness / 100) * circumference
   const beltColor = colorHex ?? '#e5e7eb'
+  const clampedReadiness = Math.min(100, Math.max(0, readiness))
+  const offset = circumference - (clampedReadiness / 100) * circumference
 
   return (
     <div className="border border-white/5 bg-[#111111] p-6">
@@ -30,12 +31,18 @@ export function BeltProgress({ beltName, stripes, colorHex, readiness, sessionsA
 
       <div className="mt-4 flex items-center gap-6">
         {/* SVG progress ring */}
-        <svg width="80" height="80" viewBox="0 0 80 80" aria-label={`${readiness}% Promotionsbereitschaft`}>
+        <svg
+          role="img"
+          width="80"
+          height="80"
+          viewBox="0 0 80 80"
+          aria-label={`${beltName} Belt, ${stripes} Stripes. Promotionsbereitschaft: ${clampedReadiness}%. ${sessionsAttended} Trainings, ${monthsInGrade} Monate.`}
+        >
           <circle cx="40" cy="40" r={radius} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="5" />
           <circle
             cx="40" cy="40" r={radius}
             fill="none"
-            stroke="#dc2626"
+            stroke={beltColor}
             strokeWidth="5"
             strokeLinecap="round"
             strokeDasharray={circumference}
@@ -43,7 +50,7 @@ export function BeltProgress({ beltName, stripes, colorHex, readiness, sessionsA
             transform="rotate(-90 40 40)"
           />
           <text x="40" y="45" textAnchor="middle" fill="white" fontSize="13" fontWeight="bold">
-            {readiness}%
+            {clampedReadiness}%
           </text>
         </svg>
 
