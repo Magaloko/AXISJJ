@@ -36,10 +36,12 @@ export function SkillCard({ skill, initialStatus }: Props) {
   const [isPending, startTransition] = useTransition()
 
   const cycle = () => {
+    const prev = status
     const next = STATUS_NEXT[status]
     setStatus(next)
     startTransition(async () => {
-      await updateSkillStatus(skill.id, next)
+      const result = await updateSkillStatus(skill.id, next)
+      if (result.error) setStatus(prev)
     })
   }
 

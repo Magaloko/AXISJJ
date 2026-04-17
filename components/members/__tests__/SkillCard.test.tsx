@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi } from 'vitest'
 import { SkillCard } from '../SkillCard'
+import { updateSkillStatus } from '@/app/actions/skills'
 
 vi.mock('@/app/actions/skills', () => ({
   updateSkillStatus: vi.fn().mockResolvedValue({ success: true }),
@@ -31,11 +32,25 @@ describe('SkillCard', () => {
     expect(screen.getByRole('button', { name: /beherrscht/i })).toBeInTheDocument()
   })
 
-  it('cycles status on click', async () => {
+  it('cycles status through full ring on click', async () => {
+    const user = userEvent.setup()
+    render(<SkillCard skill={mockSkill} initialStatus="not_started" />)
+    // not_started → in_progress
+    await user.click(screen.getByRole('button', { name: /nicht begonnen/i }))
+    expect(screen.getByRole('button', { name: /in arbeit/i })).toBeInTheDocument()
+    // in_progress → mastered
+    await user.click(screen.getByRole('button', { name: /in arbeit/i }))
+    expect(screen.getByRole('button', { name: /beherrscht/i })).toBeInTheDocument()
+    // mastered → not_started
+    await user.click(screen.getByRole('button', { name: /beherrscht/i }))
+    expect(screen.getByRole('button', { name: /nicht begonnen/i })).toBeInTheDocument()
+  })
+
+  it('calls updateSkillStatus with correct args on cycle', async () => {
     const user = userEvent.setup()
     render(<SkillCard skill={mockSkill} initialStatus="not_started" />)
     await user.click(screen.getByRole('button', { name: /nicht begonnen/i }))
-    expect(screen.getByRole('button', { name: /in arbeit/i })).toBeInTheDocument()
+    expect(updateSkillStatus).toHaveBeenCalledWith('skill-1', 'in_progress')
   })
 
   it('renders video link when video_url provided', () => {
