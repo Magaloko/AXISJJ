@@ -188,6 +188,28 @@ export interface Database {
           }
         ]
       }
+      gym_settings: {
+        Row: {
+          id: number
+          name: string
+          address_line1: string | null
+          address_line2: string | null
+          postal_code: string | null
+          city: string | null
+          country: string | null
+          phone: string | null
+          email: string | null
+          website: string | null
+          opening_hours: Json
+          house_rules: string | null
+          cancellation_policy: string | null
+          pricing_info: string | null
+          updated_at: string
+        }
+        Insert: Partial<Database['public']['Tables']['gym_settings']['Row']>
+        Update: Partial<Database['public']['Tables']['gym_settings']['Row']>
+        Relationships: []
+      }
     }
     Views: { [_ in never]: never }
     Functions: { get_my_role: { Args: Record<PropertyKey, never>; Returns: string } }
