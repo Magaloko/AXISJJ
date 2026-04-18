@@ -4,12 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
-
-const profileSchema = z.object({
-  full_name: z.string().min(2),
-  phone: z.string().optional(),
-  date_of_birth: z.string().optional(),
-})
+import { profileSchema } from './profile.schema'
 
 export async function updateProfile(
   data: z.infer<typeof profileSchema>
