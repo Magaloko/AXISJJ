@@ -98,7 +98,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="mb-6 text-2xl font-black text-white">{t.dashboard.title}</h1>
+      <h1 className="mb-6 text-2xl font-black text-foreground">{t.dashboard.title}</h1>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="sm:col-span-2">
@@ -106,13 +106,13 @@ export default async function DashboardPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="border border-white/5 bg-[#111111] p-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-600">{t.dashboard.trainingsTotal}</p>
-            <p className="mt-2 text-4xl font-black text-white">{attendanceCount ?? 0}</p>
+          <div className="border border-border bg-card p-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t.dashboard.trainingsTotal}</p>
+            <p className="mt-2 text-4xl font-black text-foreground" style={{ fontFamily: 'var(--font-mono)' }}>{attendanceCount ?? 0}</p>
           </div>
-          <div className="border border-white/5 bg-[#111111] p-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-600">{t.dashboard.activeBookings}</p>
-            <p className="mt-2 text-4xl font-black text-white">{bookingCount ?? 0}</p>
+          <div className="border border-border bg-card p-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t.dashboard.activeBookings}</p>
+            <p className="mt-2 text-4xl font-black text-foreground" style={{ fontFamily: 'var(--font-mono)' }}>{bookingCount ?? 0}</p>
           </div>
         </div>
 

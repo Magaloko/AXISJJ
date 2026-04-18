@@ -33,12 +33,12 @@ export default async function KontoPage() {
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="mb-6 text-2xl font-black text-white">{t.title}</h1>
+      <h1 className="mb-6 text-2xl font-black text-foreground">{t.title}</h1>
 
       <div className="max-w-lg space-y-8">
         {/* Profile */}
         <section>
-          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-600">
+          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             {t.profileSection}
           </p>
           <ProfileForm profile={profile} lang={lang} />
@@ -46,7 +46,7 @@ export default async function KontoPage() {
 
         {/* Language */}
         <section>
-          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-600">
+          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             {t.languageSection}
           </p>
           <LanguageToggle current={lang} />
@@ -54,24 +54,24 @@ export default async function KontoPage() {
 
         {/* Documents */}
         <section>
-          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-600">
+          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
             {t.documentsSection}
           </p>
           {!documents || documents.length === 0 ? (
-            <p className="text-sm text-gray-500">{t.noDocuments}</p>
+            <p className="text-sm text-muted-foreground">{t.noDocuments}</p>
           ) : (
             <div className="space-y-3">
               {documents.map((doc) => (
                 <div
                   key={`${doc.type}-${doc.signed_at}`}
-                  className="flex items-center justify-between border border-white/5 bg-[#111111] p-4"
+                  className="flex items-center justify-between border border-border bg-card p-4"
                 >
                   <div>
-                    <p className="text-sm font-medium text-white">
+                    <p className="text-sm font-medium text-foreground">
                       {doc.type === 'waiver' ? t.waiver : t.contract}
                     </p>
                     {doc.signed_at && (
-                      <p className="mt-0.5 text-xs text-gray-500">
+                      <p className="mt-0.5 text-xs text-muted-foreground">
                         {t.signedAt} {formatDate(doc.signed_at)}
                       </p>
                     )}
@@ -81,7 +81,7 @@ export default async function KontoPage() {
                       href={doc.content_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs font-bold uppercase tracking-wider text-red-600 hover:text-red-500"
+                      className="text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80"
                     >
                       {t.download}
                     </a>

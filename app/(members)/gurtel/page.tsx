@@ -65,7 +65,7 @@ export default async function GuertelPage() {
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="mb-6 text-2xl font-black text-white">{t.title}</h1>
+      <h1 className="mb-6 text-2xl font-black text-foreground">{t.title}</h1>
 
       <div className="max-w-lg space-y-6">
         <BeltProgress
@@ -80,8 +80,8 @@ export default async function GuertelPage() {
 
         {/* Rank history */}
         {allRanks && allRanks.length > 1 && (
-          <div className="border border-white/5 bg-[#111111] p-6">
-            <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-600">{t.history}</p>
+          <div className="border border-border bg-card p-6">
+            <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">{t.history}</p>
             <div className="space-y-3">
               {allRanks.map((row, i) => {
                 const raw = row.belt_ranks
@@ -91,10 +91,10 @@ export default async function GuertelPage() {
                   <div key={row.promoted_at ?? i} className="flex items-center gap-3">
                     <div
                       className="h-2 w-10 flex-shrink-0 rounded-sm"
-                      style={{ backgroundColor: rank.color_hex ?? '#e5e7eb', border: rank.color_hex === '#111111' ? '1px solid #dc2626' : undefined }}
+                      style={{ backgroundColor: rank.color_hex ?? '#e5e7eb', border: rank.color_hex === '#111111' ? '1px solid oklch(58% 0.21 28)' : undefined }}
                     />
-                    <span className="text-sm text-white">{rank.name} · {rank.stripes} Stripes</span>
-                    <span className="ml-auto text-xs text-gray-600">
+                    <span className="text-sm text-foreground">{rank.name} · {rank.stripes} Stripes</span>
+                    <span className="ml-auto text-xs text-muted-foreground">
                       {row.promoted_at ? new Date(row.promoted_at).toLocaleDateString('de-AT', { year: 'numeric', month: 'long' }) : '—'}
                     </span>
                   </div>
