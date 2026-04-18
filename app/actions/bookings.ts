@@ -53,8 +53,8 @@ export async function bookClass(sessionId: string): Promise<{ success?: boolean;
 
   if (error) return { error: 'Buchung fehlgeschlagen. Bitte versuche es erneut.' }
 
-  revalidatePath('/members/buchen')
-  revalidatePath('/members/dashboard')
+  revalidatePath('/buchen')
+  revalidatePath('/dashboard')
   return { success: true, status }
 }
 
@@ -115,7 +115,7 @@ export async function cancelBooking(bookingId: string): Promise<{ success?: bool
     }
   }
 
-  revalidatePath('/members/buchen')
-  revalidatePath('/members/dashboard')
+  revalidatePath('/buchen')
+  revalidatePath('/dashboard')
   return { success: true }
 }

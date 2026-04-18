@@ -8,8 +8,8 @@ export async function GET(request: NextRequest) {
     const code = searchParams.get('code')
     const token_hash = searchParams.get('token_hash')
     const type = searchParams.get('type')
-    const next = searchParams.get('next') ?? '/members/dashboard'
-    const safePath = next.startsWith('/') ? next : '/members/dashboard'
+    const next = searchParams.get('next') ?? '/dashboard'
+    const safePath = next.startsWith('/') ? next : '/dashboard'
 
   const cookieStore = await cookies()
     const supabase = createServerClient(
