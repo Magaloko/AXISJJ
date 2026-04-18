@@ -1,0 +1,95 @@
+import { cookies } from 'next/headers'
+import { createClient } from '@/lib/supabase/server'
+import { translations, type Lang } from '@/lib/i18n'
+import { ProfileForm } from '@/components/members/ProfileForm'
+import { LanguageToggle } from '@/components/members/LanguageToggle'
+import { formatDate } from '@/lib/utils/dates'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Konto' }
+
+export default async function KontoPage() {
+  const lang = ((await cookies()).get('lang')?.value ?? 'de') as Lang
+  const t = translations[lang].konto
+
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return null
+
+  const [{ data: profile }, { data: documents }] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('full_name, phone, date_of_birth, language')
+      .eq('id', user.id)
+      .single(),
+    supabase
+      .from('documents')
+      .select('type, signed_at, content_url')
+      .eq('profile_id', user.id)
+      .order('signed_at', { ascending: false }),
+  ])
+
+  return (
+    <div className="p-6 sm:p-8">
+      <h1 className="mb-6 text-2xl font-black text-white">{t.title}</h1>
+
+      <div className="max-w-lg space-y-8">
+        {/* Profile */}
+        <section>
+          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-600">
+            {t.profileSection}
+          </p>
+          <ProfileForm profile={profile} lang={lang} />
+        </section>
+
+        {/* Language */}
+        <section>
+          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-600">
+            {t.languageSection}
+          </p>
+          <LanguageToggle current={lang} />
+        </section>
+
+        {/* Documents */}
+        <section>
+          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-600">
+            {t.documentsSection}
+          </p>
+          {!documents || documents.length === 0 ? (
+            <p className="text-sm text-gray-500">{t.noDocuments}</p>
+          ) : (
+            <div className="space-y-3">
+              {documents.map((doc, i) => (
+                <div
+                  key={i}
+                  className="flex items-center justify-between border border-white/5 bg-[#111111] p-4"
+                >
+                  <div>
+                    <p className="text-sm font-medium text-white">
+                      {doc.type === 'waiver' ? t.waiver : t.contract}
+                    </p>
+                    {doc.signed_at && (
+                      <p className="mt-0.5 text-xs text-gray-500">
+                        {t.signedAt} {formatDate(doc.signed_at)}
+                      </p>
+                    )}
+                  </div>
+                  {doc.content_url && (
+                    <a
+                      href={doc.content_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-bold uppercase tracking-wider text-red-600 hover:text-red-500"
+                    >
+                      {t.download}
+                    </a>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </div>
+  )
+}
