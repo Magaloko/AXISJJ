@@ -38,6 +38,12 @@ export function NavBar() {
             </Link>
           ))}
           <Link
+            href="/login"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Login
+          </Link>
+          <Link
             href="/trial"
             className="bg-primary px-5 py-2 text-sm font-black tracking-widest text-primary-foreground transition-colors hover:bg-primary/90"
           >
@@ -74,6 +80,13 @@ export function NavBar() {
               {link.label}
             </Link>
           ))}
+          <Link
+            href="/login"
+            className="text-sm text-muted-foreground"
+            onClick={() => setOpen(false)}
+          >
+            Login
+          </Link>
           <Link
             href="/trial"
             className="bg-primary px-4 py-2 text-center text-sm font-black tracking-widest text-primary-foreground"
