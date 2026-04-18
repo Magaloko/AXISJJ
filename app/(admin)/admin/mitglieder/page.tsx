@@ -11,11 +11,20 @@ export default async function MitgliederPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
+  const { data: callerProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  const callerRole = (callerProfile?.role as string | undefined) ?? 'member'
+  const viewerRole: 'coach' | 'owner' = callerRole === 'owner' ? 'owner' : 'coach'
+
   const [profilesResult, beltsResult] = await Promise.all([
     supabase
       .from('profiles')
       .select(`
-        id, full_name, created_at,
+        id, full_name, created_at, phone, date_of_birth, role,
         profile_ranks(promoted_at, belt_ranks(name, stripes, color_hex))
       `)
       .eq('role', 'member')
@@ -59,6 +68,9 @@ export default async function MitgliederPage() {
       id: p.id as string,
       full_name: p.full_name as string | null,
       created_at: p.created_at as string,
+      phone: (p.phone as string | null) ?? null,
+      date_of_birth: (p.date_of_birth as string | null) ?? null,
+      role: ((p.role as string) ?? 'member') as 'member' | 'coach' | 'owner',
       lastAttendance: lastAttendanceMap.get(p.id as string) ?? null,
       belt: belt ? {
         name: (belt as { name: string; stripes: number; color_hex: string | null }).name,
@@ -77,7 +89,7 @@ export default async function MitgliederPage() {
   return (
     <div className="p-6 sm:p-8">
       <h1 className="mb-6 text-2xl font-black text-foreground">Mitglieder</h1>
-      <MemberTable members={members} belts={belts} />
+      <MemberTable members={members} belts={belts} viewerRole={viewerRole} />
     </div>
   )
 }

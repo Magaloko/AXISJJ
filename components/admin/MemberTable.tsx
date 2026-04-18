@@ -2,6 +2,7 @@
 'use client'
 
 import { useState } from 'react'
+import { MemberEditPanel, type MemberDetail } from './MemberEditPanel'
 
 interface Belt { id: string; name: string; color_hex: string | null }
 interface Member {
@@ -9,18 +10,22 @@ interface Member {
   full_name: string | null
   created_at: string
   lastAttendance: string | null
+  phone: string | null
+  date_of_birth: string | null
+  role: 'member' | 'coach' | 'owner'
   belt: { name: string; stripes: number; color_hex: string | null } | null
 }
 
 interface Props {
   members: Member[]
   belts: Belt[]
+  viewerRole: 'coach' | 'owner'
 }
 
-export function MemberTable({ members, belts }: Props) {
+export function MemberTable({ members, belts, viewerRole }: Props) {
   const [search, setSearch] = useState('')
   const [beltFilter, setBeltFilter] = useState('')
-  const [selected, setSelected] = useState<Member | null>(null)
+  const [selected, setSelected] = useState<MemberDetail | null>(null)
 
   const filtered = members.filter(m => {
     const matchesSearch = !search || (m.full_name ?? '').toLowerCase().includes(search.toLowerCase())
@@ -71,7 +76,13 @@ export function MemberTable({ members, belts }: Props) {
             {filtered.map(member => (
               <tr
                 key={member.id}
-                onClick={() => setSelected(member)}
+                onClick={() => setSelected({
+                  id: member.id,
+                  full_name: member.full_name ?? '',
+                  phone: member.phone,
+                  date_of_birth: member.date_of_birth,
+                  role: member.role,
+                })}
                 className="cursor-pointer border-b border-border/50 hover:bg-muted/50 transition-colors"
               >
                 <td className="py-3 pr-4 font-semibold text-foreground">
@@ -116,44 +127,12 @@ export function MemberTable({ members, belts }: Props) {
         </table>
       </div>
 
-      {/* Member detail panel (read-only modal) */}
       {selected && (
-        <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 p-4"
-          onClick={() => setSelected(null)}
-        >
-          <div
-            className="w-full max-w-sm border border-border bg-card p-6 shadow-xl"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="mb-4 flex items-start justify-between">
-              <h2 className="text-base font-black text-foreground">{selected.full_name ?? '—'}</h2>
-              <button
-                onClick={() => setSelected(null)}
-                className="text-muted-foreground hover:text-foreground"
-                aria-label="Detail schließen"
-              >
-                ✕
-              </button>
-            </div>
-            <dl className="space-y-3 text-sm">
-              <div>
-                <dt className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Gürtel</dt>
-                <dd className="mt-0.5 font-semibold text-foreground">
-                  {selected.belt ? `${selected.belt.name} · ${selected.belt.stripes} Stripe(s)` : '—'}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Mitglied seit</dt>
-                <dd className="mt-0.5 font-semibold text-foreground">{formatDate(selected.created_at)}</dd>
-              </div>
-              <div>
-                <dt className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Letztes Training</dt>
-                <dd className="mt-0.5 font-semibold text-foreground">{formatDate(selected.lastAttendance)}</dd>
-              </div>
-            </dl>
-          </div>
-        </div>
+        <MemberEditPanel
+          member={selected}
+          viewerRole={viewerRole}
+          onClose={() => setSelected(null)}
+        />
       )}
     </div>
   )
