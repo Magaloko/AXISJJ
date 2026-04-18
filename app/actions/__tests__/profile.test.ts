@@ -69,6 +69,11 @@ describe('updateLanguage', () => {
     mockCookieStore.set.mockReset()
   })
 
+  it('returns error for invalid lang value', async () => {
+    const result = await updateLanguage('fr' as 'de' | 'en')
+    expect(result.error).toBeDefined()
+  })
+
   it('returns error when not authenticated', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null }, error: null })
     const result = await updateLanguage('en')

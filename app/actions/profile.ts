@@ -34,6 +34,7 @@ export async function updateProfile(
 export async function updateLanguage(
   lang: 'de' | 'en'
 ): Promise<{ success?: boolean; error?: string }> {
+  if (lang !== 'de' && lang !== 'en') return { error: 'Ungültige Sprache.' }
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { error: 'Nicht eingeloggt.' }

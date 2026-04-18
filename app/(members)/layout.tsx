@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { MemberNav } from '@/components/members/MemberNav'
-import { type Lang } from '@/lib/i18n'
+import { resolveLang } from '@/lib/i18n/resolve-lang'
 
 export default async function MembersLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient()
@@ -19,7 +19,7 @@ export default async function MembersLayout({ children }: { children: React.Reac
 
   const displayName = profile?.full_name ?? user.email ?? 'Member'
   const rawLang = (await cookies()).get('lang')?.value
-  const lang: Lang = rawLang === 'en' ? 'en' : (profile?.language === 'en' ? 'en' : 'de')
+  const lang = resolveLang(rawLang, profile?.language)
 
   return (
     <div className="min-h-screen bg-[#0a0a0a]">

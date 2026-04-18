@@ -3,7 +3,8 @@ import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { ClassSlot } from '@/components/members/ClassSlot'
 import { getDayLabel, formatDateShort, getNextSevenDays, startOfDay, endOfDay, addDays } from '@/lib/utils/dates'
-import { translations, type Lang } from '@/lib/i18n'
+import { translations } from '@/lib/i18n'
+import { resolveLang } from '@/lib/i18n/resolve-lang'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Klassen buchen' }
@@ -23,7 +24,7 @@ interface SessionRow {
 
 export default async function BuchenPage() {
   const rawLang = (await cookies()).get('lang')?.value
-  const lang: Lang = rawLang === 'en' ? 'en' : 'de'
+  const lang = resolveLang(rawLang)
   const t = translations[lang].buchen
 
   const supabase = await createClient()

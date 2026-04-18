@@ -2,7 +2,8 @@
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { SkillCard } from '@/components/members/SkillCard'
-import { translations, type Lang } from '@/lib/i18n'
+import { translations } from '@/lib/i18n'
+import { resolveLang } from '@/lib/i18n/resolve-lang'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Skills' }
@@ -25,7 +26,7 @@ interface CategoryRow {
 
 export default async function SkillsPage() {
   const rawLang = (await cookies()).get('lang')?.value
-  const lang: Lang = rawLang === 'en' ? 'en' : 'de'
+  const lang = resolveLang(rawLang)
   const t = translations[lang].skills
 
   const supabase = await createClient()

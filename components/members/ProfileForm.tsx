@@ -46,10 +46,11 @@ export function ProfileForm({ profile, lang }: Props) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-gray-600">
+        <label htmlFor="full_name" className="mb-1 block text-xs font-bold uppercase tracking-widest text-gray-600">
           {t.fullName}
         </label>
         <input
+          id="full_name"
           {...register('full_name')}
           className="w-full border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:border-red-600 focus:outline-none"
         />
@@ -59,10 +60,11 @@ export function ProfileForm({ profile, lang }: Props) {
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-gray-600">
+        <label htmlFor="phone" className="mb-1 block text-xs font-bold uppercase tracking-widest text-gray-600">
           {t.phone}
         </label>
         <input
+          id="phone"
           {...register('phone')}
           type="tel"
           className="w-full border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:border-red-600 focus:outline-none"
@@ -70,10 +72,11 @@ export function ProfileForm({ profile, lang }: Props) {
       </div>
 
       <div>
-        <label className="mb-1 block text-xs font-bold uppercase tracking-widest text-gray-600">
+        <label htmlFor="date_of_birth" className="mb-1 block text-xs font-bold uppercase tracking-widest text-gray-600">
           {t.dateOfBirth}
         </label>
         <input
+          id="date_of_birth"
           {...register('date_of_birth')}
           type="date"
           className="w-full border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:border-red-600 focus:outline-none [color-scheme:dark]"

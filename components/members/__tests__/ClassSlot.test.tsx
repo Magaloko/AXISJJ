@@ -46,7 +46,7 @@ describe('ClassSlot', () => {
 
   it('renders English Book button when lang is en', () => {
     render(<ClassSlot session={mockSession} userBooking={null} confirmedCount={5} lang="en" />)
-    expect(screen.getByRole('button', { name: /^book$/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /book/i })).toBeInTheDocument()
   })
 
   it('renders English Full text when full and lang is en', () => {

@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 import { BeltProgress } from '@/components/members/BeltProgress'
 import { calcReadiness } from '@/lib/utils/belt'
 import { differenceInMonths } from 'date-fns'
-import { translations, type Lang } from '@/lib/i18n'
+import { translations } from '@/lib/i18n'
+import { resolveLang } from '@/lib/i18n/resolve-lang'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Gürtel' }
@@ -16,7 +17,7 @@ interface BeltRankRow {
 
 export default async function GuertelPage() {
   const rawLang = (await cookies()).get('lang')?.value
-  const lang: Lang = rawLang === 'en' ? 'en' : 'de'
+  const lang = resolveLang(rawLang)
   const t = translations[lang].gurtel
 
   const supabase = await createClient()

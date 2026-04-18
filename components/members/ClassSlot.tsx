@@ -98,6 +98,7 @@ export function ClassSlot({ session, userBooking, confirmedCount, lang = 'de' }:
           <button
             onClick={handleCancel}
             disabled={pending || booking.id === 'pending'}
+            aria-label={`${typeName} ${t.cancel}`}
             className="border border-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 transition-colors hover:border-red-600 hover:text-red-500 disabled:opacity-40"
           >
             {pending ? '...' : t.cancel}
@@ -108,6 +109,7 @@ export function ClassSlot({ session, userBooking, confirmedCount, lang = 'de' }:
           <button
             onClick={handleBook}
             disabled={pending}
+            aria-label={`${typeName} ${t.book}`}
             className="bg-red-600 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-white transition-colors hover:bg-red-700 disabled:opacity-40"
           >
             {pending ? '...' : t.book}
