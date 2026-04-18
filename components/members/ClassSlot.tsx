@@ -4,6 +4,7 @@
 import { useState } from 'react'
 import { formatTime } from '@/lib/utils/dates'
 import { bookClass, cancelBooking } from '@/app/actions/bookings'
+import { translations, type Lang } from '@/lib/i18n'
 
 interface Session {
   id: string
@@ -23,9 +24,11 @@ interface Props {
   session: Session
   userBooking: UserBooking | null
   confirmedCount: number
+  lang?: Lang
 }
 
-export function ClassSlot({ session, userBooking, confirmedCount }: Props) {
+export function ClassSlot({ session, userBooking, confirmedCount, lang = 'de' }: Props) {
+  const t = translations[lang].classSlot
   const [pending, setPending] = useState(false)
   const [booking, setBooking] = useState<UserBooking | null>(userBooking)
   const [count, setCount] = useState(confirmedCount)
@@ -43,7 +46,7 @@ export function ClassSlot({ session, userBooking, confirmedCount }: Props) {
       setBooking({ id: 'pending', status: result.status === 'confirmed' ? 'confirmed' : 'waitlisted' })
       if (result.status === 'confirmed') setCount(c => c + 1)
     } else {
-      setError(result.error ?? 'Fehler beim Buchen.')
+      setError(result.error ?? t.errorBook)
     }
     setPending(false)
   }
@@ -57,7 +60,7 @@ export function ClassSlot({ session, userBooking, confirmedCount }: Props) {
       if (booking.status === 'confirmed') setCount(c => c - 1)
       setBooking(null)
     } else {
-      setError(result.error ?? 'Fehler beim Stornieren.')
+      setError(result.error ?? t.errorCancel)
     }
     setPending(false)
   }
@@ -67,17 +70,17 @@ export function ClassSlot({ session, userBooking, confirmedCount }: Props) {
       <div className="flex-1">
         <div className="flex items-center gap-2">
           <span className="text-sm font-bold text-white">{typeName}</span>
-          <span className={`text-[10px] font-black tracking-widest px-1.5 py-0.5 ${isGi ? 'bg-white/10 text-gray-400' : 'bg-blue-900/30 text-blue-400'}`}>
+          <span className={`px-1.5 py-0.5 text-[10px] font-black tracking-widest ${isGi ? 'bg-white/10 text-gray-400' : 'bg-blue-900/30 text-blue-400'}`}>
             {isGi ? 'GI' : 'NO-GI'}
           </span>
           {booking?.status === 'confirmed' && (
-            <span className="text-[10px] font-black tracking-widest px-1.5 py-0.5 bg-green-900/30 text-green-400">
-              GEBUCHT
+            <span className="px-1.5 py-0.5 text-[10px] font-black tracking-widest bg-green-900/30 text-green-400">
+              {t.booked}
             </span>
           )}
           {booking?.status === 'waitlisted' && (
-            <span className="text-[10px] font-black tracking-widest px-1.5 py-0.5 bg-yellow-900/30 text-yellow-400">
-              WARTELISTE
+            <span className="px-1.5 py-0.5 text-[10px] font-black tracking-widest bg-yellow-900/30 text-yellow-400">
+              {t.waitlisted}
             </span>
           )}
         </div>
@@ -95,21 +98,19 @@ export function ClassSlot({ session, userBooking, confirmedCount }: Props) {
           <button
             onClick={handleCancel}
             disabled={pending || booking.id === 'pending'}
-            aria-label={`${typeName} stornieren`}
             className="border border-white/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wider text-gray-400 transition-colors hover:border-red-600 hover:text-red-500 disabled:opacity-40"
           >
-            {pending ? '...' : 'Stornieren'}
+            {pending ? '...' : t.cancel}
           </button>
         ) : isFull ? (
-          <span className="text-xs font-bold uppercase tracking-wider text-gray-700">Ausgebucht</span>
+          <span className="text-xs font-bold uppercase tracking-wider text-gray-700">{t.full}</span>
         ) : (
           <button
             onClick={handleBook}
             disabled={pending}
-            aria-label={`${typeName} buchen`}
             className="bg-red-600 px-3 py-1.5 text-xs font-black uppercase tracking-wider text-white transition-colors hover:bg-red-700 disabled:opacity-40"
           >
-            {pending ? '...' : 'Buchen'}
+            {pending ? '...' : t.book}
           </button>
         )}
       </div>
