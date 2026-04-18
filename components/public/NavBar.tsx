@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { href: '#trainingsplan', label: 'Trainingsplan' },
   { href: '#team',          label: 'Team' },
   { href: '#programme',     label: 'Programme' },
+  { href: '/preise',        label: 'Preise' },
   { href: '/kontakt',       label: 'Kontakt' },
 ]
 
