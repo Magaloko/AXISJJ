@@ -21,6 +21,6 @@ export async function updateSkillStatus(
 
   if (error) return { error: 'Fehler beim Speichern.' }
 
-  revalidatePath('/members/skills')
+  revalidatePath('/skills')
   return { success: true }
 }

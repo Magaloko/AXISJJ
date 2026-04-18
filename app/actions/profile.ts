@@ -27,7 +27,7 @@ export async function updateProfile(
 
   if (error) return { error: 'Speichern fehlgeschlagen.' }
 
-  revalidatePath('/members/konto')
+  revalidatePath('/konto')
   return { success: true }
 }
 
