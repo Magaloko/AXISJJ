@@ -1,4 +1,5 @@
 // components/members/BeltProgress.tsx
+import { translations, type Lang } from '@/lib/i18n'
 
 interface Props {
   beltName: string | null
@@ -7,27 +8,30 @@ interface Props {
   readiness: number
   sessionsAttended: number
   monthsInGrade: number
+  lang?: Lang
 }
 
-export function BeltProgress({ beltName, stripes, colorHex, readiness, sessionsAttended, monthsInGrade }: Props) {
+export function BeltProgress({ beltName, stripes, colorHex, readiness, sessionsAttended, monthsInGrade, lang = 'de' }: Props) {
+  const t = translations[lang].belt
+
   if (!beltName) {
     return (
       <div className="border border-white/5 bg-[#111111] p-6">
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-600">Gürtel</p>
-        <p className="mt-4 text-sm text-gray-500">Kein Rang eingetragen — bitte Coach kontaktieren.</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-gray-600">{t.heading}</p>
+        <p className="mt-4 text-sm text-gray-500">{t.noRank}</p>
       </div>
     )
   }
 
   const radius = 28
   const circumference = 2 * Math.PI * radius
-  const beltColor = colorHex ?? '#e5e7eb'
   const clampedReadiness = Math.min(100, Math.max(0, readiness))
   const offset = circumference - (clampedReadiness / 100) * circumference
+  const beltColor = colorHex ?? '#e5e7eb'
 
   return (
     <div className="border border-white/5 bg-[#111111] p-6">
-      <p className="text-xs font-bold uppercase tracking-widest text-gray-600">Gürtel</p>
+      <p className="text-xs font-bold uppercase tracking-widest text-gray-600">{t.heading}</p>
 
       <div className="mt-4 flex items-center gap-6">
         {/* SVG progress ring */}
@@ -36,7 +40,7 @@ export function BeltProgress({ beltName, stripes, colorHex, readiness, sessionsA
           width="80"
           height="80"
           viewBox="0 0 80 80"
-          aria-label={`${beltName} Belt, ${stripes} Stripes. Promotionsbereitschaft: ${clampedReadiness}%. ${sessionsAttended} Trainings, ${monthsInGrade} Monate.`}
+          aria-label={`${beltName} Belt, ${stripes} ${t.stripes}. ${t.readinessLabel}: ${clampedReadiness}%. ${sessionsAttended} ${t.trainings}, ${monthsInGrade} ${t.months}.`}
         >
           <circle cx="40" cy="40" r={radius} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="5" />
           <circle
@@ -57,12 +61,15 @@ export function BeltProgress({ beltName, stripes, colorHex, readiness, sessionsA
         {/* Belt info */}
         <div>
           <div className="flex items-center gap-2">
-            <div className="h-3 w-16 rounded-sm" style={{ backgroundColor: beltColor, border: beltColor === '#111111' ? '1px solid #dc2626' : undefined }} />
+            <div
+              className="h-3 w-16 rounded-sm"
+              style={{ backgroundColor: beltColor, border: beltColor === '#111111' ? '1px solid #dc2626' : undefined }}
+            />
           </div>
           <p className="mt-2 text-xl font-black text-white">{beltName} Belt</p>
-          <p className="text-xs text-gray-500">{stripes} Stripes</p>
+          <p className="text-xs text-gray-500">{stripes} {t.stripes}</p>
           <p className="mt-2 text-xs text-gray-600">
-            {sessionsAttended} Trainings · {monthsInGrade} Monate
+            {sessionsAttended} {t.trainings} · {monthsInGrade} {t.months}
           </p>
         </div>
       </div>
