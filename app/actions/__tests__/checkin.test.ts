@@ -10,6 +10,8 @@ vi.mock('@/lib/supabase/server', () => ({
 }))
 
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+vi.mock('@/lib/notifications', () => ({ notify: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@vercel/functions', () => ({ waitUntil: (p: Promise<unknown>) => p }))
 
 import { checkIn } from '../checkin'
 
@@ -70,10 +72,16 @@ describe('checkIn', () => {
     const attendanceChain = {
       upsert: vi.fn().mockResolvedValue({ error: null }),
     }
+    const sessionInfoChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { starts_at: '2026-04-18T18:00:00Z', class_types: { name: 'BJJ' } }, error: null }),
+    }
     mockSupabase.from
       .mockReturnValueOnce(callerProfileChain)
       .mockReturnValueOnce(memberProfileChain)
       .mockReturnValueOnce(attendanceChain)
+      .mockReturnValueOnce(sessionInfoChain)
 
     const result = await checkIn('profile-1', 'session-1')
     expect(result.success).toBe(true)

@@ -1,6 +1,8 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { waitUntil } from '@vercel/functions'
+import { notify } from '@/lib/notifications'
 
 export async function checkIn(
   profileId: string,
@@ -40,5 +42,26 @@ export async function checkIn(
 
   if (error) return { error: 'Check-In fehlgeschlagen. Bitte erneut versuchen.' }
 
-  return { success: true, memberName: profile.full_name ?? 'Unbekannt' }
+  const memberName = profile.full_name ?? 'Unbekannt'
+
+  // Fire-and-forget notification: fetch class info
+  try {
+    const { data: sessionInfo } = await supabase
+      .from('class_sessions')
+      .select('starts_at, class_types(name)')
+      .eq('id', sessionId)
+      .single()
+    const classTypes = (sessionInfo as { class_types?: { name?: string } | { name?: string }[] } | null)?.class_types
+    const ct = Array.isArray(classTypes) ? classTypes[0] : classTypes
+    const className = ct?.name ?? 'Unbekannt'
+    const startsAt = (sessionInfo as { starts_at?: string } | null)?.starts_at ?? ''
+    waitUntil(notify({
+      type: 'checkin.recorded',
+      data: { memberName, className, startsAt },
+    }))
+  } catch {
+    // best-effort
+  }
+
+  return { success: true, memberName }
 }

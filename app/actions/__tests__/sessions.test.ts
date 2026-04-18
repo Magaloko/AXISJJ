@@ -10,6 +10,8 @@ vi.mock('@/lib/supabase/server', () => ({
 }))
 
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+vi.mock('@/lib/notifications', () => ({ notify: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@vercel/functions', () => ({ waitUntil: (p: Promise<unknown>) => p }))
 
 import { upsertSession, cancelSession } from '../sessions'
 
@@ -44,12 +46,18 @@ describe('cancelSession', () => {
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: { role: 'coach' }, error: null }),
     }
+    const infoChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { starts_at: '2026-04-18T18:00:00Z', class_types: { name: 'BJJ' } }, error: null }),
+    }
     const updateChain = {
       update: vi.fn().mockReturnThis(),
       eq: vi.fn().mockResolvedValue({ error: null }),
     }
     mockSupabase.from
       .mockReturnValueOnce(callerChain)
+      .mockReturnValueOnce(infoChain)
       .mockReturnValueOnce(updateChain)
     const result = await cancelSession('session-1')
     expect(result.success).toBe(true)
@@ -61,12 +69,18 @@ describe('cancelSession', () => {
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: { role: 'coach' }, error: null }),
     }
+    const infoChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { starts_at: '2026-04-18T18:00:00Z', class_types: { name: 'BJJ' } }, error: null }),
+    }
     const updateChain = {
       update: vi.fn().mockReturnThis(),
       eq: vi.fn().mockResolvedValue({ error: { message: 'fail' } }),
     }
     mockSupabase.from
       .mockReturnValueOnce(callerChain)
+      .mockReturnValueOnce(infoChain)
       .mockReturnValueOnce(updateChain)
     const result = await cancelSession('session-1')
     expect(result.error).toBeTruthy()
@@ -114,9 +128,15 @@ describe('upsertSession', () => {
       select: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: newSession, error: null }),
     }
+    const classTypeChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { name: 'BJJ' }, error: null }),
+    }
     mockSupabase.from
       .mockReturnValueOnce(callerChain)
       .mockReturnValueOnce(upsertChain)
+      .mockReturnValueOnce(classTypeChain)
     const result = await upsertSession({
       class_type_id: 'ct-1', starts_at: '2026-04-18T18:00:00Z',
       ends_at: '2026-04-18T19:30:00Z', capacity: 16, location: 'AXIS Gym',

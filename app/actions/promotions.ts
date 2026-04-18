@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { waitUntil } from '@vercel/functions'
+import { notify } from '@/lib/notifications'
 
 export async function promoteToNextBelt(profileId: string): Promise<{
   success?: true
@@ -21,7 +23,7 @@ export async function promoteToNextBelt(profileId: string): Promise<{
 
   const { data: currentRank } = await supabase
     .from('profile_ranks')
-    .select('belt_rank_id, belt_ranks(order)')
+    .select('belt_rank_id, belt_ranks(order, name)')
     .eq('profile_id', profileId)
     .order('promoted_at', { ascending: false })
     .limit(1)
@@ -33,6 +35,7 @@ export async function promoteToNextBelt(profileId: string): Promise<{
     ? currentRank.belt_ranks[0]
     : currentRank.belt_ranks
   const currentOrder = (currentBelt as { order: number } | null)?.order
+  const currentBeltName = (currentBelt as { name?: string } | null)?.name ?? 'Unbekannt'
   if (currentOrder === undefined || currentOrder === null) {
     return { error: 'Gürtel-Reihenfolge ungültig.' }
   }
@@ -59,5 +62,23 @@ export async function promoteToNextBelt(profileId: string): Promise<{
   revalidatePath('/admin/guertel')
   revalidatePath('/admin/mitglieder')
 
-  return { success: true, newBeltName: (nextBelt as { name: string }).name }
+  const newBeltName = (nextBelt as { name: string }).name
+
+  // Fire-and-forget notification: fetch member name
+  try {
+    const { data: memberProfile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', profileId)
+      .single()
+    const memberName = (memberProfile as { full_name?: string } | null)?.full_name ?? 'Unbekannt'
+    waitUntil(notify({
+      type: 'belt.promoted',
+      data: { memberName, fromBelt: currentBeltName, toBelt: newBeltName },
+    }))
+  } catch {
+    // best-effort
+  }
+
+  return { success: true, newBeltName }
 }
