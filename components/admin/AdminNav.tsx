@@ -14,7 +14,6 @@ interface NavItem {
   href: string
   label: string
   Icon: React.ElementType
-  phase2b?: boolean
 }
 
 const opsItems: NavItem[] = [
@@ -25,9 +24,9 @@ const opsItems: NavItem[] = [
 
 const managementItems: NavItem[] = [
   { href: '/admin/mitglieder',    label: 'Mitglieder',    Icon: Users },
-  { href: '/admin/guertel',       label: 'Gürtel',        Icon: Award,          phase2b: true },
-  { href: '/admin/leads',         label: 'Leads',         Icon: ClipboardList,  phase2b: true },
-  { href: '/admin/einstellungen', label: 'Einstellungen', Icon: Settings,       phase2b: true },
+  { href: '/admin/guertel',       label: 'Gürtel',        Icon: Award },
+  { href: '/admin/leads',         label: 'Leads',         Icon: ClipboardList },
+  { href: '/admin/einstellungen', label: 'Einstellungen', Icon: Settings },
 ]
 
 interface NavContentProps {
@@ -82,24 +81,7 @@ function NavContent({ role, roleBadge, userName, pathname, onItemClick, onLogout
             <p className="mb-1 mt-4 px-3 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               MANAGEMENT
             </p>
-            {managementItems.map(({ href, label, Icon, phase2b }) => {
-              if (phase2b) {
-                return (
-                  <div
-                    key={href}
-                    className="flex items-center justify-between px-3 py-2.5 text-sm font-medium text-muted-foreground/50 cursor-not-allowed"
-                    title="Bald verfügbar"
-                  >
-                    <span className="flex items-center gap-3">
-                      <Icon size={16} />
-                      {label}
-                    </span>
-                    <span className="text-[9px] font-bold uppercase tracking-wide text-muted-foreground/40">
-                      Bald
-                    </span>
-                  </div>
-                )
-              }
+            {managementItems.map(({ href, label, Icon }) => {
               const active = isActive(href)
               return (
                 <Link
