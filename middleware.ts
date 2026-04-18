@@ -17,21 +17,25 @@ export async function middleware(request: NextRequest) {
             supabaseResponse.cookies.set(name, value, options)
           )
         },
-      },
+      }
     }
   )
 
   const { data: { user } } = await supabase.auth.getUser()
   const { pathname } = request.nextUrl
 
-  if (pathname.startsWith('/members') && !user) {
+  // Protect member routes - (members) group = /dashboard, /buchen, /gürtel, /konto, /skills
+  const memberPaths = ['/dashboard', '/buchen', '/g%C3%BCrtel', '/gürtel', '/konto', '/skills']
+  const isMemberPath = memberPaths.some(p => pathname.startsWith(p))
+  if (isMemberPath && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
+
   if (pathname.startsWith('/admin')) {
     if (!user) {
       return NextResponse.redirect(new URL('/login', request.url))
     }
-    // Fetch role — single lightweight query, cached by Supabase connection pooler
+    // Fetch role – single lightweight query, cached by Supabase connection pooler
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
@@ -39,11 +43,11 @@ export async function middleware(request: NextRequest) {
       .single()
 
     if (!profile || !['coach', 'owner'].includes(profile.role)) {
-      return NextResponse.redirect(new URL('/members/dashboard', request.url))
+      return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }
   if (pathname === '/login' && user) {
-    return NextResponse.redirect(new URL('/members/dashboard', request.url))
+    return NextResponse.redirect(new URL('/dashboard', request.url))
   }
 
   return supabaseResponse
