@@ -3,6 +3,7 @@ import { StatsBar } from '@/components/public/StatsBar'
 import { ScheduleWidget } from '@/components/public/ScheduleWidget'
 import { CoachSection } from '@/components/public/CoachSection'
 import { ProgramsGrid } from '@/components/public/ProgramsGrid'
+import { LandingPricing } from '@/components/public/LandingPricing'
 import { TrialCTA } from '@/components/public/TrialCTA'
 import type { Metadata } from 'next'
 
@@ -20,6 +21,7 @@ export default function HomePage() {
       <ScheduleWidget />
       <CoachSection />
       <ProgramsGrid />
+      <LandingPricing />
       <TrialCTA />
     </>
   )
