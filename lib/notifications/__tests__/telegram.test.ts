@@ -54,10 +54,30 @@ describe('sendTelegram', () => {
     process.env.TELEGRAM_BOT_TOKEN = 'T'
     process.env.TELEGRAM_CHAT_ID = '1'
     const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    // Both the MdV2 attempt and the plain fallback fail.
     const fetchMock = vi.fn().mockResolvedValue({ ok: false, status: 400, text: async () => 'bad' })
     vi.stubGlobal('fetch', fetchMock)
     await expect(sendTelegram(payload)).resolves.toBeUndefined()
     expect(errSpy).toHaveBeenCalled()
+    errSpy.mockRestore()
+  })
+
+  it('retries as plain text when MarkdownV2 fails', async () => {
+    process.env.TELEGRAM_BOT_TOKEN = 'T'
+    process.env.TELEGRAM_CHAT_ID = '1'
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 400, text: async () => "can't parse entities" })
+      .mockResolvedValueOnce({ ok: true, status: 200, text: async () => '' })
+    vi.stubGlobal('fetch', fetchMock)
+    await sendTelegram({ ...payload, telegramMarkdown: '🆕 *Neuer Lead*\n*Name:* Max\\.' })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    const secondBody = JSON.parse(fetchMock.mock.calls[1][1].body)
+    expect(secondBody.parse_mode).toBeUndefined()
+    // Plain-text fallback strips \ and * markers
+    expect(secondBody.text).toContain('Neuer Lead')
+    expect(secondBody.text).toContain('Name: Max.')
     errSpy.mockRestore()
   })
 
