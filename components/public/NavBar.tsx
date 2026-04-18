@@ -38,6 +38,12 @@ export function NavBar() {
             </Link>
           ))}
           <Link
+            href="/login"
+            className="text-sm text-gray-400 transition-colors hover:text-white"
+          >
+            Login
+          </Link>
+          <Link
             href="/trial"
             className="bg-red-600 px-5 py-2 text-sm font-black tracking-widest text-white transition-colors hover:bg-red-700"
           >
@@ -67,6 +73,13 @@ export function NavBar() {
               {link.label}
             </Link>
           ))}
+          <Link
+            href="/login"
+            className="text-sm text-gray-400"
+            onClick={() => setOpen(false)}
+          >
+            Login
+          </Link>
           <Link
             href="/trial"
             className="bg-red-600 px-4 py-2 text-center text-sm font-black tracking-widest text-white"
