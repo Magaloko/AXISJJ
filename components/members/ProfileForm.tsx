@@ -3,7 +3,7 @@
 
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { updateProfile } from '@/app/actions/profile'
 import { profileSchema, type ProfileFormData } from '@/app/actions/profile.schema'
 import { translations, type Lang } from '@/lib/i18n'
@@ -27,6 +27,12 @@ export function ProfileForm({ profile, lang }: Props) {
     },
   })
 
+  useEffect(() => {
+    if (!saved) return
+    const timer = setTimeout(() => setSaved(false), 2000)
+    return () => clearTimeout(timer)
+  }, [saved])
+
   const onSubmit = async (data: ProfileFormData) => {
     setServerError(null)
     const result = await updateProfile(data)
@@ -34,7 +40,6 @@ export function ProfileForm({ profile, lang }: Props) {
       setServerError(result.error)
     } else {
       setSaved(true)
-      setTimeout(() => setSaved(false), 2000)
     }
   }
 
