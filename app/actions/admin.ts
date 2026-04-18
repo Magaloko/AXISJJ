@@ -90,6 +90,7 @@ export async function getSessionBookings(sessionId: string): Promise<{
   ])
 
   if (bookingsResult.error) return { error: 'Buchungen konnten nicht geladen werden.' }
+  if (attendancesResult.error) return { error: 'Anwesenheitsdaten konnten nicht geladen werden.' }
 
   const attendanceMap = new Map<string, string>()
   for (const a of attendancesResult.data ?? []) {
@@ -118,7 +119,8 @@ export async function getSessionBookings(sessionId: string): Promise<{
   return { bookings }
 }
 
-export async function getAdminDashboard(role: 'coach' | 'owner'): Promise<{
+export async function getAdminDashboard(): Promise<{
+  role: 'coach' | 'owner'
   checkinsToday: number
   bookingsToday: number
   todaySessions: TodaySession[]
@@ -129,7 +131,18 @@ export async function getAdminDashboard(role: 'coach' | 'owner'): Promise<{
 }> {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) return { error: 'Nicht eingeloggt', checkinsToday: 0, bookingsToday: 0, todaySessions: [] }
+  if (authError || !user) return { error: 'Nicht eingeloggt', role: 'coach', checkinsToday: 0, bookingsToday: 0, todaySessions: [] }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  const role = profile?.role as 'coach' | 'owner' | undefined
+  if (!role || !['coach', 'owner'].includes(role)) {
+    return { error: 'Keine Berechtigung.', role: 'coach', checkinsToday: 0, bookingsToday: 0, todaySessions: [] }
+  }
 
   const todayStart = new Date()
   todayStart.setHours(0, 0, 0, 0)
@@ -174,6 +187,7 @@ export async function getAdminDashboard(role: 'coach' | 'owner'): Promise<{
   })
 
   const base = {
+    role: role as 'coach' | 'owner',
     checkinsToday: checkinsResult.count ?? 0,
     bookingsToday: bookingsResult.count ?? 0,
     todaySessions,

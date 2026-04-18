@@ -87,11 +87,17 @@ describe('getAdminDashboard', () => {
 
   it('returns error when not authenticated', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null }, error: null })
-    const result = await getAdminDashboard('coach')
+    const result = await getAdminDashboard()
     expect(result.error).toBeTruthy()
   })
 
   it('returns coach stats (checkinsToday, bookingsToday, todaySessions)', async () => {
+    // profile role fetch
+    const profileChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { role: 'coach' }, error: null }),
+    }
     // attendances count
     const attendanceChain = {
       select: vi.fn().mockReturnThis(),
@@ -113,11 +119,12 @@ describe('getAdminDashboard', () => {
       order: vi.fn().mockResolvedValue({ data: [], error: null }),
     }
     mockSupabase.from
+      .mockReturnValueOnce(profileChain)
       .mockReturnValueOnce(attendanceChain)
       .mockReturnValueOnce(bookingChain)
       .mockReturnValueOnce(sessionChain)
 
-    const result = await getAdminDashboard('coach')
+    const result = await getAdminDashboard()
     expect(result.checkinsToday).toBe(5)
     expect(result.bookingsToday).toBe(8)
     expect(result.todaySessions).toEqual([])
