@@ -57,4 +57,14 @@ describe('SkillCard', () => {
     render(<SkillCard skill={{ ...mockSkill, video_url: 'https://example.com' }} initialStatus="not_started" />)
     expect(screen.getByRole('link')).toBeInTheDocument()
   })
+
+  it('shows Not Started label when lang is en', () => {
+    render(<SkillCard skill={mockSkill} initialStatus="not_started" lang="en" />)
+    expect(screen.getByRole('button', { name: /not started/i })).toBeInTheDocument()
+  })
+
+  it('cycles to In Progress label in German by default', () => {
+    render(<SkillCard skill={mockSkill} initialStatus="not_started" />)
+    expect(screen.getByRole('button', { name: /nicht begonnen/i })).toBeInTheDocument()
+  })
 })
