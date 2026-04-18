@@ -8,6 +8,8 @@ import { differenceInMonths } from 'date-fns'
 import { translations } from '@/lib/i18n'
 import { resolveLang } from '@/lib/i18n/resolve-lang'
 import { MemberQRCode } from '@/components/members/MemberQRCode'
+import { OpeningHoursWidget } from '@/components/members/OpeningHoursWidget'
+import { getGymSettings } from '@/lib/gym-settings'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard' }
@@ -30,6 +32,8 @@ export default async function DashboardPage() {
   const userId = user.id
 
   const now = new Date().toISOString()
+
+  const gym = await getGymSettings()
 
   const [
     { data: nextSessions },
@@ -131,6 +135,10 @@ export default async function DashboardPage() {
 
         <div className="sm:col-span-2 lg:col-span-3">
           <MemberQRCode profileId={userId} />
+        </div>
+
+        <div className="sm:col-span-2 lg:col-span-3">
+          <OpeningHoursWidget hours={gym.opening_hours} />
         </div>
       </div>
     </div>

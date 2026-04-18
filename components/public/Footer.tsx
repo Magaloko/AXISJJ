@@ -1,7 +1,11 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { getGymSettings } from '@/lib/gym-settings'
+import { OpeningHoursDisplay } from './OpeningHoursDisplay'
+import { ContactCard } from './ContactCard'
 
-export function Footer() {
+export async function Footer() {
+  const settings = await getGymSettings()
   const year = new Date().getFullYear()
 
   return (
@@ -19,29 +23,21 @@ export function Footer() {
               className="mb-4 object-contain"
             />
             <p className="text-sm font-black tracking-widest text-foreground">
-              AXIS JIU-JITSU VIENNA
+              {settings.name}
             </p>
             <p className="mt-1 text-xs text-muted-foreground">
               Discipline · Technique · Progress
             </p>
+            <div className="mt-4">
+              <ContactCard settings={settings} />
+            </div>
           </div>
 
           <div>
             <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Kontakt
+              Öffnungszeiten
             </p>
-            <address className="not-italic text-sm text-muted-foreground leading-relaxed">
-              Strindberggasse 1 / R01<br />
-              1110 Wien, Österreich
-            </address>
-            <a
-              href="https://instagram.com/axisjj_at"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-4 flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-            >
-              @axisjj_at
-            </a>
+            <OpeningHoursDisplay hours={settings.opening_hours} variant="compact" />
           </div>
 
           <div>
@@ -49,6 +45,9 @@ export function Footer() {
               Navigation
             </p>
             <nav className="flex flex-col gap-2">
+              <Link href="/kontakt" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                Kontakt
+              </Link>
               <Link href="#trainingsplan" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
                 Trainingsplan
               </Link>
@@ -68,7 +67,7 @@ export function Footer() {
 
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            © {year} AXIS Jiu-Jitsu Vienna. Alle Rechte vorbehalten.
+            © {year} {settings.name}. Alle Rechte vorbehalten.
           </p>
           <div className="flex gap-6">
             <Link href="/impressum" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
