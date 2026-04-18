@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
+import { logPasswordLogin } from '@/app/actions/auth-events'
 
 type Mode = 'magic' | 'password'
 
@@ -45,6 +46,7 @@ export default function LoginPage() {
       setErrorMsg('Ungültige E-Mail oder Passwort.')
       setStatus('error')
     } else {
+      await logPasswordLogin()
       router.push('/dashboard')
       router.refresh()
     }

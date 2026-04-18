@@ -8,6 +8,11 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
 }))
 
+// Mock auth-events server action
+vi.mock('@/app/actions/auth-events', () => ({
+  logPasswordLogin: vi.fn().mockResolvedValue(undefined),
+}))
+
 // Mock supabase browser client
 vi.mock('@/lib/supabase/client', () => ({
   createClient: () => ({
