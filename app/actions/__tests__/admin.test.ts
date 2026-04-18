@@ -9,7 +9,7 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: () => Promise.resolve(mockSupabase),
 }))
 
-import { getTodaySessions, getSessionBookings } from '../admin'
+import { getTodaySessions, getSessionBookings, getAdminDashboard } from '../admin'
 
 describe('getTodaySessions', () => {
   beforeEach(() => {
@@ -74,5 +74,53 @@ describe('getSessionBookings', () => {
     const result = await getSessionBookings('session-1')
     expect(result.bookings).toHaveLength(1)
     expect(result.bookings![0].checkedInAt).toBe('2026-04-18T18:05:00Z')
+  })
+})
+
+describe('getAdminDashboard', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    mockSupabase.auth.getUser.mockResolvedValue({
+      data: { user: { id: 'coach-1' } }, error: null,
+    })
+  })
+
+  it('returns error when not authenticated', async () => {
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null }, error: null })
+    const result = await getAdminDashboard('coach')
+    expect(result.error).toBeTruthy()
+  })
+
+  it('returns coach stats (checkinsToday, bookingsToday, todaySessions)', async () => {
+    // attendances count
+    const attendanceChain = {
+      select: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockResolvedValue({ count: 5, error: null }),
+    }
+    // bookings count
+    const bookingChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockResolvedValue({ count: 8, error: null }),
+    }
+    // sessions
+    const sessionChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: [], error: null }),
+    }
+    mockSupabase.from
+      .mockReturnValueOnce(attendanceChain)
+      .mockReturnValueOnce(bookingChain)
+      .mockReturnValueOnce(sessionChain)
+
+    const result = await getAdminDashboard('coach')
+    expect(result.checkinsToday).toBe(5)
+    expect(result.bookingsToday).toBe(8)
+    expect(result.todaySessions).toEqual([])
+    expect(result.activeMembers).toBeUndefined()
   })
 })
