@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { waitUntil } from '@vercel/functions'
+import { notify } from '@/lib/notifications'
 
 export async function bookClass(sessionId: string): Promise<{ success?: boolean; status?: string; error?: string }> {
   const supabase = await createClient()
@@ -55,6 +57,34 @@ export async function bookClass(sessionId: string): Promise<{ success?: boolean;
 
   revalidatePath('/buchen')
   revalidatePath('/dashboard')
+
+  // Fire-and-forget notification: fetch class + member details
+  try {
+    const [{ data: sessionInfo }, { data: memberProfile }] = await Promise.all([
+      supabase
+        .from('class_sessions')
+        .select('starts_at, class_types(name)')
+        .eq('id', sessionId)
+        .single(),
+      supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('id', user.id)
+        .single(),
+    ])
+    const classTypes = (sessionInfo as { class_types?: { name?: string } | { name?: string }[] } | null)?.class_types
+    const ct = Array.isArray(classTypes) ? classTypes[0] : classTypes
+    const className = ct?.name ?? 'Unbekannt'
+    const startsAt = (sessionInfo as { starts_at?: string } | null)?.starts_at ?? ''
+    const memberName = (memberProfile as { full_name?: string } | null)?.full_name ?? 'Unbekannt'
+    waitUntil(notify({
+      type: 'booking.created',
+      data: { memberName, className, startsAt, status },
+    }))
+  } catch {
+    // best-effort
+  }
+
   return { success: true, status }
 }
 
@@ -117,5 +147,35 @@ export async function cancelBooking(bookingId: string): Promise<{ success?: bool
 
   revalidatePath('/buchen')
   revalidatePath('/dashboard')
+
+  // Fire-and-forget notification
+  try {
+    if (sessionId) {
+      const [{ data: sessionInfo }, { data: memberProfile }] = await Promise.all([
+        supabase
+          .from('class_sessions')
+          .select('starts_at, class_types(name)')
+          .eq('id', sessionId)
+          .single(),
+        supabase
+          .from('profiles')
+          .select('full_name')
+          .eq('id', user.id)
+          .single(),
+      ])
+      const classTypes = (sessionInfo as { class_types?: { name?: string } | { name?: string }[] } | null)?.class_types
+      const ct = Array.isArray(classTypes) ? classTypes[0] : classTypes
+      const className = ct?.name ?? 'Unbekannt'
+      const startsAt = (sessionInfo as { starts_at?: string } | null)?.starts_at ?? ''
+      const memberName = (memberProfile as { full_name?: string } | null)?.full_name ?? 'Unbekannt'
+      waitUntil(notify({
+        type: 'booking.cancelled',
+        data: { memberName, className, startsAt },
+      }))
+    }
+  } catch {
+    // best-effort
+  }
+
   return { success: true }
 }

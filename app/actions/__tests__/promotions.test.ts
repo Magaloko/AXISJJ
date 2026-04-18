@@ -9,6 +9,8 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: () => Promise.resolve(mockSupabase),
 }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+vi.mock('@/lib/notifications', () => ({ notify: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@vercel/functions', () => ({ waitUntil: (p: Promise<unknown>) => p }))
 
 import { promoteToNextBelt } from '../promotions'
 
@@ -104,6 +106,12 @@ describe('promoteToNextBelt', () => {
       insert: vi.fn().mockResolvedValue({ error: null }),
     }
     mockSupabase.from.mockReturnValueOnce(insertChain)
+    const memberChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { full_name: 'Max' }, error: null }),
+    }
+    mockSupabase.from.mockReturnValueOnce(memberChain)
 
     const result = await promoteToNextBelt('profile-1')
     expect(result.success).toBe(true)

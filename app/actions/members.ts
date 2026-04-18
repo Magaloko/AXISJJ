@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { waitUntil } from '@vercel/functions'
+import { notify } from '@/lib/notifications'
 
 async function assertOwner(): Promise<{ userId: string } | { error: string }> {
   const supabase = await createClient()
@@ -34,12 +36,31 @@ export async function updateMember(
 
   if (!Object.keys(payload).length) return { error: 'Keine Änderungen.' }
 
+  const changedFields = Object.keys(payload)
+
   const { error } = await (supabase.from('profiles') as any)
     .update(payload)
     .eq('id', profileId)
   if (error) return { error: 'Update fehlgeschlagen.' }
 
   revalidatePath('/admin/mitglieder')
+
+  // Fire-and-forget notification: fetch member name
+  try {
+    const { data: memberProfile } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', profileId)
+      .single()
+    const memberName = (memberProfile as { full_name?: string } | null)?.full_name ?? 'Unbekannt'
+    waitUntil(notify({
+      type: 'member.updated',
+      data: { memberName, changedFields },
+    }))
+  } catch {
+    // best-effort
+  }
+
   return { success: true }
 }
 
@@ -54,6 +75,14 @@ export async function updateMemberRole(
   if (check.userId === profileId) return { error: 'Eigene Rolle kann nicht geändert werden.' }
 
   const supabase = await createClient()
+
+  // Fetch existing role + name before update
+  const { data: existingProfile } = await supabase
+    .from('profiles')
+    .select('full_name, role')
+    .eq('id', profileId)
+    .single()
+
   const { error } = await (supabase.from('profiles') as any)
     .update({ role })
     .eq('id', profileId)
@@ -61,5 +90,15 @@ export async function updateMemberRole(
 
   revalidatePath('/admin/mitglieder')
   revalidatePath('/admin/einstellungen')
+
+  if (existingProfile) {
+    const memberName = (existingProfile as { full_name?: string }).full_name ?? 'Unbekannt'
+    const oldRole = (existingProfile as { role?: string }).role ?? 'unbekannt'
+    waitUntil(notify({
+      type: 'member.role_changed',
+      data: { memberName, oldRole, newRole: role },
+    }))
+  }
+
   return { success: true }
 }

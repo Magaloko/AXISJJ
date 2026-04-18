@@ -3,6 +3,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const mockSupabase = { from: vi.fn(), auth: { getUser: vi.fn() } }
 vi.mock('@/lib/supabase/server', () => ({ createClient: () => Promise.resolve(mockSupabase) }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+vi.mock('@/lib/notifications', () => ({ notify: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@vercel/functions', () => ({ waitUntil: (p: Promise<unknown>) => p }))
 
 import { upsertClassType, deleteClassType } from '../class-types'
 
@@ -63,6 +65,12 @@ describe('deleteClassType', () => {
       eq: vi.fn().mockResolvedValue({ count: 0, error: null }),
     }
     mockSupabase.from.mockReturnValueOnce(countChain)
+    const fetchNameChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { name: 'BJJ' }, error: null }),
+    }
+    mockSupabase.from.mockReturnValueOnce(fetchNameChain)
     const delChain = {
       delete: vi.fn().mockReturnThis(),
       eq: vi.fn().mockResolvedValue({ error: null }),

@@ -3,6 +3,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { waitUntil } from '@vercel/functions'
+import { notify } from '@/lib/notifications'
 import { LeadSchema } from './leads.schema'
 
 /**
@@ -31,6 +33,16 @@ export async function submitTrialLead(
     return { error: 'Fehler beim Speichern. Bitte versuche es erneut.' }
   }
 
+  waitUntil(notify({
+    type: 'lead.created',
+    data: {
+      full_name: parsed.data.full_name,
+      email: parsed.data.email,
+      phone: parsed.data.phone ?? null,
+      message: parsed.data.message ?? null,
+      source: 'website',
+    },
+  }))
   return { success: true }
 }
 
@@ -53,6 +65,13 @@ export async function updateLeadStatus(
     return { error: 'Keine Berechtigung.' }
   }
 
+  // Fetch current lead info for notification (old status + identity)
+  const { data: existingLead } = await supabase
+    .from('leads')
+    .select('full_name, email, status')
+    .eq('id', leadId)
+    .single()
+
   const { error } = await (supabase.from('leads') as any)
     .update({ status })
     .eq('id', leadId)
@@ -60,6 +79,18 @@ export async function updateLeadStatus(
 
   revalidatePath('/admin/leads')
   revalidatePath('/admin/dashboard')
+
+  if (existingLead) {
+    waitUntil(notify({
+      type: 'lead.status_changed',
+      data: {
+        full_name: existingLead.full_name ?? 'Unbekannt',
+        email: existingLead.email ?? '',
+        oldStatus: existingLead.status ?? 'unbekannt',
+        newStatus: status,
+      },
+    }))
+  }
   return { success: true }
 }
 
@@ -88,11 +119,16 @@ export async function createLead(
     return { error: 'Name und E-Mail sind Pflicht.' }
   }
 
+  const full_name = data.full_name.trim()
+  const email = data.email.trim()
+  const phone = data.phone?.trim() || null
+  const message = data.message?.trim() || null
+
   const { error } = await (supabase.from('leads') as any).insert({
-    full_name: data.full_name.trim(),
-    email: data.email.trim(),
-    phone: data.phone?.trim() || null,
-    message: data.message?.trim() || null,
+    full_name,
+    email,
+    phone,
+    message,
     source: data.source,
     status: 'new',
   })
@@ -100,5 +136,10 @@ export async function createLead(
 
   revalidatePath('/admin/leads')
   revalidatePath('/admin/dashboard')
+
+  waitUntil(notify({
+    type: 'lead.created',
+    data: { full_name, email, phone, message, source: data.source },
+  }))
   return { success: true }
 }

@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { waitUntil } from '@vercel/functions'
+import { notify } from '@/lib/notifications'
 
 export interface SessionFormData {
   id?: string
@@ -29,6 +31,8 @@ export async function upsertSession(
     return { error: 'Keine Berechtigung.' }
   }
 
+  const isNew = !data.id
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: session, error } = await supabase
     .from('class_sessions')
@@ -46,6 +50,30 @@ export async function upsertSession(
   if (error) return { error: 'Speichern fehlgeschlagen. Bitte erneut versuchen.' }
 
   revalidatePath('/admin/klassen')
+
+  // Fire-and-forget notification: look up class type name
+  try {
+    const { data: classType } = await supabase
+      .from('class_types')
+      .select('name')
+      .eq('id', data.class_type_id)
+      .single()
+    const className = (classType as { name?: string } | null)?.name ?? 'Unbekannt'
+    if (isNew) {
+      waitUntil(notify({
+        type: 'session.created',
+        data: { className, startsAt: data.starts_at, capacity: data.capacity },
+      }))
+    } else {
+      waitUntil(notify({
+        type: 'session.updated',
+        data: { className, startsAt: data.starts_at },
+      }))
+    }
+  } catch {
+    // best-effort
+  }
+
   return { success: true, session: session as Record<string, unknown> }
 }
 
@@ -66,6 +94,13 @@ export async function cancelSession(
     return { error: 'Keine Berechtigung.' }
   }
 
+  // Fetch session info for notification before updating
+  const { data: sessionInfo } = await supabase
+    .from('class_sessions')
+    .select('starts_at, class_types(name)')
+    .eq('id', sessionId)
+    .single()
+
   const { error } = await supabase
     .from('class_sessions')
     .update({ cancelled: true })
@@ -75,5 +110,17 @@ export async function cancelSession(
 
   revalidatePath('/admin/klassen')
   revalidatePath('/admin/checkin')
+
+  if (sessionInfo) {
+    const classTypes = (sessionInfo as { class_types?: { name?: string } | { name?: string }[] }).class_types
+    const ct = Array.isArray(classTypes) ? classTypes[0] : classTypes
+    const className = ct?.name ?? 'Unbekannt'
+    const startsAt = (sessionInfo as { starts_at?: string }).starts_at ?? ''
+    waitUntil(notify({
+      type: 'session.cancelled',
+      data: { className, startsAt },
+    }))
+  }
+
   return { success: true }
 }
