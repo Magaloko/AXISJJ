@@ -32,4 +32,14 @@ describe('BeltProgress', () => {
     render(<BeltProgress beltName={null} stripes={0} colorHex={null} readiness={0} sessionsAttended={0} monthsInGrade={0} />)
     expect(screen.getByText(/kein rang/i)).toBeInTheDocument()
   })
+
+  it('renders English month label when lang is en', () => {
+    render(<BeltProgress {...mockRank} lang="en" />)
+    expect(screen.getByText(/8 Months/)).toBeInTheDocument()
+  })
+
+  it('renders English empty state when lang is en', () => {
+    render(<BeltProgress beltName={null} stripes={0} colorHex={null} readiness={0} sessionsAttended={0} monthsInGrade={0} lang="en" />)
+    expect(screen.getByText(/no rank on file/i)).toBeInTheDocument()
+  })
 })

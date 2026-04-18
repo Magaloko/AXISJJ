@@ -26,4 +26,9 @@ describe('NextClassCard', () => {
     render(<NextClassCard session={null} bookingId={null} />)
     expect(screen.getByText(/keine/i)).toBeInTheDocument()
   })
+
+  it('renders English empty state when lang is en', () => {
+    render(<NextClassCard session={null} bookingId={null} lang="en" />)
+    expect(screen.getByText('No upcoming booking')).toBeInTheDocument()
+  })
 })

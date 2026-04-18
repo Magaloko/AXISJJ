@@ -4,14 +4,9 @@
 import { useState, useTransition } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { updateSkillStatus } from '@/app/actions/skills'
+import { translations, type Lang } from '@/lib/i18n'
 
 type SkillStatus = 'not_started' | 'in_progress' | 'mastered'
-
-const STATUS_LABELS: Record<SkillStatus, string> = {
-  not_started: 'Nicht begonnen',
-  in_progress: 'In Arbeit',
-  mastered: 'Beherrscht',
-}
 
 const STATUS_NEXT: Record<SkillStatus, SkillStatus> = {
   not_started: 'in_progress',
@@ -29,11 +24,19 @@ interface Skill {
 interface Props {
   skill: Skill
   initialStatus: SkillStatus
+  lang?: Lang
 }
 
-export function SkillCard({ skill, initialStatus }: Props) {
+export function SkillCard({ skill, initialStatus, lang = 'de' }: Props) {
   const [status, setStatus] = useState<SkillStatus>(initialStatus)
   const [isPending, startTransition] = useTransition()
+  const t = translations[lang].skillCard
+
+  const statusLabels: Record<SkillStatus, string> = {
+    not_started: t.notStarted,
+    in_progress: t.inProgress,
+    mastered: t.mastered,
+  }
 
   const cycle = () => {
     const prev = status
@@ -69,7 +72,7 @@ export function SkillCard({ skill, initialStatus }: Props) {
         <button
           onClick={cycle}
           disabled={isPending}
-          aria-label={STATUS_LABELS[status]}
+          aria-label={statusLabels[status]}
           className={cn(
             'px-2 py-1 text-[10px] font-black uppercase tracking-widest transition-colors disabled:opacity-40',
             status === 'mastered'    && 'bg-green-900/30 text-green-400',
@@ -77,7 +80,7 @@ export function SkillCard({ skill, initialStatus }: Props) {
             status === 'not_started' && 'bg-white/5 text-gray-600'
           )}
         >
-          {STATUS_LABELS[status]}
+          {statusLabels[status]}
         </button>
       </div>
     </div>
