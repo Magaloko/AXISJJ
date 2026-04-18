@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getAdminDashboard } from '@/app/actions/admin'
 import { AdminStatCard } from '@/components/admin/AdminStatCard'
+import { PromotionsWidget } from '@/components/admin/PromotionsWidget'
+import { LeadsMiniKanban } from '@/components/admin/LeadsMiniKanban'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard | Admin' }
@@ -36,89 +38,103 @@ export default async function AdminDashboardPage() {
       <h1 className="mb-6 text-2xl font-black text-foreground">Dashboard</h1>
 
       {/* Stat cards */}
-      <div className={`mb-6 grid gap-4 ${role === 'owner' ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
-        {role === 'owner' && (
-          <AdminStatCard label="Mitglieder" value={data.activeMembers ?? 0} />
-        )}
-        {role === 'owner' && (
-          <AdminStatCard label="Neue Leads" value={data.newLeads ?? 0} highlight />
-        )}
+      <div className={`mb-6 grid gap-4 ${role === 'owner' ? 'sm:grid-cols-2 lg:grid-cols-5' : 'sm:grid-cols-2'}`}>
+        {role === 'owner' && <AdminStatCard label="Mitglieder" value={data.activeMembers ?? 0} />}
+        {role === 'owner' && <AdminStatCard label="Neue Leads" value={data.newLeads ?? 0} highlight />}
         <AdminStatCard label="Check-Ins heute" value={data.checkinsToday} />
         <AdminStatCard label="Buchungen heute" value={data.bookingsToday} />
+        {role === 'owner' && <AdminStatCard label="Promotions bereit" value={data.promotionsReady?.length ?? 0} />}
       </div>
 
-      {/* Upcoming class card */}
-      {upcomingSession && (
-        <div className="mb-6 border border-border bg-card p-6">
-          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Nächste Klasse
-          </p>
-          <p className="text-base font-black text-foreground">
-            {upcomingSession.class_types?.name ?? 'Session'}
-          </p>
-          <p className="mt-1 font-mono text-sm text-muted-foreground">
-            {formatTime(upcomingSession.starts_at)} – {formatTime(upcomingSession.ends_at)}
-          </p>
-          {/* Capacity bar */}
-          <div className="mt-3">
-            <div className="mb-1 flex justify-between text-xs text-muted-foreground">
-              <span>{upcomingSession.confirmedCount} Buchungen</span>
-              <span>{upcomingSession.capacity} Plätze</span>
+      {/* Upcoming class card + PromotionsWidget (owner) / upcoming alone (coach) */}
+      {role === 'owner' ? (
+        <div className="mb-6 grid gap-6 lg:grid-cols-2">
+          {upcomingSession && (
+            <div className="border border-border bg-card p-6">
+              <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+                Nächste Klasse
+              </p>
+              <p className="text-base font-black text-foreground">
+                {upcomingSession.class_types?.name ?? 'Session'}
+              </p>
+              <p className="mt-1 font-mono text-sm text-muted-foreground">
+                {formatTime(upcomingSession.starts_at)} – {formatTime(upcomingSession.ends_at)}
+              </p>
+              {/* Capacity bar */}
+              <div className="mt-3">
+                <div className="mb-1 flex justify-between text-xs text-muted-foreground">
+                  <span>{upcomingSession.confirmedCount} Buchungen</span>
+                  <span>{upcomingSession.capacity} Plätze</span>
+                </div>
+                <div className="h-1.5 w-full bg-muted">
+                  <div
+                    className="h-full bg-primary transition-all"
+                    style={{ width: `${Math.min(100, (upcomingSession.confirmedCount / upcomingSession.capacity) * 100)}%` }}
+                  />
+                </div>
+              </div>
             </div>
-            <div className="h-1.5 w-full bg-muted">
-              <div
-                className="h-full bg-primary transition-all"
-                style={{ width: `${Math.min(100, (upcomingSession.confirmedCount / upcomingSession.capacity) * 100)}%` }}
-              />
+          )}
+          {data.promotionsReady && <PromotionsWidget promotions={data.promotionsReady} />}
+        </div>
+      ) : (
+        upcomingSession && (
+          <div className="mb-6 border border-border bg-card p-6">
+            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              Nächste Klasse
+            </p>
+            <p className="text-base font-black text-foreground">
+              {upcomingSession.class_types?.name ?? 'Session'}
+            </p>
+            <p className="mt-1 font-mono text-sm text-muted-foreground">
+              {formatTime(upcomingSession.starts_at)} – {formatTime(upcomingSession.ends_at)}
+            </p>
+            {/* Capacity bar */}
+            <div className="mt-3">
+              <div className="mb-1 flex justify-between text-xs text-muted-foreground">
+                <span>{upcomingSession.confirmedCount} Buchungen</span>
+                <span>{upcomingSession.capacity} Plätze</span>
+              </div>
+              <div className="h-1.5 w-full bg-muted">
+                <div
+                  className="h-full bg-primary transition-all"
+                  style={{ width: `${Math.min(100, (upcomingSession.confirmedCount / upcomingSession.capacity) * 100)}%` }}
+                />
+              </div>
             </div>
           </div>
-        </div>
+        )
       )}
 
-      <div className={`grid gap-6 ${role === 'owner' && (data.promotionsReady?.length ?? 0) > 0 ? 'lg:grid-cols-2' : ''}`}>
-        {/* Today's schedule */}
-        <div className="border border-border bg-card p-6">
-          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Heutiger Plan
-          </p>
-          {(data.todaySessions?.length ?? 0) === 0 ? (
-            <p className="text-sm text-muted-foreground">Keine Sessions heute.</p>
-          ) : (
-            <ul className="space-y-2">
-              {data.todaySessions?.map(s => (
-                <li key={s.id} className="flex items-center justify-between text-sm">
-                  <span className="font-semibold text-foreground">
-                    {s.class_types?.name ?? 'Session'}
-                  </span>
-                  <span className="font-mono text-muted-foreground">
-                    {formatTime(s.starts_at)} · {s.confirmedCount}/{s.capacity}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Owner only: promotions-ready widget (read-only) */}
-        {role === 'owner' && (data.promotionsReady?.length ?? 0) > 0 && (
-          <div className="border border-border bg-card p-6">
-            <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Promotions bereit
-            </p>
-            <ul className="space-y-2">
-              {data.promotionsReady?.map(p => (
-                <li key={p.profileId} className="flex items-center justify-between text-sm">
-                  <span className="font-semibold text-foreground">{p.memberName}</span>
-                  <span className="text-muted-foreground">{p.currentBelt} →</span>
-                </li>
-              ))}
-            </ul>
-            <p className="mt-4 text-xs text-muted-foreground">
-              Gürtelpromotion kommt in Phase 2b.
-            </p>
-          </div>
+      {/* Today's schedule */}
+      <div className="border border-border bg-card p-6">
+        <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+          Heutiger Plan
+        </p>
+        {(data.todaySessions?.length ?? 0) === 0 ? (
+          <p className="text-sm text-muted-foreground">Keine Sessions heute.</p>
+        ) : (
+          <ul className="space-y-2">
+            {data.todaySessions?.map(s => (
+              <li key={s.id} className="flex items-center justify-between text-sm">
+                <span className="font-semibold text-foreground">
+                  {s.class_types?.name ?? 'Session'}
+                </span>
+                <span className="font-mono text-muted-foreground">
+                  {formatTime(s.starts_at)} · {s.confirmedCount}/{s.capacity}
+                </span>
+              </li>
+            ))}
+          </ul>
         )}
       </div>
+
+      {/* Owner only: LeadsMiniKanban */}
+      {role === 'owner' && data.leadsByStatus && (
+        <div className="mt-6">
+          <LeadsMiniKanban data={data.leadsByStatus} />
+        </div>
+      )}
     </div>
   )
 }

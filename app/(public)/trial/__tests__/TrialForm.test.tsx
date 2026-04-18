@@ -5,10 +5,10 @@ import TrialPage from '../page'
 
 // Mock the server action
 vi.mock('@/app/actions/leads', () => ({
-  createLead: vi.fn(),
+  submitTrialLead: vi.fn(),
 }))
 
-import { createLead } from '@/app/actions/leads'
+import { submitTrialLead } from '@/app/actions/leads'
 
 describe('Trial signup page', () => {
   beforeEach(() => {
@@ -23,7 +23,7 @@ describe('Trial signup page', () => {
   })
 
   it('shows success state after submission', async () => {
-    vi.mocked(createLead).mockResolvedValueOnce({ success: true })
+    vi.mocked(submitTrialLead).mockResolvedValueOnce({ success: true })
     render(<TrialPage />)
 
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Max Mustermann' } })
@@ -36,7 +36,7 @@ describe('Trial signup page', () => {
   })
 
   it('shows error when server action fails', async () => {
-    vi.mocked(createLead).mockResolvedValueOnce({ error: 'Fehler beim Speichern' })
+    vi.mocked(submitTrialLead).mockResolvedValueOnce({ error: 'Fehler beim Speichern' })
     render(<TrialPage />)
 
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Max Mustermann' } })

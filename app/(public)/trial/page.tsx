@@ -4,7 +4,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { createLead } from '@/app/actions/leads'
+import { submitTrialLead } from '@/app/actions/leads'
 import { LeadSchema, type LeadFormData } from '@/app/actions/leads.schema'
 
 export default function TrialPage() {
@@ -19,7 +19,7 @@ export default function TrialPage() {
 
   const onSubmit = async (data: LeadFormData) => {
     setServerError('')
-    const result = await createLead(data)
+    const result = await submitTrialLead(data)
     if (result.error) {
       setServerError(result.error)
     } else {

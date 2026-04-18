@@ -119,6 +119,33 @@ export async function getSessionBookings(sessionId: string): Promise<{
   return { bookings }
 }
 
+export interface PromotionReady {
+  profileId: string
+  memberName: string
+  currentBelt: string
+  currentBeltColor: string | null
+  nextBelt: string
+  nextBeltColor: string | null
+  sessions: number
+  months: number
+}
+
+export interface LeadCard {
+  id: string
+  full_name: string
+  source: 'website' | 'instagram'
+  status: 'new' | 'contacted' | 'converted' | 'lost'
+  created_at: string
+}
+
+export interface LeadsByStatus {
+  new: LeadCard[]
+  contacted: LeadCard[]
+  converted: LeadCard[]
+  lost: LeadCard[]
+  totals: { new: number; contacted: number; converted: number; lost: number }
+}
+
 export async function getAdminDashboard(): Promise<{
   role: 'coach' | 'owner'
   checkinsToday: number
@@ -126,7 +153,8 @@ export async function getAdminDashboard(): Promise<{
   todaySessions: TodaySession[]
   activeMembers?: number
   newLeads?: number
-  promotionsReady?: { profileId: string; memberName: string; currentBelt: string; nextBelt: string }[]
+  promotionsReady?: PromotionReady[]
+  leadsByStatus?: LeadsByStatus
   error?: string
 }> {
   const supabase = await createClient()
@@ -196,7 +224,7 @@ export async function getAdminDashboard(): Promise<{
   if (role !== 'owner') return base
 
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-  const [membersResult, leadsResult, promotionsResult] = await Promise.all([
+  const [membersResult, leadsResult, promotionsResult, beltsResult, allLeadsResult] = await Promise.all([
     supabase
       .from('profiles')
       .select('*', { count: 'exact', head: true })
@@ -208,40 +236,90 @@ export async function getAdminDashboard(): Promise<{
       .gte('created_at', weekAgo),
     supabase
       .from('profile_ranks')
-      .select(`
-        profile_id,
-        promoted_at,
-        profiles(full_name),
-        belt_ranks(name, min_sessions, min_time_months)
-      `)
+      .select(`profile_id, belt_rank_id, promoted_at, profiles(full_name)`)
       .order('promoted_at', { ascending: false }),
+    supabase
+      .from('belt_ranks')
+      .select('id, name, order, color_hex, min_sessions, min_time_months')
+      .order('order', { ascending: true }),
+    supabase
+      .from('leads')
+      .select('id, full_name, source, status, created_at')
+      .order('created_at', { ascending: false }),
   ])
 
-  const now = new Date()
-  const promotionsReady: { profileId: string; memberName: string; currentBelt: string; nextBelt: string }[] = []
+  type BeltRow = { id: string; name: string; order: number; color_hex: string | null; min_sessions: number | null; min_time_months: number | null }
+  const beltList = (beltsResult.data ?? []) as BeltRow[]
+  const beltById = new Map(beltList.map(b => [b.id, b]))
+  const beltByOrder = new Map(beltList.map(b => [b.order, b]))
 
+  const now = new Date()
+
+  // Group profile_ranks by profile, pick the most recent row per profile
+  const latestRankByProfile = new Map<string, { belt_rank_id: string; promoted_at: string; full_name: string }>()
   for (const row of promotionsResult.data ?? []) {
-    const rawBelt = Array.isArray(row.belt_ranks) ? row.belt_ranks[0] : row.belt_ranks
     const rawProfile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
-    if (!rawBelt || !rawProfile) continue
-    const belt = rawBelt as { name: string; min_sessions: number | null; min_time_months: number | null }
+    if (!rawProfile) continue
     const profile = rawProfile as { full_name: string }
-    if (!belt.min_time_months || !row.promoted_at) continue
-    const monthsElapsed = Math.floor((now.getTime() - new Date(row.promoted_at).getTime()) / (1000 * 60 * 60 * 24 * 30))
-    if (monthsElapsed >= belt.min_time_months) {
-      promotionsReady.push({
-        profileId: row.profile_id as string,
-        memberName: profile.full_name ?? 'Unbekannt',
-        currentBelt: belt.name,
-        nextBelt: '—',
+    const key = row.profile_id as string
+    if (!latestRankByProfile.has(key)) {
+      latestRankByProfile.set(key, {
+        belt_rank_id: row.belt_rank_id as string,
+        promoted_at: row.promoted_at as string,
+        full_name: profile.full_name ?? 'Unbekannt',
       })
     }
+  }
+
+  const promotionsReady: PromotionReady[] = []
+  for (const [profileId, latest] of latestRankByProfile) {
+    const currentBelt = beltById.get(latest.belt_rank_id)
+    if (!currentBelt) continue
+    const nextBelt = beltByOrder.get(currentBelt.order + 1)
+    if (!nextBelt) continue
+
+    const { count: sessions } = await supabase
+      .from('attendances')
+      .select('*', { count: 'exact', head: true })
+      .eq('profile_id', profileId)
+
+    const monthsElapsed = Math.floor(
+      (now.getTime() - new Date(latest.promoted_at).getTime()) / (1000 * 60 * 60 * 24 * 30)
+    )
+    const sessionsOk = !nextBelt.min_sessions || (sessions ?? 0) >= nextBelt.min_sessions
+    const monthsOk = !nextBelt.min_time_months || monthsElapsed >= nextBelt.min_time_months
+    if (!sessionsOk || !monthsOk) continue
+
+    promotionsReady.push({
+      profileId,
+      memberName: latest.full_name,
+      currentBelt: currentBelt.name,
+      currentBeltColor: currentBelt.color_hex,
+      nextBelt: nextBelt.name,
+      nextBeltColor: nextBelt.color_hex,
+      sessions: sessions ?? 0,
+      months: monthsElapsed,
+    })
+  }
+  promotionsReady.sort((a, b) => b.months - a.months)
+  const promotionsTop3 = promotionsReady.slice(0, 3)
+
+  const leadsByStatus: LeadsByStatus = {
+    new: [], contacted: [], converted: [], lost: [],
+    totals: { new: 0, contacted: 0, converted: 0, lost: 0 },
+  }
+  for (const row of (allLeadsResult.data ?? []) as LeadCard[]) {
+    const bucket = row.status
+    if (!(bucket in leadsByStatus.totals)) continue
+    leadsByStatus.totals[bucket] += 1
+    if (leadsByStatus[bucket].length < 2) leadsByStatus[bucket].push(row)
   }
 
   return {
     ...base,
     activeMembers: membersResult.count ?? 0,
     newLeads: leadsResult.count ?? 0,
-    promotionsReady,
+    promotionsReady: promotionsTop3,
+    leadsByStatus,
   }
 }
