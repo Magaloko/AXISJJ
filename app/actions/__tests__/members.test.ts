@@ -3,6 +3,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 const mockSupabase = { from: vi.fn(), auth: { getUser: vi.fn() } }
 vi.mock('@/lib/supabase/server', () => ({ createClient: () => Promise.resolve(mockSupabase) }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+vi.mock('@/lib/notifications', () => ({ notify: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@vercel/functions', () => ({ waitUntil: (p: Promise<unknown>) => p }))
 
 import { updateMember, updateMemberRole } from '../members'
 
@@ -29,6 +31,12 @@ describe('updateMember', () => {
     mockSupabase.from.mockReturnValueOnce(callerChain('owner'))
     const upd = { update: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ error: null }) }
     mockSupabase.from.mockReturnValueOnce(upd)
+    const memberFetch = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { full_name: 'Thomas B.' }, error: null }),
+    }
+    mockSupabase.from.mockReturnValueOnce(memberFetch)
     const res = await updateMember('p-1', { full_name: 'Thomas B.', phone: '+43 660', date_of_birth: '1990-01-01' })
     expect(res.success).toBe(true)
     expect(upd.update).toHaveBeenCalledWith({
@@ -60,6 +68,12 @@ describe('updateMemberRole', () => {
 
   it('updates role on success', async () => {
     mockSupabase.from.mockReturnValueOnce(callerChain('owner'))
+    const existing = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { full_name: 'Max', role: 'member' }, error: null }),
+    }
+    mockSupabase.from.mockReturnValueOnce(existing)
     const upd = { update: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ error: null }) }
     mockSupabase.from.mockReturnValueOnce(upd)
     const res = await updateMemberRole('p-1', 'coach')

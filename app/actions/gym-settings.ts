@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { waitUntil } from '@vercel/functions'
+import { notify } from '@/lib/notifications'
 import type { OpeningHours } from '@/lib/gym-settings'
 import { DAY_KEYS } from '@/lib/opening-hours'
 
@@ -48,6 +50,7 @@ export async function updateGymInfo(data: GymInfoUpdate): Promise<{ success?: tr
   const { error } = await (supabase.from('gym_settings') as any).update(payload).eq('id', 1)
   if (error) return { error: 'Speichern fehlgeschlagen.' }
   revalidatePath('/', 'layout')
+  waitUntil(notify({ type: 'gym.info_updated', data: {} }))
   return { success: true }
 }
 
@@ -77,6 +80,7 @@ export async function updateOpeningHours(hours: OpeningHours): Promise<{ success
     .eq('id', 1)
   if (error) return { error: 'Speichern fehlgeschlagen.' }
   revalidatePath('/', 'layout')
+  waitUntil(notify({ type: 'gym.hours_updated', data: {} }))
   return { success: true }
 }
 
@@ -99,5 +103,6 @@ export async function updatePolicies(data: PoliciesUpdate): Promise<{ success?: 
   const { error } = await (supabase.from('gym_settings') as any).update(payload).eq('id', 1)
   if (error) return { error: 'Speichern fehlgeschlagen.' }
   revalidatePath('/', 'layout')
+  waitUntil(notify({ type: 'gym.policies_updated', data: {} }))
   return { success: true }
 }

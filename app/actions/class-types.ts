@@ -2,6 +2,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { waitUntil } from '@vercel/functions'
+import { notify } from '@/lib/notifications'
 
 async function assertOwner(): Promise<true | { error: string }> {
   const supabase = await createClient()
@@ -27,9 +29,12 @@ export async function upsertClassType(data: ClassTypeData): Promise<{ success?: 
 
   if (!data.name?.trim()) return { error: 'Name ist Pflicht.' }
 
+  const isNew = !data.id
+
   const supabase = await createClient()
+  const name = data.name.trim()
   const payload: Record<string, unknown> = {
-    name: data.name.trim(),
+    name,
     description: data.description?.trim() || null,
     level: data.level,
     gi: data.gi,
@@ -41,6 +46,11 @@ export async function upsertClassType(data: ClassTypeData): Promise<{ success?: 
 
   revalidatePath('/admin/einstellungen')
   revalidatePath('/admin/klassen')
+
+  waitUntil(notify({
+    type: 'classtype.upserted',
+    data: { name, isNew },
+  }))
   return { success: true }
 }
 
@@ -56,10 +66,23 @@ export async function deleteClassType(id: string): Promise<{ success?: true; err
   if (countError) return { error: 'Prüfung fehlgeschlagen.' }
   if ((count ?? 0) > 0) return { error: 'Noch aktive Sessions — zuerst Sessions absagen.' }
 
+  // Fetch name before delete for notification
+  const { data: existing } = await supabase
+    .from('class_types')
+    .select('name')
+    .eq('id', id)
+    .single()
+
   const { error } = await (supabase.from('class_types') as any).delete().eq('id', id)
   if (error) return { error: 'Löschen fehlgeschlagen.' }
 
   revalidatePath('/admin/einstellungen')
   revalidatePath('/admin/klassen')
+
+  const name = (existing as { name?: string } | null)?.name ?? 'Unbekannt'
+  waitUntil(notify({
+    type: 'classtype.deleted',
+    data: { name },
+  }))
   return { success: true }
 }
