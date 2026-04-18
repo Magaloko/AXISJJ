@@ -2,10 +2,11 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Calendar, Award, BookOpen, Settings } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { LayoutDashboard, Calendar, Award, BookOpen, Settings, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { translations, type Lang } from '@/lib/i18n'
+import { createClient } from '@/lib/supabase/client'
 
 interface NavItem {
   href: string
@@ -31,10 +32,17 @@ interface Props {
 
 export function MemberNav({ userName, lang = 'de' }: Props) {
   const pathname = usePathname()
+  const router = useRouter()
   const items = navItems(lang)
 
   const isActive = (href: string) =>
-    pathname === href || (href !== '/members/dashboard' && pathname.startsWith(href))
+    pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
+
+  async function handleLogout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
 
   return (
     <>
@@ -65,6 +73,16 @@ export function MemberNav({ userName, lang = 'de' }: Props) {
             )
           })}
         </nav>
+
+        <div className="border-t border-white/5 p-4">
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:bg-white/5 hover:text-white"
+          >
+            <LogOut size={16} />
+            Abmelden
+          </button>
+        </div>
       </aside>
 
       {/* Mobile bottom tab bar */}
@@ -85,6 +103,13 @@ export function MemberNav({ userName, lang = 'de' }: Props) {
             </Link>
           )
         })}
+        <button
+          onClick={handleLogout}
+          className="flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-bold uppercase tracking-wide text-gray-600 transition-colors hover:text-white"
+        >
+          <LogOut size={18} />
+          Logout
+        </button>
       </nav>
     </>
   )
