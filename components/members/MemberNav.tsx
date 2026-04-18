@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Calendar, Award, BookOpen, Settings } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { translations, type Lang } from '@/lib/i18n'
 
 interface NavItem {
   href: string
@@ -12,20 +13,25 @@ interface NavItem {
   Icon: React.ElementType
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { href: '/members/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
-  { href: '/members/buchen', label: 'Buchen', Icon: Calendar },
-  { href: '/members/gürtel', label: 'Gürtel', Icon: Award },
-  { href: '/members/skills', label: 'Skills', Icon: BookOpen },
-  { href: '/members/konto', label: 'Konto', Icon: Settings },
-]
+function navItems(lang: Lang): NavItem[] {
+  const t = translations[lang].nav
+  return [
+    { href: '/members/dashboard', label: t.dashboard, Icon: LayoutDashboard },
+    { href: '/members/buchen',    label: t.buchen,    Icon: Calendar },
+    { href: '/members/gürtel',   label: t.gurtel,    Icon: Award },
+    { href: '/members/skills',   label: t.skills,    Icon: BookOpen },
+    { href: '/members/konto',    label: t.konto,     Icon: Settings },
+  ]
+}
 
 interface Props {
   userName: string
+  lang?: Lang
 }
 
-export function MemberNav({ userName }: Props) {
+export function MemberNav({ userName, lang = 'de' }: Props) {
   const pathname = usePathname()
+  const items = navItems(lang)
 
   const isActive = (href: string) =>
     pathname === href || (href !== '/members/dashboard' && pathname.startsWith(href))
@@ -40,7 +46,7 @@ export function MemberNav({ userName }: Props) {
         </div>
 
         <nav className="flex-1 space-y-1 p-4">
-          {NAV_ITEMS.map(({ href, label, Icon }) => {
+          {items.map(({ href, label, Icon }) => {
             const active = isActive(href)
             return (
               <Link
@@ -63,7 +69,7 @@ export function MemberNav({ userName }: Props) {
 
       {/* Mobile bottom tab bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-white/5 bg-[#080808] lg:hidden" aria-label="Mobile Navigation">
-        {NAV_ITEMS.slice(0, 4).map(({ href, label, Icon }) => {
+        {items.slice(0, 4).map(({ href, label, Icon }) => {
           const active = isActive(href)
           return (
             <Link
