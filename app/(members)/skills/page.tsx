@@ -1,6 +1,8 @@
 // app/(members)/skills/page.tsx
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { SkillCard } from '@/components/members/SkillCard'
+import { translations, type Lang } from '@/lib/i18n'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Skills' }
@@ -22,6 +24,10 @@ interface CategoryRow {
 }
 
 export default async function SkillsPage() {
+  const rawLang = (await cookies()).get('lang')?.value
+  const lang: Lang = rawLang === 'en' ? 'en' : 'de'
+  const t = translations[lang].skills
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
@@ -46,10 +52,10 @@ export default async function SkillsPage() {
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="mb-6 text-2xl font-black text-white">Skills</h1>
+      <h1 className="mb-6 text-2xl font-black text-white">{t.title}</h1>
 
       {categories.length === 0 && (
-        <p className="text-sm text-gray-500">Noch keine Skills eingetragen.</p>
+        <p className="text-sm text-gray-500">{t.empty}</p>
       )}
 
       <div className="space-y-8">
@@ -72,7 +78,7 @@ export default async function SkillsPage() {
                   {cat.name}
                 </h2>
                 <span className="text-xs text-gray-600">
-                  {masteredCount}/{skills.length} beherrscht
+                  {masteredCount}/{skills.length} {t.mastered}
                 </span>
                 <span className="h-px flex-1 bg-white/5" />
               </div>
@@ -83,6 +89,7 @@ export default async function SkillsPage() {
                     key={skill.id}
                     skill={skill}
                     initialStatus={progressMap.get(skill.id) ?? 'not_started'}
+                    lang={lang}
                   />
                 ))}
               </div>
