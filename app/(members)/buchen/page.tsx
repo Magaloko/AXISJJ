@@ -60,23 +60,23 @@ export default async function BuchenPage() {
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="mb-6 text-2xl font-black text-white">{t.title}</h1>
+      <h1 className="mb-6 text-2xl font-black text-foreground">{t.title}</h1>
 
       <div className="space-y-6">
         {sessionsByDay.map(({ day, sessions: daySessions }) => (
           <div key={day.toISOString()}>
             <div className="mb-3 flex items-center gap-3">
-              <h2 className="text-sm font-black uppercase tracking-widest text-white">
+              <h2 className="text-sm font-black uppercase tracking-widest text-foreground">
                 {getDayLabel(day)}
               </h2>
-              <span className="text-xs text-gray-600">{formatDateShort(day.toISOString())}</span>
-              <span className="h-px flex-1 bg-white/5" />
+              <span className="text-xs text-muted-foreground">{formatDateShort(day.toISOString())}</span>
+              <span className="h-px flex-1 bg-border" />
             </div>
 
             {daySessions.length === 0 ? (
-              <p className="text-xs text-gray-700">Keine Klassen an diesem Tag</p>
+              <p className="text-xs text-muted-foreground">Keine Klassen an diesem Tag</p>
             ) : (
-              <div className="border border-white/5 bg-[#111111] px-4">
+              <div className="border border-border bg-card px-4">
                 {daySessions.map(session => {
                   const bookings = session.bookings ?? []
                   const confirmedCount = bookings.filter(b => b.status === 'confirmed').length

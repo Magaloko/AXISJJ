@@ -15,7 +15,7 @@ export function NavBar() {
   const [open, setOpen] = useState(false)
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b border-white/5 bg-[#0a0a0a]/95 backdrop-blur-sm">
+    <nav className="fixed top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <Link href="/" aria-label="AXIS JIU JITSU — Zur Startseite">
           <Image
@@ -32,27 +32,27 @@ export function NavBar() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm text-gray-400 transition-colors hover:text-white"
+              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               {link.label}
             </Link>
           ))}
           <Link
             href="/login"
-            className="text-sm text-gray-400 transition-colors hover:text-white"
+            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             Login
           </Link>
           <Link
             href="/trial"
-            className="bg-red-600 px-5 py-2 text-sm font-black tracking-widest text-white transition-colors hover:bg-red-700"
+            className="bg-primary px-5 py-2 text-sm font-black tracking-widest text-primary-foreground transition-colors hover:bg-primary/90"
           >
             1 WOCHE GRATIS
           </Link>
         </div>
 
         <button
-          className="text-gray-400 md:hidden"
+          className="text-muted-foreground md:hidden"
           onClick={() => setOpen(v => !v)}
           aria-label="Toggle menu"
           aria-expanded={open}
@@ -61,13 +61,20 @@ export function NavBar() {
         </button>
       </div>
 
-      <div aria-hidden={!open} className={open ? 'block border-t border-white/5 bg-[#0a0a0a] px-4 py-4 md:hidden' : 'hidden'}>
+      <div
+        aria-hidden={!open}
+        className={
+          open
+            ? 'block border-t border-border bg-background px-4 py-4 md:hidden'
+            : 'hidden'
+        }
+      >
         <div className="flex flex-col gap-4">
           {NAV_LINKS.map(link => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm text-gray-400"
+              className="text-sm text-muted-foreground"
               onClick={() => setOpen(false)}
             >
               {link.label}
@@ -75,14 +82,14 @@ export function NavBar() {
           ))}
           <Link
             href="/login"
-            className="text-sm text-gray-400"
+            className="text-sm text-muted-foreground"
             onClick={() => setOpen(false)}
           >
             Login
           </Link>
           <Link
             href="/trial"
-            className="bg-red-600 px-4 py-2 text-center text-sm font-black tracking-widest text-white"
+            className="bg-primary px-4 py-2 text-center text-sm font-black tracking-widest text-primary-foreground"
             onClick={() => setOpen(false)}
           >
             1 WOCHE GRATIS

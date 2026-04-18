@@ -53,10 +53,10 @@ export default async function SkillsPage() {
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="mb-6 text-2xl font-black text-white">{t.title}</h1>
+      <h1 className="mb-6 text-2xl font-black text-foreground">{t.title}</h1>
 
       {categories.length === 0 && (
-        <p className="text-sm text-gray-500">{t.empty}</p>
+        <p className="text-sm text-muted-foreground">{t.empty}</p>
       )}
 
       <div className="space-y-8">
@@ -75,16 +75,16 @@ export default async function SkillsPage() {
           return (
             <div key={cat.id}>
               <div className="mb-3 flex items-center gap-3">
-                <h2 className="text-sm font-black uppercase tracking-widest text-white">
+                <h2 className="text-sm font-black uppercase tracking-widest text-foreground">
                   {cat.name}
                 </h2>
-                <span className="text-xs text-gray-600">
+                <span className="text-xs text-muted-foreground">
                   {masteredCount}/{skills.length} {t.mastered}
                 </span>
-                <span className="h-px flex-1 bg-white/5" />
+                <span className="h-px flex-1 bg-border" />
               </div>
 
-              <div className="border border-white/5 bg-[#111111] px-4">
+              <div className="border border-border bg-card px-4">
                 {skills.map(skill => (
                   <SkillCard
                     key={skill.id}

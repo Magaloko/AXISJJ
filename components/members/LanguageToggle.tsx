@@ -31,10 +31,10 @@ export function LanguageToggle({ current }: Props) {
           disabled={isPending}
           aria-pressed={current === lang}
           className={cn(
-            'px-4 py-2 text-xs font-black uppercase tracking-widest transition-colors disabled:opacity-40',
+            'border border-border px-4 py-2 text-xs font-black uppercase tracking-widest transition-colors disabled:opacity-40',
             current === lang
-              ? 'bg-red-600 text-white'
-              : 'bg-white/5 text-gray-500 hover:bg-white/10 hover:text-white'
+              ? 'bg-primary text-primary-foreground border-primary'
+              : 'bg-background text-muted-foreground hover:bg-muted hover:text-foreground'
           )}
         >
           {lang.toUpperCase()}

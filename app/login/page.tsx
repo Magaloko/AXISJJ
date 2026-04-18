@@ -45,18 +45,18 @@ export default function LoginPage() {
       setErrorMsg('Ungültige E-Mail oder Passwort.')
       setStatus('error')
     } else {
-      router.push('/dashboard')
+      router.push('/members/dashboard')
       router.refresh()
     }
   }
 
   if (status === 'success' && mode === 'magic') {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] px-4">
+      <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="text-center">
-          <h2 className="mb-3 text-2xl font-black text-white">Check deine E-Mail</h2>
-          <p className="text-gray-400">
-            Wir haben einen Magic Link an <strong className="text-white">{email}</strong> gesendet.
+          <h2 className="mb-3 text-2xl font-black text-foreground">Check deine E-Mail</h2>
+          <p className="text-muted-foreground">
+            Wir haben einen Magic Link an <strong className="text-foreground">{email}</strong> gesendet.
           </p>
         </div>
       </div>
@@ -64,22 +64,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#0a0a0a] px-4">
+    <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm">
         <div className="mb-8 flex justify-center">
           <Image src="/images/logo.jpg" alt="AXIS JIU JITSU" width={56} height={56} className="object-contain" />
         </div>
 
-        <h1 className="mb-1 text-center text-2xl font-black text-white">AXIS Member Portal</h1>
-        <p className="mb-8 text-center text-sm text-gray-600">Mitglieder-Login</p>
+        <h1 className="mb-1 text-center text-2xl font-black text-foreground">AXIS Member Portal</h1>
+        <p className="mb-8 text-center text-sm text-muted-foreground">Mitglieder-Login</p>
 
         {/* Mode toggle */}
-        <div className="mb-6 flex border border-white/10">
+        <div className="mb-6 flex border border-border">
           <button
             type="button"
             onClick={() => { setMode('magic'); setStatus('idle') }}
             className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
-              mode === 'magic' ? 'bg-red-600 text-white' : 'text-gray-500 hover:text-white'
+              mode === 'magic' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Magic Link
@@ -88,7 +88,7 @@ export default function LoginPage() {
             type="button"
             onClick={() => { setMode('password'); setStatus('idle') }}
             className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
-              mode === 'password' ? 'bg-red-600 text-white' : 'text-gray-500 hover:text-white'
+              mode === 'password' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Passwort
@@ -97,7 +97,7 @@ export default function LoginPage() {
 
         <form onSubmit={mode === 'magic' ? handleMagicLink : handlePassword} className="space-y-4">
           <div>
-            <label htmlFor="email" className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-400">
+            <label htmlFor="email" className="mb-1 block text-xs font-bold uppercase tracking-wider text-muted-foreground">
               E-Mail
             </label>
             <input
@@ -107,13 +107,13 @@ export default function LoginPage() {
               onChange={e => setEmail(e.target.value)}
               required
               placeholder="deine@email.at"
-              className="w-full border border-white/10 bg-[#111111] px-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-red-600"
+              className="w-full border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary"
             />
           </div>
 
           {mode === 'password' && (
             <div>
-              <label htmlFor="password" className="mb-1 block text-xs font-bold uppercase tracking-wider text-gray-400">
+              <label htmlFor="password" className="mb-1 block text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 Passwort
               </label>
               <input
@@ -123,17 +123,17 @@ export default function LoginPage() {
                 onChange={e => setPassword(e.target.value)}
                 required
                 placeholder="••••••••"
-                className="w-full border border-white/10 bg-[#111111] px-4 py-3 text-sm text-white placeholder-gray-600 outline-none focus:border-red-600"
+                className="w-full border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary"
               />
             </div>
           )}
 
-          {errorMsg && <p className="text-sm text-red-500">{errorMsg}</p>}
+          {errorMsg && <p className="text-sm text-destructive">{errorMsg}</p>}
 
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="w-full bg-red-600 py-4 text-sm font-black uppercase tracking-widest text-white hover:bg-red-700 disabled:opacity-50"
+            className="w-full bg-primary py-4 text-sm font-black uppercase tracking-widest text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
             {status === 'loading'
               ? 'Wird geladen ...'

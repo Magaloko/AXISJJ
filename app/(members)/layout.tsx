@@ -22,7 +22,7 @@ export default async function MembersLayout({ children }: { children: React.Reac
   const lang = resolveLang(rawLang, profile?.language)
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-background">
       <MemberNav userName={displayName} lang={lang} />
       <div className="lg:ml-64">
         <main className="min-h-screen pb-20 lg:pb-0">{children}</main>

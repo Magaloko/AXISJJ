@@ -4,7 +4,8 @@ import { describe, it, expect, vi } from 'vitest'
 import { MemberNav } from '../MemberNav'
 
 vi.mock('next/navigation', () => ({
-  usePathname: () => '/members/dashboard',
+  usePathname: () => '/dashboard',
+  useRouter: () => ({ push: vi.fn() }),
 }))
 
 describe('MemberNav', () => {
@@ -23,7 +24,7 @@ describe('MemberNav', () => {
   it('highlights the active link', () => {
     render(<MemberNav userName="Max Mustermann" />)
     const dashboardLink = screen.getAllByRole('link', { name: /dashboard/i })[0]
-    expect(dashboardLink.className).toContain('red')
+    expect(dashboardLink.className).toContain('primary')
   })
 
   it('renders English nav labels when lang is en', () => {
