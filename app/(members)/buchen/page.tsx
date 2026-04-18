@@ -1,7 +1,9 @@
 // app/(members)/buchen/page.tsx
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { ClassSlot } from '@/components/members/ClassSlot'
 import { getDayLabel, formatDateShort, getNextSevenDays, startOfDay, endOfDay, addDays } from '@/lib/utils/dates'
+import { translations, type Lang } from '@/lib/i18n'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Klassen buchen' }
@@ -20,6 +22,10 @@ interface SessionRow {
 }
 
 export default async function BuchenPage() {
+  const rawLang = (await cookies()).get('lang')?.value
+  const lang: Lang = rawLang === 'en' ? 'en' : 'de'
+  const t = translations[lang].buchen
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
@@ -53,7 +59,7 @@ export default async function BuchenPage() {
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="mb-6 text-2xl font-black text-white">Klassen buchen</h1>
+      <h1 className="mb-6 text-2xl font-black text-white">{t.title}</h1>
 
       <div className="space-y-6">
         {sessionsByDay.map(({ day, sessions: daySessions }) => (
@@ -98,6 +104,7 @@ export default async function BuchenPage() {
                       session={typedSession}
                       userBooking={userBooking}
                       confirmedCount={confirmedCount}
+                      lang={lang}
                     />
                   )
                 })}
