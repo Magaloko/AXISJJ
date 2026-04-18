@@ -49,11 +49,11 @@ export function SkillCard({ skill, initialStatus, lang = 'de' }: Props) {
   }
 
   return (
-    <div className="flex items-center justify-between border-b border-white/5 py-3 last:border-0">
+    <div className="flex items-center justify-between border-b border-border py-3 last:border-0">
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-white">{skill.name}</p>
+        <p className="text-sm font-medium text-foreground">{skill.name}</p>
         {skill.description && (
-          <p className="mt-0.5 truncate text-xs text-gray-500">{skill.description}</p>
+          <p className="mt-0.5 truncate text-xs text-muted-foreground">{skill.description}</p>
         )}
       </div>
 
@@ -63,7 +63,7 @@ export function SkillCard({ skill, initialStatus, lang = 'de' }: Props) {
             href={skill.video_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-gray-600 hover:text-white"
+            className="text-xs text-muted-foreground hover:text-foreground"
             aria-label={`${skill.name} Video`}
           >
             ▶
@@ -75,9 +75,9 @@ export function SkillCard({ skill, initialStatus, lang = 'de' }: Props) {
           aria-label={statusLabels[status]}
           className={cn(
             'px-2 py-1 text-[10px] font-black uppercase tracking-widest transition-colors disabled:opacity-40',
-            status === 'mastered'    && 'bg-green-900/30 text-green-400',
-            status === 'in_progress' && 'bg-yellow-900/30 text-yellow-400',
-            status === 'not_started' && 'bg-white/5 text-gray-600'
+            status === 'mastered'    && 'bg-green-100 text-green-700',
+            status === 'in_progress' && 'bg-yellow-100 text-yellow-700',
+            status === 'not_started' && 'bg-muted text-muted-foreground'
           )}
         >
           {statusLabels[status]}

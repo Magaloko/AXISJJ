@@ -46,40 +46,40 @@ export function ProfileForm({ profile, lang }: Props) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <label htmlFor="full_name" className="mb-1 block text-xs font-bold uppercase tracking-widest text-gray-600">
+        <label htmlFor="full_name" className="mb-1 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
           {t.fullName}
         </label>
         <input
           id="full_name"
           {...register('full_name')}
-          className="w-full border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:border-red-600 focus:outline-none"
+          className="w-full border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
         />
         {errors.full_name && (
-          <p className="mt-1 text-xs text-red-500">{errors.full_name.message}</p>
+          <p className="mt-1 text-xs text-destructive">{errors.full_name.message}</p>
         )}
       </div>
 
       <div>
-        <label htmlFor="phone" className="mb-1 block text-xs font-bold uppercase tracking-widest text-gray-600">
+        <label htmlFor="phone" className="mb-1 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
           {t.phone}
         </label>
         <input
           id="phone"
           {...register('phone')}
           type="tel"
-          className="w-full border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:border-red-600 focus:outline-none"
+          className="w-full border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
         />
       </div>
 
       <div>
-        <label htmlFor="date_of_birth" className="mb-1 block text-xs font-bold uppercase tracking-widest text-gray-600">
+        <label htmlFor="date_of_birth" className="mb-1 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
           {t.dateOfBirth}
         </label>
         <input
           id="date_of_birth"
           {...register('date_of_birth')}
           type="date"
-          className="w-full border border-white/10 bg-[#111111] px-3 py-2 text-sm text-white focus:border-red-600 focus:outline-none [color-scheme:dark]"
+          className="w-full border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
         />
       </div>
 
@@ -87,11 +87,11 @@ export function ProfileForm({ profile, lang }: Props) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="bg-red-600 px-4 py-2 text-xs font-black uppercase tracking-wider text-white hover:bg-red-700 disabled:opacity-40"
+          className="bg-primary px-4 py-2 text-xs font-black uppercase tracking-wider text-primary-foreground hover:bg-primary/90 disabled:opacity-40"
         >
           {saved ? t.saved : t.save}
         </button>
-        {serverError && <p className="text-xs text-red-500">{serverError}</p>}
+        {serverError && <p className="text-xs text-destructive">{serverError}</p>}
       </div>
     </form>
   )
