@@ -22,9 +22,11 @@
   /* Brand / accent */
   --color-primary:          oklch(58% 0.21 28);
   --color-primary-foreground: oklch(99% 0.000 0);
+  /* Accent = same brand red as primary (intentional — AXISJJ uses one brand accent) */
   --color-accent:           oklch(58% 0.21 28);
   --color-accent-foreground: oklch(99% 0.000 0);
-  --color-destructive:      oklch(52% 0.24 22);
+  --color-destructive:            oklch(52% 0.24 22);
+  --color-destructive-foreground: oklch(99% 0.000 0);
 
   /* Legacy brand tokens */
   --color-brand-red:        oklch(58% 0.21 28);
