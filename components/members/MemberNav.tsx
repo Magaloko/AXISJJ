@@ -66,7 +66,7 @@ export function MemberNav({ userName, lang = 'de' }: Props) {
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors',
                   active
-                    ? 'bg-red-600/10 text-red-500'
+                    ? 'bg-primary/10 text-primary'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 )}
               >
@@ -101,7 +101,7 @@ export function MemberNav({ userName, lang = 'de' }: Props) {
               href={href}
               className={cn(
                 'flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-bold uppercase tracking-wide transition-colors',
-                active ? 'text-red-500' : 'text-muted-foreground'
+                active ? 'text-primary' : 'text-muted-foreground'
               )}
             >
               <Icon size={18} />
