@@ -7,6 +7,7 @@ import { calcReadiness } from '@/lib/utils/belt'
 import { differenceInMonths } from 'date-fns'
 import { translations } from '@/lib/i18n'
 import { resolveLang } from '@/lib/i18n/resolve-lang'
+import { MemberQRCode } from '@/components/members/MemberQRCode'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard' }
@@ -126,6 +127,10 @@ export default async function DashboardPage() {
             monthsInGrade={monthsInGrade}
             lang={lang}
           />
+        </div>
+
+        <div className="sm:col-span-2 lg:col-span-3">
+          <MemberQRCode profileId={userId} />
         </div>
       </div>
     </div>
