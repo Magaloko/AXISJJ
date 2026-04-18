@@ -1,9 +1,11 @@
 // app/(members)/dashboard/page.tsx
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { NextClassCard } from '@/components/members/NextClassCard'
 import { BeltProgress } from '@/components/members/BeltProgress'
 import { calcReadiness } from '@/lib/utils/belt'
 import { differenceInMonths } from 'date-fns'
+import { translations, type Lang } from '@/lib/i18n'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard' }
@@ -16,6 +18,10 @@ interface BeltRankRow {
 }
 
 export default async function DashboardPage() {
+  const rawLang = (await cookies()).get('lang')?.value
+  const lang: Lang = rawLang === 'en' ? 'en' : 'de'
+  const t = translations[lang]
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
@@ -91,27 +97,24 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="mb-6 text-2xl font-black text-white">Dashboard</h1>
+      <h1 className="mb-6 text-2xl font-black text-white">{t.dashboard.title}</h1>
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {/* Next class — spans 2 columns */}
         <div className="sm:col-span-2">
-          <NextClassCard session={nextSession} bookingId={bookingId} />
+          <NextClassCard session={nextSession} bookingId={bookingId} lang={lang} />
         </div>
 
-        {/* Stats column */}
         <div className="space-y-4">
           <div className="border border-white/5 bg-[#111111] p-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-600">Trainings gesamt</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-600">{t.dashboard.trainingsTotal}</p>
             <p className="mt-2 text-4xl font-black text-white">{attendanceCount ?? 0}</p>
           </div>
           <div className="border border-white/5 bg-[#111111] p-6">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-600">Aktive Buchungen</p>
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-600">{t.dashboard.activeBookings}</p>
             <p className="mt-2 text-4xl font-black text-white">{bookingCount ?? 0}</p>
           </div>
         </div>
 
-        {/* Belt progress — full width below */}
         <div className="sm:col-span-2 lg:col-span-3">
           <BeltProgress
             beltName={beltRank?.name ?? null}
@@ -120,6 +123,7 @@ export default async function DashboardPage() {
             readiness={readiness}
             sessionsAttended={attendanceCount ?? 0}
             monthsInGrade={monthsInGrade}
+            lang={lang}
           />
         </div>
       </div>
