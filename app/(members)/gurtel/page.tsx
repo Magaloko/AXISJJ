@@ -1,4 +1,4 @@
-// app/(members)/gürtel/page.tsx
+// app/(members)/gurtel/page.tsx
 import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { BeltProgress } from '@/components/members/BeltProgress'
