@@ -19,6 +19,16 @@ export async function upsertSession(
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { error: 'Nicht eingeloggt' }
 
+  const { data: callerProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!callerProfile || !['coach', 'owner'].includes(callerProfile.role)) {
+    return { error: 'Keine Berechtigung.' }
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: session, error } = await supabase
     .from('class_sessions')
@@ -45,6 +55,16 @@ export async function cancelSession(
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { error: 'Nicht eingeloggt' }
+
+  const { data: callerProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!callerProfile || !['coach', 'owner'].includes(callerProfile.role)) {
+    return { error: 'Keine Berechtigung.' }
+  }
 
   const { error } = await supabase
     .from('class_sessions')

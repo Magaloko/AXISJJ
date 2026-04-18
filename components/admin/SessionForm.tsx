@@ -30,6 +30,10 @@ export function SessionForm({ initialData, classTypes, onSuccess, onCancel }: Pr
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
+    if (form.startTime >= form.endTime) {
+      setError('Endzeit muss nach der Startzeit liegen.')
+      return
+    }
     startTransition(async () => {
       const data: SessionFormData = {
         ...(form.id ? { id: form.id } : {}),

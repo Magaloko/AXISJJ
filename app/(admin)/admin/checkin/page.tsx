@@ -2,6 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTodaySessions, getSessionBookings } from '@/app/actions/admin'
+import Link from 'next/link'
 import { CheckInScanner } from '@/components/admin/CheckInScanner'
 import { CheckInList } from '@/components/admin/CheckInList'
 import type { Metadata } from 'next'
@@ -51,7 +52,7 @@ export default async function CheckInPage({ searchParams }: Props) {
         ) : (
           <div className="flex flex-wrap gap-2">
             {sessions.map(s => (
-              <a
+              <Link
                 key={s.id}
                 href={`/admin/checkin?session=${s.id}`}
                 className={`border px-4 py-2 text-sm font-semibold transition-colors ${
@@ -61,7 +62,7 @@ export default async function CheckInPage({ searchParams }: Props) {
                 }`}
               >
                 {s.class_types?.name ?? 'Session'} · {formatTime(s.starts_at)}
-              </a>
+              </Link>
             ))}
           </div>
         )}

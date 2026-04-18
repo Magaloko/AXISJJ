@@ -27,22 +27,47 @@ describe('cancelSession', () => {
     expect(result.error).toBeTruthy()
   })
 
+  it('returns error when caller lacks role', async () => {
+    const callerChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { role: 'member' }, error: null }),
+    }
+    mockSupabase.from.mockReturnValue(callerChain)
+    const result = await cancelSession('session-1')
+    expect(result.error).toBeTruthy()
+  })
+
   it('returns success when cancel succeeds', async () => {
-    const chain = {
+    const callerChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { role: 'coach' }, error: null }),
+    }
+    const updateChain = {
       update: vi.fn().mockReturnThis(),
       eq: vi.fn().mockResolvedValue({ error: null }),
     }
-    mockSupabase.from.mockReturnValue(chain)
+    mockSupabase.from
+      .mockReturnValueOnce(callerChain)
+      .mockReturnValueOnce(updateChain)
     const result = await cancelSession('session-1')
     expect(result.success).toBe(true)
   })
 
   it('returns error when DB update fails', async () => {
-    const chain = {
+    const callerChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { role: 'coach' }, error: null }),
+    }
+    const updateChain = {
       update: vi.fn().mockReturnThis(),
       eq: vi.fn().mockResolvedValue({ error: { message: 'fail' } }),
     }
-    mockSupabase.from.mockReturnValue(chain)
+    mockSupabase.from
+      .mockReturnValueOnce(callerChain)
+      .mockReturnValueOnce(updateChain)
     const result = await cancelSession('session-1')
     expect(result.error).toBeTruthy()
   })
@@ -63,14 +88,35 @@ describe('upsertSession', () => {
     expect(result.error).toBeTruthy()
   })
 
+  it('returns error when caller lacks role', async () => {
+    const callerChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { role: 'member' }, error: null }),
+    }
+    mockSupabase.from.mockReturnValue(callerChain)
+    const result = await upsertSession({
+      class_type_id: 'ct-1', starts_at: '2026-04-18T18:00:00Z',
+      ends_at: '2026-04-18T19:30:00Z', capacity: 16, location: 'AXIS Gym',
+    })
+    expect(result.error).toBeTruthy()
+  })
+
   it('inserts new session and returns it', async () => {
     const newSession = { id: 's-new', class_type_id: 'ct-1', starts_at: '2026-04-18T18:00:00Z', ends_at: '2026-04-18T19:30:00Z', capacity: 16, location: 'AXIS Gym', cancelled: false }
-    const chain = {
+    const callerChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { role: 'coach' }, error: null }),
+    }
+    const upsertChain = {
       upsert: vi.fn().mockReturnThis(),
       select: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: newSession, error: null }),
     }
-    mockSupabase.from.mockReturnValue(chain)
+    mockSupabase.from
+      .mockReturnValueOnce(callerChain)
+      .mockReturnValueOnce(upsertChain)
     const result = await upsertSession({
       class_type_id: 'ct-1', starts_at: '2026-04-18T18:00:00Z',
       ends_at: '2026-04-18T19:30:00Z', capacity: 16, location: 'AXIS Gym',

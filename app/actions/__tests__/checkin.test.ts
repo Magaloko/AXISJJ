@@ -27,20 +27,42 @@ describe('checkIn', () => {
     expect(result.error).toBeTruthy()
   })
 
+  it('returns error when caller lacks role', async () => {
+    const callerChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { role: 'member' }, error: null }),
+    }
+    mockSupabase.from.mockReturnValue(callerChain)
+    const result = await checkIn('profile-1', 'session-1')
+    expect(result.error).toBeTruthy()
+  })
+
   it('returns error when profile not found', async () => {
-    const chain = {
+    const callerProfileChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { role: 'coach' }, error: null }),
+    }
+    const memberProfileChain = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: null, error: null }),
-      upsert: vi.fn().mockResolvedValue({ error: null }),
     }
-    mockSupabase.from.mockReturnValue(chain)
+    mockSupabase.from
+      .mockReturnValueOnce(callerProfileChain)
+      .mockReturnValueOnce(memberProfileChain)
     const result = await checkIn('unknown-uuid', 'session-1')
     expect(result.error).toBeTruthy()
   })
 
   it('returns success with member name on valid check-in', async () => {
-    const profileChain = {
+    const callerProfileChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { role: 'coach' }, error: null }),
+    }
+    const memberProfileChain = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: { full_name: 'Anna Kovács' }, error: null }),
@@ -49,7 +71,8 @@ describe('checkIn', () => {
       upsert: vi.fn().mockResolvedValue({ error: null }),
     }
     mockSupabase.from
-      .mockReturnValueOnce(profileChain)
+      .mockReturnValueOnce(callerProfileChain)
+      .mockReturnValueOnce(memberProfileChain)
       .mockReturnValueOnce(attendanceChain)
 
     const result = await checkIn('profile-1', 'session-1')
@@ -58,7 +81,12 @@ describe('checkIn', () => {
   })
 
   it('returns error when upsert fails', async () => {
-    const profileChain = {
+    const callerProfileChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { role: 'coach' }, error: null }),
+    }
+    const memberProfileChain = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: { full_name: 'Anna Kovács' }, error: null }),
@@ -67,7 +95,8 @@ describe('checkIn', () => {
       upsert: vi.fn().mockResolvedValue({ error: { message: 'DB error' } }),
     }
     mockSupabase.from
-      .mockReturnValueOnce(profileChain)
+      .mockReturnValueOnce(callerProfileChain)
+      .mockReturnValueOnce(memberProfileChain)
       .mockReturnValueOnce(attendanceChain)
 
     const result = await checkIn('profile-1', 'session-1')

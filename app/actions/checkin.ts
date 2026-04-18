@@ -10,6 +10,17 @@ export async function checkIn(
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { error: 'Nicht eingeloggt' }
 
+  // Verify caller is a coach or owner
+  const { data: callerProfile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (!callerProfile || !['coach', 'owner'].includes(callerProfile.role)) {
+    return { error: 'Keine Berechtigung.' }
+  }
+
   // Verify profile exists and get member name
   const { data: profile } = await supabase
     .from('profiles')
