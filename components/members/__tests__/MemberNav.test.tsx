@@ -4,7 +4,8 @@ import { describe, it, expect, vi } from 'vitest'
 import { MemberNav } from '../MemberNav'
 
 vi.mock('next/navigation', () => ({
-  usePathname: () => '/members/dashboard',
+  usePathname: () => '/dashboard',
+  useRouter: () => ({ push: vi.fn() }),
 }))
 
 describe('MemberNav', () => {
