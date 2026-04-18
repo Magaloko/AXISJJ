@@ -9,6 +9,8 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: () => Promise.resolve(mockSupabase),
 }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+vi.mock('@/lib/notifications', () => ({ notify: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@vercel/functions', () => ({ waitUntil: (p: Promise<unknown>) => p }))
 
 import { updateLeadStatus, createLead } from '../leads'
 
@@ -45,6 +47,12 @@ describe('updateLeadStatus', () => {
 
   it('updates status on success', async () => {
     mockSupabase.from.mockReturnValueOnce(callerRoleChain('owner'))
+    const leadFetchChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { full_name: 'Max', email: 'm@x.com', status: 'new' }, error: null }),
+    }
+    mockSupabase.from.mockReturnValueOnce(leadFetchChain)
     const updateChain = {
       update: vi.fn().mockReturnThis(),
       eq: vi.fn().mockResolvedValue({ error: null }),
