@@ -1,8 +1,10 @@
 // app/(members)/gürtel/page.tsx
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { BeltProgress } from '@/components/members/BeltProgress'
 import { calcReadiness } from '@/lib/utils/belt'
 import { differenceInMonths } from 'date-fns'
+import { translations, type Lang } from '@/lib/i18n'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Gürtel' }
@@ -13,6 +15,10 @@ interface BeltRankRow {
 }
 
 export default async function GuertelPage() {
+  const rawLang = (await cookies()).get('lang')?.value
+  const lang: Lang = rawLang === 'en' ? 'en' : 'de'
+  const t = translations[lang].gurtel
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
@@ -58,7 +64,7 @@ export default async function GuertelPage() {
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="mb-6 text-2xl font-black text-white">Gürtel</h1>
+      <h1 className="mb-6 text-2xl font-black text-white">{t.title}</h1>
 
       <div className="max-w-lg space-y-6">
         <BeltProgress
@@ -68,12 +74,13 @@ export default async function GuertelPage() {
           readiness={readiness}
           sessionsAttended={totalSessions}
           monthsInGrade={monthsInGrade}
+          lang={lang}
         />
 
         {/* Rank history */}
         {allRanks && allRanks.length > 1 && (
           <div className="border border-white/5 bg-[#111111] p-6">
-            <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-600">Verlauf</p>
+            <p className="mb-4 text-xs font-bold uppercase tracking-widest text-gray-600">{t.history}</p>
             <div className="space-y-3">
               {allRanks.map((row, i) => {
                 const raw = row.belt_ranks
