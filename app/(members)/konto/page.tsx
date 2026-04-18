@@ -9,7 +9,8 @@ import type { Metadata } from 'next'
 export const metadata: Metadata = { title: 'Konto' }
 
 export default async function KontoPage() {
-  const lang = ((await cookies()).get('lang')?.value ?? 'de') as Lang
+  const rawLang = (await cookies()).get('lang')?.value
+  const lang: Lang = rawLang === 'en' ? 'en' : 'de'
   const t = translations[lang].konto
 
   const supabase = await createClient()
@@ -59,9 +60,9 @@ export default async function KontoPage() {
             <p className="text-sm text-gray-500">{t.noDocuments}</p>
           ) : (
             <div className="space-y-3">
-              {documents.map((doc, i) => (
+              {documents.map((doc) => (
                 <div
-                  key={i}
+                  key={`${doc.type}-${doc.signed_at}`}
                   className="flex items-center justify-between border border-white/5 bg-[#111111] p-4"
                 >
                   <div>
