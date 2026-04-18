@@ -3,7 +3,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, CheckSquare, CalendarDays, Users, Award, ClipboardList, Settings, LogOut, Menu, X } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, CalendarDays, Users, Award, ClipboardList, Settings, LogOut, Menu, X, Building2 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { createClient } from '@/lib/supabase/client'
@@ -23,6 +23,7 @@ const opsItems: NavItem[] = [
 ]
 
 const managementItems: NavItem[] = [
+  { href: '/admin/gym',           label: 'Gym',           Icon: Building2 },
   { href: '/admin/mitglieder',    label: 'Mitglieder',    Icon: Users },
   { href: '/admin/guertel',       label: 'Gürtel',        Icon: Award },
   { href: '/admin/leads',         label: 'Leads',         Icon: ClipboardList },
