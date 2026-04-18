@@ -16,11 +16,11 @@ interface NavItem {
 function navItems(lang: Lang): NavItem[] {
   const t = translations[lang].nav
   return [
-    { href: '/members/dashboard', label: t.dashboard, Icon: LayoutDashboard },
-    { href: '/members/buchen',    label: t.buchen,    Icon: Calendar },
-    { href: '/members/gürtel',   label: t.gurtel,    Icon: Award },
-    { href: '/members/skills',   label: t.skills,    Icon: BookOpen },
-    { href: '/members/konto',    label: t.konto,     Icon: Settings },
+    { href: '/dashboard', label: t.dashboard, Icon: LayoutDashboard },
+    { href: '/buchen',    label: t.buchen,    Icon: Calendar },
+    { href: '/gurtel',   label: t.gurtel,    Icon: Award },
+    { href: '/skills',   label: t.skills,    Icon: BookOpen },
+    { href: '/konto',    label: t.konto,     Icon: Settings },
   ]
 }
 
