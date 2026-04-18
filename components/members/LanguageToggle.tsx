@@ -17,8 +17,8 @@ export function LanguageToggle({ current }: Props) {
   const handleChange = (lang: Lang) => {
     if (lang === current) return
     startTransition(async () => {
-      await updateLanguage(lang)
-      router.refresh()
+      const result = await updateLanguage(lang)
+      if (!result.error) router.refresh()
     })
   }
 
