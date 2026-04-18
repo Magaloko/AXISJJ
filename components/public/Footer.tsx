@@ -45,6 +45,9 @@ export async function Footer() {
               Navigation
             </p>
             <nav className="flex flex-col gap-2">
+              <Link href="/preise" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
+                Preise
+              </Link>
               <Link href="/kontakt" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
                 Kontakt
               </Link>
