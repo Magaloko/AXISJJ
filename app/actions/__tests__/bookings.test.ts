@@ -36,6 +36,8 @@ vi.mock('@/lib/supabase/server', () => ({
 }))
 
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
+vi.mock('@/lib/notifications', () => ({ notify: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@vercel/functions', () => ({ waitUntil: (p: Promise<unknown>) => p }))
 
 import { bookClass, cancelBooking } from '../bookings'
 
@@ -146,13 +148,26 @@ describe('cancelBooking', () => {
       gt: vi.fn().mockResolvedValue({ data: [], error: null }),
     }
 
+    const sessionInfoChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { starts_at: '2026-04-18T18:00:00Z', class_types: { name: 'BJJ' } }, error: null }),
+    }
+    const memberProfileChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { full_name: 'Max' }, error: null }),
+    }
+
     let callCount = 0
     mockSupabase.from.mockImplementation(() => {
       callCount++
       if (callCount === 1) return cancelChain
       if (callCount === 2) return waitlistChain
       if (callCount === 3) return promoteChain
-      return remainingChain
+      if (callCount === 4) return remainingChain
+      if (callCount === 5) return sessionInfoChain
+      return memberProfileChain
     })
 
     const result = await cancelBooking('b-1')
