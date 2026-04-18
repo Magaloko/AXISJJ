@@ -1,0 +1,63 @@
+'use server'
+
+import { createClient } from '@/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
+
+export async function promoteToNextBelt(profileId: string): Promise<{
+  success?: true
+  newBeltName?: string
+  error?: string
+}> {
+  const supabase = await createClient()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) return { error: 'Nicht eingeloggt.' }
+
+  const { data: caller, error: callerError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+  if (callerError || caller?.role !== 'owner') return { error: 'Keine Berechtigung.' }
+
+  const { data: currentRank } = await supabase
+    .from('profile_ranks')
+    .select('belt_rank_id, belt_ranks(order)')
+    .eq('profile_id', profileId)
+    .order('promoted_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (!currentRank) return { error: 'Kein aktueller Gürtel gefunden.' }
+
+  const currentBelt = Array.isArray(currentRank.belt_ranks)
+    ? currentRank.belt_ranks[0]
+    : currentRank.belt_ranks
+  const currentOrder = (currentBelt as { order: number } | null)?.order
+  if (currentOrder === undefined || currentOrder === null) {
+    return { error: 'Gürtel-Reihenfolge ungültig.' }
+  }
+
+  const { data: nextBelt } = await supabase
+    .from('belt_ranks')
+    .select('id, name')
+    .gt('order', currentOrder)
+    .order('order', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  if (!nextBelt) return { error: 'Kein höherer Gürtel verfügbar.' }
+
+  const { error: insertError } = await (supabase.from('profile_ranks') as any).insert({
+    profile_id: profileId,
+    belt_rank_id: (nextBelt as { id: string }).id,
+    promoted_at: new Date().toISOString().slice(0, 10),
+    promoted_by: user.id,
+  })
+  if (insertError) return { error: 'Promotion fehlgeschlagen.' }
+
+  revalidatePath('/admin/dashboard')
+  revalidatePath('/admin/guertel')
+  revalidatePath('/admin/mitglieder')
+
+  return { success: true, newBeltName: (nextBelt as { name: string }).name }
+}
