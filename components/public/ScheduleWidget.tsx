@@ -12,8 +12,8 @@ const LEVEL_LABELS: Record<ScheduleClass['level'], string> = {
 }
 
 const LEVEL_COLORS: Record<ScheduleClass['level'], string> = {
-  beginner: 'border-l-white/40',
-  all:      'border-l-red-600',
+  beginner: 'border-l-border',
+  all:      'border-l-primary',
   advanced: 'border-l-blue-500',
   kids:     'border-l-yellow-500',
 }
@@ -23,13 +23,13 @@ export function ScheduleWidget() {
   const day = SCHEDULE[activeDay]
 
   return (
-    <section id="trainingsplan" className="bg-[#0f0f0f] py-16 sm:py-24">
+    <section id="trainingsplan" className="bg-background py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mb-10">
-          <p className="mb-1 text-xs font-bold uppercase tracking-[0.3em] text-red-600">
+          <p className="mb-1 text-xs font-bold uppercase tracking-[0.3em] text-primary">
             Schedule · Trainingsplan
           </p>
-          <h2 className="text-3xl font-black text-white sm:text-4xl">
+          <h2 className="text-3xl font-black text-foreground sm:text-4xl">
             WÖCHENTLICHER STUNDENPLAN
           </h2>
         </div>
@@ -42,8 +42,8 @@ export function ScheduleWidget() {
               className={cn(
                 'min-w-[52px] flex-shrink-0 px-3 py-2 text-xs font-bold tracking-wider transition-all',
                 activeDay === i
-                  ? 'bg-red-600 text-white'
-                  : 'bg-[#1a1a1a] text-gray-500 hover:bg-[#222] hover:text-gray-300'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted text-muted-foreground hover:bg-card hover:text-foreground'
               )}
             >
               {d.short}
@@ -51,33 +51,33 @@ export function ScheduleWidget() {
           ))}
         </div>
 
-        <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-gray-500">
+        <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
           {day.label}
         </p>
 
         {day.classes.length === 0 ? (
-          <p className="text-gray-600">Kein Training an diesem Tag.</p>
+          <p className="text-muted-foreground">Kein Training an diesem Tag.</p>
         ) : (
           <div className="flex flex-col gap-2">
             {day.classes.map(cls => (
               <div
                 key={`${cls.name}-${cls.time}`}
                 className={cn(
-                  'flex items-center justify-between border-l-4 bg-[#1a1a1a] px-4 py-4 transition-colors hover:bg-[#222]',
+                  'flex items-center justify-between border-l-4 bg-muted px-4 py-4 transition-colors hover:bg-card',
                   LEVEL_COLORS[cls.level]
                 )}
               >
                 <div>
-                  <p className="font-semibold text-white">{cls.name}</p>
-                  <p className="mt-0.5 text-xs text-gray-500">{LEVEL_LABELS[cls.level]}</p>
+                  <p className="font-semibold text-foreground">{cls.name}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{LEVEL_LABELS[cls.level]}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="rounded bg-[#111] px-2 py-1 text-xs font-bold text-gray-400">
+                  <span className="rounded bg-background px-2 py-1 text-xs font-bold text-muted-foreground">
                     {cls.gi ? 'GI' : 'NO-GI'}
                   </span>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-white">{cls.time}</p>
-                    <p className="text-xs text-gray-600">{cls.endTime}</p>
+                  <div className="text-right" style={{ fontFamily: 'var(--font-mono)' }}>
+                    <p className="text-sm font-bold text-foreground">{cls.time}</p>
+                    <p className="text-xs text-muted-foreground">{cls.endTime}</p>
                   </div>
                 </div>
               </div>
@@ -85,7 +85,7 @@ export function ScheduleWidget() {
           </div>
         )}
 
-        <p className="mt-8 text-xs text-gray-700">
+        <p className="mt-8 text-xs text-muted-foreground">
           * Stundenplan kann variieren. Änderungen auf @axisjj_at.
         </p>
       </div>

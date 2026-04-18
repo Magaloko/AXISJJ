@@ -18,7 +18,7 @@ const PROGRAMS: Program[] = [
     level: 'Anfänger · White Belt',
     image: '/images/hero-action.jpg',
     imageAlt: 'Fundamentals BJJ Training',
-    accent: 'border-t-white/40',
+    accent: 'border-t-border',
   },
   {
     name: 'All Levels Gi',
@@ -27,7 +27,7 @@ const PROGRAMS: Program[] = [
     level: 'Alle Levels',
     image: '/images/hero-action.jpg',
     imageAlt: 'Gi BJJ Training Wien',
-    accent: 'border-t-red-600',
+    accent: 'border-t-primary',
   },
   {
     name: 'No-Gi',
@@ -51,14 +51,14 @@ const PROGRAMS: Program[] = [
 
 export function ProgramsGrid() {
   return (
-    <section id="programme" className="bg-[#0f0f0f] py-16 sm:py-24">
+    <section id="programme" className="bg-background py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
 
         <div className="mb-12">
-          <p className="mb-1 text-xs font-bold uppercase tracking-[0.3em] text-red-600">
+          <p className="mb-1 text-xs font-bold uppercase tracking-[0.3em] text-primary">
             Programme · Classes
           </p>
-          <h2 className="text-3xl font-black text-white sm:text-4xl">
+          <h2 className="text-3xl font-black text-foreground sm:text-4xl">
             UNSERE KLASSEN
           </h2>
         </div>
@@ -67,26 +67,26 @@ export function ProgramsGrid() {
           {PROGRAMS.map(program => (
             <div
               key={program.name}
-              className={`group relative overflow-hidden border-t-4 bg-[#1a1a1a] ${program.accent} transition-transform hover:-translate-y-1`}
+              className={`group relative overflow-hidden border-t-4 bg-card ${program.accent} transition-transform hover:-translate-y-1`}
             >
               <div className="relative h-48 overflow-hidden">
                 <Image
                   src={program.image}
                   alt={program.imageAlt}
                   fill
-                  className="object-cover object-center opacity-60 transition-transform duration-500 group-hover:scale-105"
+                  className="object-cover object-center opacity-70 transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[#1a1a1a] via-[#1a1a1a]/40 to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
               </div>
 
               <div className="p-6">
-                <span className="mb-2 inline-block text-xs font-bold uppercase tracking-widest text-gray-600">
+                <span className="mb-2 inline-block text-xs font-bold uppercase tracking-widest text-muted-foreground">
                   {program.level}
                 </span>
-                <h3 className="mb-3 text-xl font-black text-white">
+                <h3 className="mb-3 text-xl font-black text-foreground">
                   {program.name}
                 </h3>
-                <p className="text-sm leading-relaxed text-gray-400">
+                <p className="text-sm leading-relaxed text-muted-foreground">
                   {program.description}
                 </p>
               </div>
