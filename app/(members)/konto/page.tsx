@@ -5,6 +5,8 @@ import { resolveLang } from '@/lib/i18n/resolve-lang'
 import { ProfileForm } from '@/components/members/ProfileForm'
 import { LanguageToggle } from '@/components/members/LanguageToggle'
 import { formatDate } from '@/lib/utils/dates'
+import { PoliciesSection } from '@/components/members/PoliciesSection'
+import { getGymSettings } from '@/lib/gym-settings'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Konto' }
@@ -17,6 +19,8 @@ export default async function KontoPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return null
+
+  const gym = await getGymSettings()
 
   const [{ data: profile }, { data: documents }] = await Promise.all([
     supabase
@@ -91,6 +95,8 @@ export default async function KontoPage() {
             </div>
           )}
         </section>
+
+        <PoliciesSection settings={gym} />
       </div>
     </div>
   )
