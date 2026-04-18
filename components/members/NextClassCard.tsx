@@ -1,6 +1,7 @@
 // components/members/NextClassCard.tsx
 import Link from 'next/link'
 import { formatTime, formatDate } from '@/lib/utils/dates'
+import { translations, type Lang } from '@/lib/i18n'
 
 interface ClassSession {
   id: string
@@ -13,19 +14,22 @@ interface ClassSession {
 interface Props {
   session: ClassSession | null
   bookingId: string | null
+  lang?: Lang
 }
 
-export function NextClassCard({ session, bookingId }: Props) {
+export function NextClassCard({ session, bookingId, lang = 'de' }: Props) {
+  const t = translations[lang].nextClassCard
+
   if (!session) {
     return (
       <div className="border border-white/5 bg-[#111111] p-6">
-        <p className="text-xs font-bold uppercase tracking-widest text-gray-600">Nächste Klasse</p>
-        <p className="mt-4 text-sm text-gray-500">Keine bevorstehende Buchung</p>
+        <p className="text-xs font-bold uppercase tracking-widest text-gray-600">{t.heading}</p>
+        <p className="mt-4 text-sm text-gray-500">{t.noBooking}</p>
         <Link
           href="/members/buchen"
           className="mt-4 inline-block text-xs font-bold uppercase tracking-wider text-red-600 hover:text-red-500"
         >
-          Klasse buchen →
+          {t.bookCta}
         </Link>
       </div>
     )
@@ -36,7 +40,7 @@ export function NextClassCard({ session, bookingId }: Props) {
 
   return (
     <div className="border border-white/5 bg-[#111111] p-6">
-      <p className="text-xs font-bold uppercase tracking-widest text-gray-600">Nächste Klasse</p>
+      <p className="text-xs font-bold uppercase tracking-widest text-gray-600">{t.heading}</p>
       <div className="mt-4 flex items-start justify-between">
         <div>
           <h3 className="text-xl font-black text-white">{typeName}</h3>

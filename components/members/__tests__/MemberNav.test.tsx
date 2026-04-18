@@ -25,4 +25,9 @@ describe('MemberNav', () => {
     const dashboardLink = screen.getAllByRole('link', { name: /dashboard/i })[0]
     expect(dashboardLink.className).toContain('red')
   })
+
+  it('renders English nav labels when lang is en', () => {
+    render(<MemberNav userName="Max Mustermann" lang="en" />)
+    expect(screen.getAllByRole('link', { name: /^book$/i })[0]).toBeInTheDocument()
+  })
 })

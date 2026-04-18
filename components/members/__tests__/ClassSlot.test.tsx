@@ -43,4 +43,14 @@ describe('ClassSlot', () => {
     render(<ClassSlot session={mockSession} userBooking={null} confirmedCount={20} />)
     expect(screen.getByText(/ausgebucht/i)).toBeInTheDocument()
   })
+
+  it('renders English Book button when lang is en', () => {
+    render(<ClassSlot session={mockSession} userBooking={null} confirmedCount={5} lang="en" />)
+    expect(screen.getByRole('button', { name: /book/i })).toBeInTheDocument()
+  })
+
+  it('renders English Full text when full and lang is en', () => {
+    render(<ClassSlot session={mockSession} userBooking={null} confirmedCount={20} lang="en" />)
+    expect(screen.getByText(/^Full$/i)).toBeInTheDocument()
+  })
 })

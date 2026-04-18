@@ -2,9 +2,11 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Calendar, Award, BookOpen, Settings } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { LayoutDashboard, Calendar, Award, BookOpen, Settings, LogOut } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { translations, type Lang } from '@/lib/i18n'
+import { createClient } from '@/lib/supabase/client'
 
 interface NavItem {
   href: string
@@ -12,23 +14,35 @@ interface NavItem {
   Icon: React.ElementType
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { href: '/members/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
-  { href: '/members/buchen', label: 'Buchen', Icon: Calendar },
-  { href: '/members/gürtel', label: 'Gürtel', Icon: Award },
-  { href: '/members/skills', label: 'Skills', Icon: BookOpen },
-  { href: '/members/konto', label: 'Konto', Icon: Settings },
-]
+function navItems(lang: Lang): NavItem[] {
+  const t = translations[lang].nav
+  return [
+    { href: '/dashboard', label: t.dashboard, Icon: LayoutDashboard },
+    { href: '/buchen',    label: t.buchen,    Icon: Calendar },
+    { href: '/gurtel',   label: t.gurtel,    Icon: Award },
+    { href: '/skills',   label: t.skills,    Icon: BookOpen },
+    { href: '/konto',    label: t.konto,     Icon: Settings },
+  ]
+}
 
 interface Props {
   userName: string
+  lang?: Lang
 }
 
-export function MemberNav({ userName }: Props) {
+export function MemberNav({ userName, lang = 'de' }: Props) {
   const pathname = usePathname()
+  const router = useRouter()
+  const items = navItems(lang)
 
   const isActive = (href: string) =>
-    pathname === href || (href !== '/members/dashboard' && pathname.startsWith(href))
+    pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
+
+  async function handleLogout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    router.push('/login')
+  }
 
   return (
     <>
@@ -40,7 +54,7 @@ export function MemberNav({ userName }: Props) {
         </div>
 
         <nav className="flex-1 space-y-1 p-4">
-          {NAV_ITEMS.map(({ href, label, Icon }) => {
+          {items.map(({ href, label, Icon }) => {
             const active = isActive(href)
             return (
               <Link
@@ -59,11 +73,21 @@ export function MemberNav({ userName }: Props) {
             )
           })}
         </nav>
+
+        <div className="border-t border-white/5 p-4">
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:bg-white/5 hover:text-white"
+          >
+            <LogOut size={16} />
+            Abmelden
+          </button>
+        </div>
       </aside>
 
       {/* Mobile bottom tab bar */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-white/5 bg-[#080808] lg:hidden" aria-label="Mobile Navigation">
-        {NAV_ITEMS.slice(0, 4).map(({ href, label, Icon }) => {
+        {items.slice(0, 4).map(({ href, label, Icon }) => {
           const active = isActive(href)
           return (
             <Link
@@ -79,6 +103,13 @@ export function MemberNav({ userName }: Props) {
             </Link>
           )
         })}
+        <button
+          onClick={handleLogout}
+          className="flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-bold uppercase tracking-wide text-gray-600 transition-colors hover:text-white"
+        >
+          <LogOut size={18} />
+          Logout
+        </button>
       </nav>
     </>
   )

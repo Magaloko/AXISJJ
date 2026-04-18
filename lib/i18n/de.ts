@@ -1,0 +1,70 @@
+// lib/i18n/de.ts
+export const de = {
+  nav: {
+    dashboard: 'Dashboard',
+    buchen: 'Buchen',
+    gurtel: 'Gürtel',
+    skills: 'Skills',
+    konto: 'Konto',
+  },
+  dashboard: {
+    title: 'Dashboard',
+    trainingsTotal: 'Trainings gesamt',
+    activeBookings: 'Aktive Buchungen',
+  },
+  nextClassCard: {
+    heading: 'Nächste Klasse',
+    noBooking: 'Keine bevorstehende Buchung',
+    bookCta: 'Klasse buchen →',
+  },
+  buchen: {
+    title: 'Buchen',
+  },
+  classSlot: {
+    booked: 'GEBUCHT',
+    waitlisted: 'WARTELISTE',
+    cancel: 'Stornieren',
+    book: 'Buchen',
+    full: 'Ausgebucht',
+    errorBook: 'Fehler beim Buchen.',
+    errorCancel: 'Fehler beim Stornieren.',
+  },
+  gurtel: {
+    title: 'Gürtel',
+    history: 'Verlauf',
+  },
+  belt: {
+    heading: 'Gürtel',
+    noRank: 'Kein Rang eingetragen — bitte Coach kontaktieren.',
+    stripes: 'Stripes',
+    trainings: 'Trainings',
+    months: 'Monate',
+    readinessLabel: 'Promotionsbereitschaft',
+  },
+  skills: {
+    title: 'Skills',
+    empty: 'Noch keine Skills eingetragen.',
+    mastered: 'beherrscht',
+  },
+  skillCard: {
+    notStarted: 'Nicht begonnen',
+    inProgress: 'In Arbeit',
+    mastered: 'Beherrscht',
+  },
+  konto: {
+    title: 'Konto',
+    profileSection: 'Profil',
+    fullName: 'Vollständiger Name',
+    phone: 'Telefon',
+    dateOfBirth: 'Geburtsdatum',
+    save: 'Speichern',
+    saved: 'Gespeichert ✓',
+    languageSection: 'Sprache',
+    documentsSection: 'Dokumente',
+    waiver: 'Haftungsausschluss',
+    contract: 'Vertrag',
+    signedAt: 'Unterzeichnet am',
+    noDocuments: 'Keine Dokumente vorhanden.',
+    download: 'Download',
+  },
+}

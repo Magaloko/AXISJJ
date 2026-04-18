@@ -1,0 +1,70 @@
+// lib/i18n/en.ts
+export const en = {
+  nav: {
+    dashboard: 'Dashboard',
+    buchen: 'Book',
+    gurtel: 'Belt',
+    skills: 'Skills',
+    konto: 'Account',
+  },
+  dashboard: {
+    title: 'Dashboard',
+    trainingsTotal: 'Total Trainings',
+    activeBookings: 'Active Bookings',
+  },
+  nextClassCard: {
+    heading: 'Next Class',
+    noBooking: 'No upcoming booking',
+    bookCta: 'Book a class →',
+  },
+  buchen: {
+    title: 'Book a Class',
+  },
+  classSlot: {
+    booked: 'BOOKED',
+    waitlisted: 'WAITLISTED',
+    cancel: 'Cancel',
+    book: 'Book',
+    full: 'Full',
+    errorBook: 'Booking failed.',
+    errorCancel: 'Cancellation failed.',
+  },
+  gurtel: {
+    title: 'Belt',
+    history: 'History',
+  },
+  belt: {
+    heading: 'Belt',
+    noRank: 'No rank on file — please contact your coach.',
+    stripes: 'Stripes',
+    trainings: 'Trainings',
+    months: 'Months',
+    readinessLabel: 'Promotion Readiness',
+  },
+  skills: {
+    title: 'Skills',
+    empty: 'No skills added yet.',
+    mastered: 'mastered',
+  },
+  skillCard: {
+    notStarted: 'Not Started',
+    inProgress: 'In Progress',
+    mastered: 'Mastered',
+  },
+  konto: {
+    title: 'Account',
+    profileSection: 'Profile',
+    fullName: 'Full Name',
+    phone: 'Phone',
+    dateOfBirth: 'Date of Birth',
+    save: 'Save',
+    saved: 'Saved ✓',
+    languageSection: 'Language',
+    documentsSection: 'Documents',
+    waiver: 'Waiver',
+    contract: 'Contract',
+    signedAt: 'Signed on',
+    noDocuments: 'No documents on file.',
+    download: 'Download',
+  },
+}
