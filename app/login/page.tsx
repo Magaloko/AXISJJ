@@ -45,7 +45,7 @@ export default function LoginPage() {
       setErrorMsg('Ungültige E-Mail oder Passwort.')
       setStatus('error')
     } else {
-      router.push('/members/dashboard')
+      router.push('/dashboard')
       router.refresh()
     }
   }
