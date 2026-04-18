@@ -6,6 +6,7 @@ import { ProfileForm } from '@/components/members/ProfileForm'
 import { LanguageToggle } from '@/components/members/LanguageToggle'
 import { formatDate } from '@/lib/utils/dates'
 import { PoliciesSection } from '@/components/members/PoliciesSection'
+import { BotLinkCard } from '@/components/members/BotLinkCard'
 import { getGymSettings } from '@/lib/gym-settings'
 import type { Metadata } from 'next'
 
@@ -21,6 +22,15 @@ export default async function KontoPage() {
   if (!user) return null
 
   const gym = await getGymSettings()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: botUser } = await (supabase as any)
+    .from('bot_users')
+    .select('chat_id, telegram_username')
+    .eq('profile_id', user.id)
+    .maybeSingle()
+  const isLinked = !!botUser
+  const telegramUsername = (botUser as { telegram_username: string | null } | null)?.telegram_username ?? null
 
   const [{ data: profile }, { data: documents }] = await Promise.all([
     supabase
@@ -95,6 +105,8 @@ export default async function KontoPage() {
             </div>
           )}
         </section>
+
+        <BotLinkCard isLinked={isLinked} telegramUsername={telegramUsername} />
 
         <PoliciesSection settings={gym} />
       </div>
