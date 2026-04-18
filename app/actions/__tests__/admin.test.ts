@@ -131,3 +131,90 @@ describe('getAdminDashboard', () => {
     expect(result.activeMembers).toBeUndefined()
   })
 })
+
+describe('getAdminDashboard — new owner fields', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'owner-1' } }, error: null })
+  })
+
+  it('returns leadsByStatus and PromotionReady shape for owner', async () => {
+    // Profile lookup returns owner
+    mockSupabase.from.mockReturnValueOnce({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { role: 'owner' }, error: null }),
+    })
+    // 3 Promise.all queries for coach base: attendances count, bookings count, sessions list
+    const countPromise = (count: number) => ({ count, error: null, data: [] })
+    const mkCountChain = (count: number) => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockResolvedValue(countPromise(count)),
+    })
+    mockSupabase.from.mockReturnValueOnce(mkCountChain(0))
+    mockSupabase.from.mockReturnValueOnce({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockResolvedValue({ count: 0, error: null }),
+    })
+    mockSupabase.from.mockReturnValueOnce({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: [], error: null }),
+    })
+    // 5 Promise.all queries for owner block
+    // members count
+    mockSupabase.from.mockReturnValueOnce({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ count: 5, error: null }),
+    })
+    // new leads count
+    mockSupabase.from.mockReturnValueOnce({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockResolvedValue({ count: 2, error: null }),
+    })
+    // profile_ranks
+    mockSupabase.from.mockReturnValueOnce({
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: [], error: null }),
+    })
+    // belt_ranks
+    mockSupabase.from.mockReturnValueOnce({
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({
+        data: [{ id: 'w', name: 'Weiß', order: 0, color_hex: '#fff', min_sessions: null, min_time_months: null },
+               { id: 'b', name: 'Blau', order: 1, color_hex: '#3b82f6', min_sessions: 100, min_time_months: 6 }],
+        error: null,
+      }),
+    })
+    // all leads
+    mockSupabase.from.mockReturnValueOnce({
+      select: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({
+        data: [
+          { id: 'l1', full_name: 'Max', source: 'instagram', status: 'new', created_at: '2026-04-18T00:00:00Z' },
+          { id: 'l2', full_name: 'Sara', source: 'website', status: 'new', created_at: '2026-04-17T00:00:00Z' },
+          { id: 'l3', full_name: 'Tim', source: 'instagram', status: 'contacted', created_at: '2026-04-16T00:00:00Z' },
+          { id: 'l4', full_name: 'Anna', source: 'website', status: 'converted', created_at: '2026-04-15T00:00:00Z' },
+        ],
+        error: null,
+      }),
+    })
+
+    const { getAdminDashboard } = await import('../admin')
+    const result = await getAdminDashboard()
+
+    expect(result.leadsByStatus).toBeDefined()
+    expect(result.leadsByStatus?.new.length).toBe(2)
+    expect(result.leadsByStatus?.contacted.length).toBe(1)
+    expect(result.leadsByStatus?.converted.length).toBe(1)
+    expect(result.leadsByStatus?.lost.length).toBe(0)
+    expect(result.leadsByStatus?.totals.new).toBe(2)
+    expect(result.promotionsReady).toEqual([])
+  })
+})
