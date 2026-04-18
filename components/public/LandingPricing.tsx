@@ -5,11 +5,17 @@ import { TimelineContent } from '@/components/ui/timeline-animation'
 import { VerticalCutReveal } from '@/components/ui/vertical-cut-reveal'
 import { cn } from '@/lib/utils'
 import NumberFlow from '@number-flow/react'
-import { CheckCheck } from 'lucide-react'
+import { Baby, CheckCheck, GraduationCap, Sparkles, Swords, type LucideIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRef, useState } from 'react'
-import { PRICING_PLANS, type PricingPlan, type PricingTier } from '@/lib/pricing'
+import { PRICING_PLANS, type PricingCategory, type PricingPlan, type PricingTier } from '@/lib/pricing'
+
+const CATEGORY_ICONS: Record<PricingCategory, LucideIcon> = {
+  students: GraduationCap,
+  adults: Swords,
+  kids: Baby,
+}
 
 type Duration = 12 | 6 | 3 | 1
 
@@ -123,6 +129,7 @@ export function LandingPricing() {
         {PRICING_PLANS.map((plan, index) => {
           const tier = tierFor(plan, duration)
           const isPopular = plan.category === 'adults'
+          const Icon = CATEGORY_ICONS[plan.category]
           return (
             <TimelineContent
               key={plan.category}
@@ -140,7 +147,7 @@ export function LandingPricing() {
                 <CardHeader className="text-left">
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="mb-1 text-3xl">{plan.icon}</p>
+                      <Icon className="mb-2 h-8 w-8 text-primary" strokeWidth={1.5} aria-hidden="true" />
                       <h3 className="text-2xl font-black text-foreground md:text-3xl">{plan.titleDe}</h3>
                       {plan.subtitleDe && (
                         <p className="mt-1 text-xs text-muted-foreground">{plan.subtitleDe}</p>
@@ -208,8 +215,9 @@ export function LandingPricing() {
                       ))}
                     </ul>
                     {plan.noteDe && (
-                      <p className="mt-3 rounded-md bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-                        💡 {plan.noteDe}
+                      <p className="mt-3 flex items-center gap-2 rounded-md bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
+                        <Sparkles className="h-3.5 w-3.5 flex-shrink-0 text-primary" strokeWidth={2} aria-hidden="true" />
+                        <span>{plan.noteDe}</span>
                       </p>
                     )}
                   </div>

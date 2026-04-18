@@ -7,7 +7,6 @@ const basePlan: PricingPlan = {
   category: 'students',
   titleDe: 'Studenten',
   subtitleDe: 'bis 26 Jahre',
-  icon: '🎓',
   tiers: [
     { durationMonths: 12, pricePerMonth: 70, totalPrice: 840, highlighted: true },
     { durationMonths: 6, pricePerMonth: 80, totalPrice: 480 },
@@ -16,11 +15,10 @@ const basePlan: PricingPlan = {
 }
 
 describe('PricingCard', () => {
-  it('renders title, subtitle, and icon', () => {
+  it('renders title and subtitle', () => {
     render(<PricingCard plan={basePlan} />)
     expect(screen.getByText('Studenten')).toBeInTheDocument()
     expect(screen.getByText('bis 26 Jahre')).toBeInTheDocument()
-    expect(screen.getByText('🎓')).toBeInTheDocument()
   })
 
   it('renders each tier with duration', () => {

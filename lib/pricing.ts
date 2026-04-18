@@ -12,7 +12,6 @@ export interface PricingPlan {
   titleDe: string
   subtitleDe?: string
   noteDe?: string
-  icon: string
   tiers: PricingTier[]
 }
 
@@ -21,7 +20,6 @@ export const PRICING_PLANS: PricingPlan[] = [
     category: 'students',
     titleDe: 'Studenten',
     subtitleDe: 'bis 26 Jahre',
-    icon: '🎓',
     tiers: [
       { durationMonths: 12, pricePerMonth: 70, totalPrice: 840, highlighted: true },
       { durationMonths: 6, pricePerMonth: 80, totalPrice: 480 },
@@ -32,7 +30,6 @@ export const PRICING_PLANS: PricingPlan[] = [
   {
     category: 'adults',
     titleDe: 'Erwachsene',
-    icon: '🥋',
     tiers: [
       { durationMonths: 12, pricePerMonth: 80, totalPrice: 960, highlighted: true },
       { durationMonths: 6, pricePerMonth: 90, totalPrice: 540 },
@@ -44,7 +41,6 @@ export const PRICING_PLANS: PricingPlan[] = [
     category: 'kids',
     titleDe: 'Kinder',
     noteDe: 'Geschwisterrabatt: 40€/Monat',
-    icon: '👶',
     tiers: [
       { durationMonths: 12, pricePerMonth: 50, totalPrice: 600, highlighted: true },
       { durationMonths: 6, pricePerMonth: 55, totalPrice: 330 },

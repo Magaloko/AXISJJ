@@ -1,14 +1,22 @@
-import type { PricingPlan } from '@/lib/pricing'
+import { Baby, GraduationCap, Sparkles, Swords, type LucideIcon } from 'lucide-react'
+import type { PricingCategory, PricingPlan } from '@/lib/pricing'
+
+const CATEGORY_ICONS: Record<PricingCategory, LucideIcon> = {
+  students: GraduationCap,
+  adults: Swords,
+  kids: Baby,
+}
 
 interface Props {
   plan: PricingPlan
 }
 
 export function PricingCard({ plan }: Props) {
+  const Icon = CATEGORY_ICONS[plan.category]
   return (
     <div className="flex flex-col border border-border bg-card">
       <div className="border-b border-border p-6">
-        <p className="text-2xl">{plan.icon}</p>
+        <Icon className="h-7 w-7 text-primary" strokeWidth={1.5} aria-hidden="true" />
         <h2 className="mt-2 text-lg font-black text-foreground">{plan.titleDe}</h2>
         {plan.subtitleDe && (
           <p className="text-xs text-muted-foreground">{plan.subtitleDe}</p>
@@ -44,8 +52,9 @@ export function PricingCard({ plan }: Props) {
 
       {plan.noteDe && (
         <div className="border-t border-border bg-muted/40 p-4">
-          <p className="text-xs text-muted-foreground">
-            <span className="font-bold">💡</span> {plan.noteDe}
+          <p className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Sparkles className="h-3.5 w-3.5 text-primary" strokeWidth={2} aria-hidden="true" />
+            <span>{plan.noteDe}</span>
           </p>
         </div>
       )}
