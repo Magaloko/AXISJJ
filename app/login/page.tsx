@@ -133,7 +133,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={status === 'loading'}
-            className="w-full bg-primary py-4 text-sm font-black uppercase tracking-widest text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            className="w-full bg-primary py-4 text-sm font-black uppercase tracking-widest text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
             {status === 'loading'
               ? 'Wird geladen ...'
