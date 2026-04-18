@@ -19,9 +19,9 @@ function navItems(lang: Lang): NavItem[] {
   return [
     { href: '/dashboard', label: t.dashboard, Icon: LayoutDashboard },
     { href: '/buchen',    label: t.buchen,    Icon: Calendar },
-    { href: '/gurtel',   label: t.gurtel,    Icon: Award },
-    { href: '/skills',   label: t.skills,    Icon: BookOpen },
-    { href: '/konto',    label: t.konto,     Icon: Settings },
+    { href: '/gurtel',    label: t.gurtel,    Icon: Award },
+    { href: '/skills',    label: t.skills,    Icon: BookOpen },
+    { href: '/konto',     label: t.konto,     Icon: Settings },
   ]
 }
 
@@ -47,10 +47,13 @@ export function MemberNav({ userName, lang = 'de' }: Props) {
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="fixed left-0 top-0 hidden h-screen w-64 flex-col border-r border-white/5 bg-[#080808] lg:flex" aria-label="Mitglieder Navigation">
-        <div className="border-b border-white/5 p-6">
-          <p className="text-xs font-bold uppercase tracking-widest text-red-600">AXIS Member</p>
-          <p className="mt-1 truncate text-sm font-semibold text-white">{userName}</p>
+      <aside
+        className="fixed left-0 top-0 hidden h-screen w-64 flex-col border-r border-border bg-card lg:flex"
+        aria-label="Mitglieder Navigation"
+      >
+        <div className="border-b border-border p-6">
+          <p className="text-xs font-bold uppercase tracking-widest text-primary">AXIS Member</p>
+          <p className="mt-1 truncate text-sm font-semibold text-foreground">{userName}</p>
         </div>
 
         <nav className="flex-1 space-y-1 p-4">
@@ -64,7 +67,7 @@ export function MemberNav({ userName, lang = 'de' }: Props) {
                   'flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors',
                   active
                     ? 'bg-red-600/10 text-red-500'
-                    : 'text-gray-500 hover:bg-white/5 hover:text-white'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                 )}
               >
                 <Icon size={16} />
@@ -74,10 +77,10 @@ export function MemberNav({ userName, lang = 'de' }: Props) {
           })}
         </nav>
 
-        <div className="border-t border-white/5 p-4">
+        <div className="border-t border-border p-4">
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-gray-500 transition-colors hover:bg-white/5 hover:text-white"
+            className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <LogOut size={16} />
             Abmelden
@@ -86,7 +89,10 @@ export function MemberNav({ userName, lang = 'de' }: Props) {
       </aside>
 
       {/* Mobile bottom tab bar */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-white/5 bg-[#080808] lg:hidden" aria-label="Mobile Navigation">
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-border bg-card lg:hidden"
+        aria-label="Mobile Navigation"
+      >
         {items.slice(0, 4).map(({ href, label, Icon }) => {
           const active = isActive(href)
           return (
@@ -95,7 +101,7 @@ export function MemberNav({ userName, lang = 'de' }: Props) {
               href={href}
               className={cn(
                 'flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-bold uppercase tracking-wide transition-colors',
-                active ? 'text-red-500' : 'text-gray-600'
+                active ? 'text-red-500' : 'text-muted-foreground'
               )}
             >
               <Icon size={18} />
@@ -105,7 +111,7 @@ export function MemberNav({ userName, lang = 'de' }: Props) {
         })}
         <button
           onClick={handleLogout}
-          className="flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-bold uppercase tracking-wide text-gray-600 transition-colors hover:text-white"
+          className="flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-bold uppercase tracking-wide text-muted-foreground transition-colors hover:text-foreground"
         >
           <LogOut size={18} />
           Logout
