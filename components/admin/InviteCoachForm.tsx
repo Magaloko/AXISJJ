@@ -16,7 +16,7 @@ export function InviteCoachForm() {
       if (result.error) {
         setMessage({ type: 'error', text: result.error })
       } else {
-        setMessage({ type: 'success', text: `Einladung an ${form.email} gesendet. Der Coach muss in der E-Mail den Link bestätigen.` })
+        setMessage({ type: 'success', text: result.message ?? `Einladung an ${form.email} gesendet.` })
         setForm({ full_name: '', email: '' })
       }
     })
