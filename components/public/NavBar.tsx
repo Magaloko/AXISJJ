@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: '#team',          label: 'Team' },
   { href: '#programme',     label: 'Programme' },
   { href: '/preise',        label: 'Preise' },
+  { href: '/blog',          label: 'Blog' },
   { href: '/kontakt',       label: 'Kontakt' },
 ]
 
