@@ -1,6 +1,6 @@
 'use client'
 
-import { RadarChart, Radar, PolarGrid, PolarAngleAxis, ResponsiveContainer, Tooltip } from 'recharts'
+import { RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Tooltip } from 'recharts'
 
 interface Props {
   data: { technique: number; conditioning: number; mental: number } | null
@@ -24,6 +24,7 @@ export function SkillRadarChart({ data }: Props) {
           <RadarChart data={chartData}>
             <PolarGrid stroke="hsl(var(--border))" />
             <PolarAngleAxis dataKey="subject" tick={{ fontSize: 11, fill: 'hsl(var(--foreground))' }} />
+            <PolarRadiusAxis domain={[0, 5]} tick={false} axisLine={false} />
             <Tooltip
               contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', fontSize: 12 }}
             />
