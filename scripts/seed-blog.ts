@@ -1,6 +1,6 @@
 import fs from 'fs'
 import path from 'path'
-import Anthropic from '@anthropic-ai/sdk'
+import OpenAI from 'openai'
 import { createClient } from '@supabase/supabase-js'
 import { config } from 'dotenv'
 
@@ -9,7 +9,10 @@ config({ path: path.resolve(process.cwd(), '.env.local') })
 const BOOKS_DIR = 'C:/Users/Mago/Downloads/AXISJJ APP/Books'
 const CATEGORIES = ['Techniques', 'Rules & Scoring', 'History', 'Belt System', 'Competition', 'Mindset', 'Nutrition', 'No-Gi', 'Kids BJJ']
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! })
+const deepseek = new OpenAI({
+  apiKey: process.env.DEEPSEEK_API_KEY!,
+  baseURL: 'https://api.deepseek.com',
+})
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
@@ -69,7 +72,7 @@ async function extractEpub(filePath: string): Promise<string[]> {
   })
 }
 
-async function rewriteWithClaude(chunk: string, bookTitle: string): Promise<{
+async function rewriteWithDeepSeek(chunk: string, bookTitle: string): Promise<{
   title: string
   excerpt: string
   body: string
@@ -90,13 +93,13 @@ ${chunk.slice(0, 3000)}
 
 Return only the JSON, no other text.`
 
-  const message = await anthropic.messages.create({
-    model: 'claude-sonnet-4-6',
+  const response = await deepseek.chat.completions.create({
+    model: 'deepseek-chat',
     max_tokens: 2048,
     messages: [{ role: 'user', content: prompt }],
   })
 
-  const text = message.content[0].type === 'text' ? message.content[0].text : ''
+  const text = response.choices[0]?.message?.content ?? ''
   const jsonMatch = text.match(/\{[\s\S]*\}/)
   if (!jsonMatch) return null
   try {
@@ -131,8 +134,8 @@ async function main() {
     const toProcess = chunks.slice(0, 6)
 
     for (const chunk of toProcess) {
-      const article = await rewriteWithClaude(chunk, bookTitle)
-      if (!article) { console.log('  Claude returned null, skipping chunk'); continue }
+      const article = await rewriteWithDeepSeek(chunk, bookTitle)
+      if (!article) { console.log('  DeepSeek returned null, skipping chunk'); continue }
 
       const slug = slugify(article.title)
       const { data: existing } = await supabase.from('blog_posts').select('id').eq('slug', slug).single()
