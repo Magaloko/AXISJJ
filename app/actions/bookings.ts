@@ -72,11 +72,10 @@ export async function bookClass(sessionId: string): Promise<{ success?: boolean;
         .eq('id', user.id)
         .single(),
     ])
-    const classTypes = (sessionInfo as { class_types?: { name?: string } | { name?: string }[] } | null)?.class_types
-    const ct = Array.isArray(classTypes) ? classTypes[0] : classTypes
+    const ct = Array.isArray(sessionInfo?.class_types) ? sessionInfo.class_types[0] : sessionInfo?.class_types
     const className = ct?.name ?? 'Unbekannt'
-    const startsAt = (sessionInfo as { starts_at?: string } | null)?.starts_at ?? ''
-    const memberName = (memberProfile as { full_name?: string } | null)?.full_name ?? 'Unbekannt'
+    const startsAt = sessionInfo?.starts_at ?? ''
+    const memberName = memberProfile?.full_name ?? 'Unbekannt'
     waitUntil(notify({
       type: 'booking.created',
       data: { memberName, className, startsAt, status },
@@ -163,11 +162,10 @@ export async function cancelBooking(bookingId: string): Promise<{ success?: bool
           .eq('id', user.id)
           .single(),
       ])
-      const classTypes = (sessionInfo as { class_types?: { name?: string } | { name?: string }[] } | null)?.class_types
-      const ct = Array.isArray(classTypes) ? classTypes[0] : classTypes
+      const ct = Array.isArray(sessionInfo?.class_types) ? sessionInfo.class_types[0] : sessionInfo?.class_types
       const className = ct?.name ?? 'Unbekannt'
-      const startsAt = (sessionInfo as { starts_at?: string } | null)?.starts_at ?? ''
-      const memberName = (memberProfile as { full_name?: string } | null)?.full_name ?? 'Unbekannt'
+      const startsAt = sessionInfo?.starts_at ?? ''
+      const memberName = memberProfile?.full_name ?? 'Unbekannt'
       waitUntil(notify({
         type: 'booking.cancelled',
         data: { memberName, className, startsAt },

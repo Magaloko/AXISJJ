@@ -48,19 +48,17 @@ export async function getTodaySessions(): Promise<{
 
   if (error) return { error: 'Daten konnten nicht geladen werden.' }
 
-  const sessions: TodaySession[] = (data ?? []).map((s: Record<string, unknown>) => {
-    const bookingsArr = Array.isArray(s.bookings) ? s.bookings as { status: string }[] : []
-    const confirmedCount = bookingsArr.filter(b => b.status === 'confirmed').length
-    const rawCt = s.class_types
-    const classType = Array.isArray(rawCt) ? rawCt[0] : rawCt
+  const sessions: TodaySession[] = (data ?? []).map((s) => {
+    const confirmedCount = s.bookings?.filter(b => b.status === 'confirmed').length ?? 0
+    const classType = Array.isArray(s.class_types) ? s.class_types[0] : s.class_types
     return {
-      id: s.id as string,
-      starts_at: s.starts_at as string,
-      ends_at: s.ends_at as string,
-      cancelled: s.cancelled as boolean,
-      location: s.location as string | null,
-      capacity: s.capacity as number,
-      class_types: classType ? { name: (classType as { name: string }).name } : null,
+      id: s.id,
+      starts_at: s.starts_at,
+      ends_at: s.ends_at,
+      cancelled: s.cancelled,
+      location: s.location,
+      capacity: s.capacity,
+      class_types: classType ? { name: classType.name } : null,
       confirmedCount,
     }
   })
@@ -97,15 +95,14 @@ export async function getSessionBookings(sessionId: string): Promise<{
     attendanceMap.set(a.profile_id, a.checked_in_at)
   }
 
-  const bookings: BookingWithAttendance[] = (bookingsResult.data ?? []).map((b: Record<string, unknown>) => {
-    const rawProfile = b.profiles
-    const profile = Array.isArray(rawProfile) ? rawProfile[0] : rawProfile
+  const bookings: BookingWithAttendance[] = (bookingsResult.data ?? []).map((b) => {
+    const rawProfile = Array.isArray(b.profiles) ? b.profiles[0] : b.profiles
     return {
-      id: b.id as string,
-      profile_id: b.profile_id as string,
-      status: b.status as string,
-      memberName: (profile as { full_name: string } | null)?.full_name ?? 'Unbekannt',
-      checkedInAt: attendanceMap.get(b.profile_id as string) ?? null,
+      id: b.id,
+      profile_id: b.profile_id,
+      status: b.status,
+      memberName: rawProfile?.full_name ?? 'Unbekannt',
+      checkedInAt: attendanceMap.get(b.profile_id) ?? null,
     }
   })
 
@@ -167,8 +164,8 @@ export async function getAdminDashboard(): Promise<{
     .eq('id', user.id)
     .single()
 
-  const role = profile?.role as 'coach' | 'owner' | undefined
-  if (!role || !['coach', 'owner'].includes(role)) {
+  const role = profile?.role
+  if (role !== 'coach' && role !== 'owner') {
     return { error: 'Keine Berechtigung.', role: 'coach', checkinsToday: 0, bookingsToday: 0, todaySessions: [] }
   }
 
@@ -197,25 +194,23 @@ export async function getAdminDashboard(): Promise<{
       .order('starts_at', { ascending: true }),
   ])
 
-  const todaySessions: TodaySession[] = (sessionsResult.data ?? []).map((s: Record<string, unknown>) => {
-    const bookingsArr = Array.isArray(s.bookings) ? s.bookings as { status: string }[] : []
-    const confirmedCount = bookingsArr.filter(b => b.status === 'confirmed').length
-    const rawCt = s.class_types
-    const classType = Array.isArray(rawCt) ? rawCt[0] : rawCt
+  const todaySessions: TodaySession[] = (sessionsResult.data ?? []).map((s) => {
+    const confirmedCount = s.bookings?.filter(b => b.status === 'confirmed').length ?? 0
+    const classType = Array.isArray(s.class_types) ? s.class_types[0] : s.class_types
     return {
-      id: s.id as string,
-      starts_at: s.starts_at as string,
-      ends_at: s.ends_at as string,
-      cancelled: s.cancelled as boolean,
-      location: s.location as string | null,
-      capacity: s.capacity as number,
-      class_types: classType ? { name: (classType as { name: string }).name } : null,
+      id: s.id,
+      starts_at: s.starts_at,
+      ends_at: s.ends_at,
+      cancelled: s.cancelled,
+      location: s.location,
+      capacity: s.capacity,
+      class_types: classType ? { name: classType.name } : null,
       confirmedCount,
     }
   })
 
   const base = {
-    role: role as 'coach' | 'owner',
+    role,
     checkinsToday: checkinsResult.count ?? 0,
     bookingsToday: bookingsResult.count ?? 0,
     todaySessions,
@@ -248,8 +243,7 @@ export async function getAdminDashboard(): Promise<{
       .order('created_at', { ascending: false }),
   ])
 
-  type BeltRow = { id: string; name: string; order: number; color_hex: string | null; min_sessions: number | null; min_time_months: number | null }
-  const beltList = (beltsResult.data ?? []) as BeltRow[]
+  const beltList = beltsResult.data ?? []
   const beltById = new Map(beltList.map(b => [b.id, b]))
   const beltByOrder = new Map(beltList.map(b => [b.order, b]))
 
@@ -260,13 +254,11 @@ export async function getAdminDashboard(): Promise<{
   for (const row of promotionsResult.data ?? []) {
     const rawProfile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
     if (!rawProfile) continue
-    const profile = rawProfile as { full_name: string }
-    const key = row.profile_id as string
-    if (!latestRankByProfile.has(key)) {
-      latestRankByProfile.set(key, {
-        belt_rank_id: row.belt_rank_id as string,
-        promoted_at: row.promoted_at as string,
-        full_name: profile.full_name ?? 'Unbekannt',
+    if (!latestRankByProfile.has(row.profile_id)) {
+      latestRankByProfile.set(row.profile_id, {
+        belt_rank_id: row.belt_rank_id,
+        promoted_at: row.promoted_at,
+        full_name: rawProfile.full_name ?? 'Unbekannt',
       })
     }
   }

@@ -29,7 +29,7 @@ export async function updateMember(
   if ('error' in check) return { error: check.error }
 
   const supabase = await createClient()
-  const payload: Record<string, unknown> = {}
+  const payload: { full_name?: string; phone?: string | null; date_of_birth?: string | null } = {}
   if (data.full_name !== undefined) payload.full_name = data.full_name.trim()
   if (data.phone !== undefined) payload.phone = data.phone?.trim() || null
   if (data.date_of_birth !== undefined) payload.date_of_birth = data.date_of_birth || null
@@ -38,7 +38,7 @@ export async function updateMember(
 
   const changedFields = Object.keys(payload)
 
-  const { error } = await (supabase.from('profiles') as any)
+  const { error } = await supabase.from('profiles')
     .update(payload)
     .eq('id', profileId)
   if (error) return { error: 'Update fehlgeschlagen.' }
@@ -52,7 +52,7 @@ export async function updateMember(
       .select('full_name')
       .eq('id', profileId)
       .single()
-    const memberName = (memberProfile as { full_name?: string } | null)?.full_name ?? 'Unbekannt'
+    const memberName = memberProfile?.full_name ?? 'Unbekannt'
     waitUntil(notify({
       type: 'member.updated',
       data: { memberName, changedFields },
@@ -83,7 +83,7 @@ export async function updateMemberRole(
     .eq('id', profileId)
     .single()
 
-  const { error } = await (supabase.from('profiles') as any)
+  const { error } = await supabase.from('profiles')
     .update({ role })
     .eq('id', profileId)
   if (error) return { error: 'Rollen-Update fehlgeschlagen.' }
@@ -92,8 +92,8 @@ export async function updateMemberRole(
   revalidatePath('/admin/einstellungen')
 
   if (existingProfile) {
-    const memberName = (existingProfile as { full_name?: string }).full_name ?? 'Unbekannt'
-    const oldRole = (existingProfile as { role?: string }).role ?? 'unbekannt'
+    const memberName = existingProfile.full_name ?? 'Unbekannt'
+    const oldRole = existingProfile.role ?? 'unbekannt'
     waitUntil(notify({
       type: 'member.role_changed',
       data: { memberName, oldRole, newRole: role },
