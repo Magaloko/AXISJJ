@@ -34,7 +34,7 @@ export interface Database {
           starts_at: string; ends_at: string; capacity: number
           location: string; recurring_group_id: string | null; cancelled: boolean
         }
-        Insert: Omit<Database['public']['Tables']['class_sessions']['Row'], 'id'>
+        Insert: { id?: string; class_type_id: string; coach_id?: string | null; starts_at: string; ends_at: string; capacity?: number; location?: string; recurring_group_id?: string | null; cancelled?: boolean }
         Update: Partial<Database['public']['Tables']['class_sessions']['Insert']>
         Relationships: [
           {
@@ -80,7 +80,7 @@ export interface Database {
       }
       attendances: {
         Row: { id: string; session_id: string; profile_id: string; checked_in_at: string; checked_in_by: string | null }
-        Insert: Omit<Database['public']['Tables']['attendances']['Row'], 'id' | 'checked_in_at'>
+        Insert: { session_id: string; profile_id: string; checked_in_at?: string; checked_in_by?: string | null }
         Update: Partial<Database['public']['Tables']['attendances']['Insert']>
         Relationships: [
           {

@@ -16,7 +16,7 @@ export interface SessionFormData {
 
 export async function upsertSession(
   data: SessionFormData
-): Promise<{ success?: boolean; session?: Record<string, unknown>; error?: string }> {
+): Promise<{ success?: boolean; session?: { id: string }; error?: string }> {
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { error: 'Nicht eingeloggt' }
@@ -33,7 +33,6 @@ export async function upsertSession(
 
   const isNew = !data.id
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: session, error } = await supabase
     .from('class_sessions')
     .upsert({
@@ -43,7 +42,7 @@ export async function upsertSession(
       ends_at: data.ends_at,
       capacity: data.capacity,
       location: data.location,
-    } as any)
+    })
     .select()
     .single()
 
@@ -58,7 +57,7 @@ export async function upsertSession(
       .select('name')
       .eq('id', data.class_type_id)
       .single()
-    const className = (classType as { name?: string } | null)?.name ?? 'Unbekannt'
+    const className = classType?.name ?? 'Unbekannt'
     if (isNew) {
       waitUntil(notify({
         type: 'session.created',
@@ -74,7 +73,7 @@ export async function upsertSession(
     // best-effort
   }
 
-  return { success: true, session: session as Record<string, unknown> }
+  return { success: true, session: { id: session.id } }
 }
 
 export async function cancelSession(
@@ -112,10 +111,9 @@ export async function cancelSession(
   revalidatePath('/admin/checkin')
 
   if (sessionInfo) {
-    const classTypes = (sessionInfo as { class_types?: { name?: string } | { name?: string }[] }).class_types
-    const ct = Array.isArray(classTypes) ? classTypes[0] : classTypes
+    const ct = Array.isArray(sessionInfo?.class_types) ? sessionInfo.class_types[0] : sessionInfo?.class_types
     const className = ct?.name ?? 'Unbekannt'
-    const startsAt = (sessionInfo as { starts_at?: string }).starts_at ?? ''
+    const startsAt = sessionInfo?.starts_at ?? ''
     waitUntil(notify({
       type: 'session.cancelled',
       data: { className, startsAt },

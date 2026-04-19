@@ -32,11 +32,10 @@ export async function checkIn(
 
   if (!profile) return { error: 'Mitglied nicht gefunden.' }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await supabase
     .from('attendances')
     .upsert(
-      { profile_id: profileId, session_id: sessionId, checked_in_at: new Date().toISOString() } as any,
+      { profile_id: profileId, session_id: sessionId, checked_in_at: new Date().toISOString() },
       { onConflict: 'profile_id,session_id' }
     )
 
@@ -51,10 +50,9 @@ export async function checkIn(
       .select('starts_at, class_types(name)')
       .eq('id', sessionId)
       .single()
-    const classTypes = (sessionInfo as { class_types?: { name?: string } | { name?: string }[] } | null)?.class_types
-    const ct = Array.isArray(classTypes) ? classTypes[0] : classTypes
+    const ct = Array.isArray(sessionInfo?.class_types) ? sessionInfo.class_types[0] : sessionInfo?.class_types
     const className = ct?.name ?? 'Unbekannt'
-    const startsAt = (sessionInfo as { starts_at?: string } | null)?.starts_at ?? ''
+    const startsAt = sessionInfo?.starts_at ?? ''
     waitUntil(notify({
       type: 'checkin.recorded',
       data: { memberName, className, startsAt },
