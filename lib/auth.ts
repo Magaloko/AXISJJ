@@ -16,5 +16,5 @@ export async function assertRole(roles: Role[]): Promise<AuthResult> {
   return { userId: user.id, role: caller.role }
 }
 
-export const assertOwner = () => assertRole(['owner'])
-export const assertStaff = () => assertRole(['coach', 'owner'])
+export const assertOwner = async () => assertRole(['owner'])
+export const assertStaff = async () => assertRole(['coach', 'owner'])
