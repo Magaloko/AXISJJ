@@ -5,8 +5,9 @@ import { revalidatePath } from 'next/cache'
 import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
 import { assertStaff } from '@/lib/auth'
+import { sessionFormSchema } from './sessions.schema'
 
-export interface SessionFormData {
+export type SessionFormData = {
   id?: string
   class_type_id: string
   starts_at: string
@@ -18,6 +19,9 @@ export interface SessionFormData {
 export async function upsertSession(
   data: SessionFormData
 ): Promise<{ success?: boolean; session?: { id: string }; error?: string }> {
+  const parsed = sessionFormSchema.safeParse(data)
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Ungültige Eingabe.' }
+
   const auth = await assertStaff()
   if ('error' in auth) return { error: auth.error }
 
@@ -27,12 +31,12 @@ export async function upsertSession(
   const { data: session, error } = await supabase
     .from('class_sessions')
     .upsert({
-      ...(data.id ? { id: data.id } : {}),
-      class_type_id: data.class_type_id,
-      starts_at: data.starts_at,
-      ends_at: data.ends_at,
-      capacity: data.capacity,
-      location: data.location,
+      ...(parsed.data.id ? { id: parsed.data.id } : {}),
+      class_type_id: parsed.data.class_type_id,
+      starts_at: parsed.data.starts_at,
+      ends_at: parsed.data.ends_at,
+      capacity: parsed.data.capacity,
+      location: parsed.data.location,
     })
     .select()
     .single()

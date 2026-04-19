@@ -5,8 +5,9 @@ import { revalidatePath } from 'next/cache'
 import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
 import { assertOwner } from '@/lib/auth'
+import { classTypeSchema } from './class-types.schema'
 
-export interface ClassTypeData {
+export type ClassTypeData = {
   id?: string
   name: string
   description?: string
@@ -15,22 +16,21 @@ export interface ClassTypeData {
 }
 
 export async function upsertClassType(data: ClassTypeData): Promise<{ success?: true; error?: string }> {
+  const parsed = classTypeSchema.safeParse(data)
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Ungültige Eingabe.' }
+
   const ok = await assertOwner()
   if ('error' in ok) return { error: ok.error }
 
-  if (!data.name?.trim()) return { error: 'Name ist Pflicht.' }
-
-  const isNew = !data.id
-
+  const isNew = !parsed.data.id
   const supabase = await createClient()
-  const name = data.name.trim()
 
   const { error } = await supabase.from('class_types').upsert({
-    ...(data.id ? { id: data.id } : {}),
-    name,
-    description: data.description?.trim() || null,
-    level: data.level,
-    gi: data.gi,
+    ...(parsed.data.id ? { id: parsed.data.id } : {}),
+    name: parsed.data.name,
+    description: parsed.data.description?.trim() || null,
+    level: parsed.data.level,
+    gi: parsed.data.gi,
   })
   if (error) return { error: 'Speichern fehlgeschlagen.' }
 
@@ -39,7 +39,7 @@ export async function upsertClassType(data: ClassTypeData): Promise<{ success?: 
 
   waitUntil(notify({
     type: 'classtype.upserted',
-    data: { name, isNew },
+    data: { name: parsed.data.name, isNew },
   }))
   return { success: true }
 }
