@@ -33,3 +33,45 @@ Der Supabase-Client (`createServerClient<Database>`) hatte durchgehend korrekte 
 - Pattern-Key: harden.supabase-typed-payload
 
 ---
+
+## [LRN-20260420-001] best_practice
+
+**Logged**: 2026-04-20
+**Priority**: critical
+**Status**: resolved
+**Area**: backend
+
+### Summary
+Generische Fehlermeldungen ("Speichern fehlgeschlagen.") + `as any` Casts verbargen echte Supabase-Fehler monatelang. Der tatsächliche Grund war: die `gym_settings` Tabelle existierte nie in der Produktions-DB (Migration nie ausgeführt).
+
+### Details
+**Ursachen-Kaskade:**
+1. Migration `20260418_gym_settings.sql` wurde im Repo committet aber nie in Supabase ausgeführt
+2. `(supabase.from('gym_settings') as any).update(...)` hat zur Compile-Zeit keinen Fehler produziert
+3. Runtime-Fehler `Could not find the table 'public.gym_settings' in the schema cache` wurde von `if (error) return { error: 'Speichern fehlgeschlagen.' }` maskiert
+4. User sah nur "Speichern fehlgeschlagen" — keine Möglichkeit, die Ursache zu diagnostizieren
+
+### Suggested Action
+**Regel für ALLE Server-Actions:**
+```typescript
+if (error) {
+  console.error('[action-name] error:', error)  // server logs
+  return { error: `Speichern fehlgeschlagen: ${error.message}` }  // user sees real cause
+}
+```
+
+**Deployment-Checkliste nach jeder Migration:**
+- Migration auf Supabase ausführen (nicht nur im Repo)
+- Mit echtem Testuser ein Feature testen das die Tabelle nutzt
+
+### Resolution
+- **Resolved**: 2026-04-20
+- **Notes**: Alle Actions haben jetzt echte Fehlermeldungen + `console.error` für Server-Logs. Migration wurde manuell im Supabase SQL Editor ausgeführt.
+
+### Metadata
+- Source: user_feedback
+- Related Files: app/actions/gym-settings.ts, app/actions/bot-link.ts, app/actions/promotions.ts
+- Tags: supabase, migrations, error-messages, debugging, as-any
+- Pattern-Key: harden.error-message-transparency
+
+---
