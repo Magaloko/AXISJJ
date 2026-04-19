@@ -16,13 +16,13 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <>
-      <Hero />
+      <TrialCTA />
       <StatsBar />
-      <ScheduleWidget />
       <CoachSection />
       <ProgramsGrid />
       <LandingPricing />
-      <TrialCTA />
+      <ScheduleWidget />
+      <Hero />
     </>
   )
 }
