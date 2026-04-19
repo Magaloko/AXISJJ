@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { ClassTypeTable } from '@/components/admin/ClassTypeTable'
 import { RoleManager } from '@/components/admin/RoleManager'
+import { InviteCoachForm } from '@/components/admin/InviteCoachForm'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Einstellungen | Admin' }
@@ -31,7 +32,10 @@ export default async function EinstellungenPage() {
       <h1 className="mb-6 text-2xl font-black text-foreground">Einstellungen</h1>
       <div className="grid gap-6 lg:grid-cols-2">
         <ClassTypeTable types={types} />
-        <RoleManager coaches={coaches} members={members} />
+        <div className="space-y-6">
+          <InviteCoachForm />
+          <RoleManager coaches={coaches} members={members} />
+        </div>
       </div>
     </div>
   )
