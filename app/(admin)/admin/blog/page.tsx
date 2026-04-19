@@ -13,14 +13,15 @@ export default async function AdminBlogPage() {
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'owner') redirect('/admin/dashboard')
 
-  const { data: posts } = await getAllPosts()
+  const { data: postsRaw } = await getAllPosts()
+  // Narrow the supabase-js Union type (incl. SelectQueryError) down to a plain record list.
+  const posts = (postsRaw ?? []) as unknown as Record<string, unknown>[]
 
   return (
     <div className="p-6 sm:p-8">
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-black text-foreground">Blog</h1>
-        <Link href="/admin/blog/new"
-          className="bg-primary px-4 py-2 text-xs font-black uppercase tracking-widest text-primary-foreground">
+        <Link href="/admin/blog/new" className="bg-primary px-4 py-2 text-xs font-black uppercase tracking-widest text-primary-foreground">
           + New Post
         </Link>
       </div>
@@ -37,7 +38,7 @@ export default async function AdminBlogPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {(posts ?? []).map((post: Record<string, unknown>) => (
+            {posts.map((post) => (
               <tr key={post.id as string}>
                 <td className="py-3 pr-4 font-medium">{post.title as string}</td>
                 <td className="py-3 pr-4 text-xs text-muted-foreground">{post.category as string}</td>
@@ -56,15 +57,13 @@ export default async function AdminBlogPage() {
                 </td>
                 <td className="py-3">
                   <div className="flex gap-2">
-                    <Link href={`/admin/blog/${post.id}/edit`}
-                      className="text-xs font-bold text-primary hover:underline">Edit</Link>
+                    <Link href={`/admin/blog/${post.id}/edit`} className="text-xs font-bold text-primary hover:underline">Edit</Link>
                     <form action={togglePublished.bind(null, post.id as string)}>
                       <button type="submit" className="text-xs font-bold text-muted-foreground hover:text-foreground">
                         {post.published ? 'Unpublish' : 'Publish'}
                       </button>
                     </form>
-                    <form action={deletePost.bind(null, post.id as string)}
-                      onSubmit={e => { if (!confirm('Post löschen?')) e.preventDefault() }}>
+                    <form action={deletePost.bind(null, post.id as string)} onSubmit={e => { if (!confirm('Post löschen?')) e.preventDefault() }}>
                       <button type="submit" className="text-xs font-bold text-destructive hover:underline">Delete</button>
                     </form>
                   </div>
@@ -73,7 +72,7 @@ export default async function AdminBlogPage() {
             ))}
           </tbody>
         </table>
-        {(!posts || posts.length === 0) && (
+        {posts.length === 0 && (
           <p className="mt-8 text-sm text-muted-foreground">Keine Posts. Seed-Skript ausführen oder neuen Post erstellen.</p>
         )}
       </div>
