@@ -64,16 +64,16 @@ export function CoachSection() {
             </div>
           </div>
 
-          <div className="relative">
+          <div className="relative h-full">
             <div className="absolute -right-4 -top-4 h-full w-3/4 bg-primary/5 blur-2xl" />
-            <div className="relative overflow-hidden rounded-sm">
-              <Image
+            <div className="relative overflow-hidden rounded-sm h-full">
+              <a href="/images/coach-portrait.jpg" target="_blank" rel="noopener noreferrer" className="block h-full cursor-zoom-in"><Image
                 src="/images/coach-portrait.jpg"
                 alt="Shamsudin Baisarov — Head Coach AXIS Jiu-Jitsu Vienna"
                 width={600}
                 height={800}
-                className="w-full object-cover object-top"                style={{ aspectRatio: '3/4' }} 
-              />
+                className="w-full h-full object-cover object-top"                 
+              /></a>
               <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-card to-transparent" />
             </div>
           </div>
