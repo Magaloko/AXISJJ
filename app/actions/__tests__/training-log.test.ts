@@ -1,11 +1,5 @@
-import { describe, it, expect, vi } from 'vitest'
-
-vi.mock('@/lib/supabase/server', () => ({
-  createClient: () => Promise.resolve({ auth: { getUser: vi.fn() }, from: vi.fn() }),
-}))
-vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
-
-import { computeStats } from '../training-log'
+import { describe, it, expect } from 'vitest'
+import { computeStats } from '../training-log-stats'
 
 const today = new Date()
 today.setHours(12, 0, 0, 0)
