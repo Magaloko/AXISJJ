@@ -1,0 +1,123 @@
+{
+  "nav": {
+    "schedule": "Raspored",
+    "team": "Tim",
+    "programs": "Programi",
+    "pricing": "Cene",
+    "blog": "Blog",
+    "contact": "Kontakt",
+    "login": "Prijava",
+    "trial": "1 NEDELJA BESPLATNO",
+    "menu_open": "Otvori meni",
+    "menu_close": "Zatvori meni",
+    "home_aria": "AXIS JIU JITSU — Na početnu"
+  },
+  "footer": {
+    "tagline": "Disciplina · Tehnika · Napredak",
+    "opening_hours": "Radno vreme",
+    "navigation": "Navigacija",
+    "pricing": "Cene",
+    "contact": "Kontakt",
+    "schedule": "Raspored",
+    "team": "Tim",
+    "programs": "Programi",
+    "trial": "Isprobaj 1 nedelju besplatno",
+    "rights": "Sva prava zadržana.",
+    "imprint": "Impressum",
+    "privacy": "Politika privatnosti"
+  },
+  "hero": {
+    "cta_trial": "1 NEDELJA BESPLATNO",
+    "cta_schedule": "RASPORED"
+  },
+  "pricing_page": {
+    "title": "Cene",
+    "subtitle": "Sve cene uključuju PDV · Bez naknade za upis.",
+    "cta_heading": "Niste sigurni koji plan odgovara?",
+    "cta_text": "Dođite na besplatan probni trening i upoznajte nas.",
+    "cta_button": "Rezerviši probni trening"
+  },
+  "contact_page": {
+    "title": "Kontakt",
+    "opening_hours": "Radno vreme"
+  },
+  "trial_page": {
+    "title": "Besplatan probni trening",
+    "subtitle": "Prijavite se za besplatni probni čas.",
+    "name_label": "Vaše ime",
+    "email_label": "E-mail",
+    "phone_label": "Telefon (opciono)",
+    "message_label": "Poruka (opciono)",
+    "submit": "PRIJAVITE SE",
+    "success": "Hvala! Uskoro ćemo vas kontaktirati.",
+    "error": "Nešto nije u redu. Pokušajte ponovo."
+  },
+  "blog_page": {
+    "title": "Blog",
+    "subtitle": "Članci o brazilskom džiju džicu, treninzima i još mnogo toga.",
+    "read_more": "Pročitaj više",
+    "all_categories": "Sve",
+    "min_read": "min čitanja",
+    "featured": "Preporučeno",
+    "back_to_blog": "← Nazad na blog",
+    "published": "Objavljeno",
+    "no_posts": "Nema pronađenih članaka."
+  },
+  "login_page": {
+    "title": "AXIS Member Portal",
+    "subtitle": "Prijava članova",
+    "magic_link_tab": "MAGIC LINK",
+    "password_tab": "LOZINKA",
+    "email_label": "E-MAIL",
+    "email_placeholder": "vas@email.com",
+    "password_label": "LOZINKA",
+    "forgot": "ZABORAVILI?",
+    "send_link": "POŠALJI LINK →",
+    "login_button": "PRIJAVI SE →",
+    "error_invalid": "Pogrešan email ili lozinka.",
+    "error_generic": "Došlo je do greške.",
+    "magic_sent": "Magic link je poslat! Proverite poštu."
+  },
+  "reset_password_page": {
+    "title": "Resetovanje lozinke",
+    "subtitle": "Unesite vaš email. Poslaćemo vam link.",
+    "email_label": "E-MAIL",
+    "send_button": "POŠALJI LINK →",
+    "back_to_login": "← NAZAD NA PRIJAVU",
+    "success": "Link je poslat! Proverite poštu.",
+    "error": "Greška pri slanju. Pokušajte ponovo."
+  },
+  "update_password_page": {
+    "title": "Nova lozinka",
+    "password_label": "NOVA LOZINKA",
+    "confirm_label": "POTVRDITE LOZINKU",
+    "submit": "SAČUVAJ LOZINKU →",
+    "success": "Lozinka je uspešno promenjena!",
+    "error_mismatch": "Lozinke se ne poklapaju.",
+    "error_generic": "Greška pri čuvanju."
+  },
+  "coach_section": {
+    "label": "Tim · Trener"
+  },
+  "programs_grid": {
+    "label": "Programi"
+  },
+  "stats_bar": {
+    "years": "Godina BJJ",
+    "members": "Članova",
+    "classes_week": "Treninga/nedeljno",
+    "belts": "Pojaseva"
+  },
+  "trial_cta": {
+    "heading": "Započni svoju avanturu",
+    "text": "Isprobaj jednu nedelju besplatno. Bez obaveza.",
+    "button": "PRIJAVITE SE"
+  },
+  "lang": {
+    "de": "Deutsch",
+    "en": "English",
+    "ru": "Русский",
+    "sr": "Srpski",
+    "tr": "Türkçe"
+  }
+}
