@@ -1,7 +1,7 @@
 // app/(admin)/admin/klassen/page.tsx
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { startOfWeek, endOfWeek } from 'date-fns'
+import { subMonths, addMonths } from 'date-fns'
 import { SessionCalendar } from '@/components/admin/SessionCalendar'
 import type { Metadata } from 'next'
 
@@ -12,8 +12,10 @@ export default async function KlassenPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 })
-  const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 })
+  // Fetch a wide range (±2 months around today) so Day/Week/Month/Quarter views
+  // all work without re-fetching. Client filters this down per view.
+  const rangeStart = subMonths(new Date(), 2)
+  const rangeEnd = addMonths(new Date(), 2)
 
   const [sessionsResult, classTypesResult, coachesResult] = await Promise.all([
     supabase
@@ -24,8 +26,8 @@ export default async function KlassenPage() {
         bookings(id, status),
         profiles!class_sessions_coach_id_fkey(full_name)
       `)
-      .gte('starts_at', weekStart.toISOString())
-      .lte('starts_at', weekEnd.toISOString())
+      .gte('starts_at', rangeStart.toISOString())
+      .lte('starts_at', rangeEnd.toISOString())
       .order('starts_at', { ascending: true }),
     supabase
       .from('class_types')
