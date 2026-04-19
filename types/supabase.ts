@@ -212,7 +212,13 @@ export interface Database {
       }
     }
     Views: { [_ in never]: never }
-    Functions: { get_my_role: { Args: Record<PropertyKey, never>; Returns: string } }
+    Functions: {
+      get_my_role: { Args: Record<PropertyKey, never>; Returns: string }
+      book_class: {
+        Args: { p_session_id: string; p_user_id: string }
+        Returns: { status?: 'confirmed' | 'waitlisted'; error?: string }
+      }
+    }
     Enums: { [_ in never]: never }
   }
 }

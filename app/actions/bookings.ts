@@ -10,50 +10,15 @@ export async function bookClass(sessionId: string): Promise<{ success?: boolean;
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { error: 'Nicht eingeloggt' }
 
-  // Check for existing non-cancelled booking
-  const { data: existing } = await supabase
-    .from('bookings')
-    .select('id, status')
-    .eq('session_id', sessionId)
-    .eq('profile_id', user.id)
-    .single()
+  const { data: result, error: rpcError } = await supabase.rpc('book_class', {
+    p_session_id: sessionId,
+    p_user_id: user.id,
+  })
 
-  if (existing && existing.status !== 'cancelled') {
-    return { error: 'Du hast diese Klasse bereits gebucht.' }
-  }
+  if (rpcError) return { error: 'Buchung fehlgeschlagen. Bitte versuche es erneut.' }
+  if (result?.error) return { error: result.error }
 
-  // NOTE: capacity check and insert are not atomic — concurrent requests can cause overbooking.
-  // A proper fix requires a DB-level function (RPC). Acceptable for current scale.
-  const [{ count: confirmedCount, error: countError }, { data: session }] = await Promise.all([
-    supabase
-      .from('bookings')
-      .select('*', { count: 'exact', head: true })
-      .eq('session_id', sessionId)
-      .eq('status', 'confirmed'),
-    supabase
-      .from('class_sessions')
-      .select('capacity')
-      .eq('id', sessionId)
-      .single(),
-  ])
-
-  if (countError) return { error: 'Buchung fehlgeschlagen. Bitte versuche es erneut.' }
-  if (!session) return { error: 'Klasse nicht gefunden.' }
-
-  const hasSpace = (confirmedCount ?? 0) < session.capacity
-  const status = hasSpace ? 'confirmed' as const : 'waitlisted' as const
-
-  const { error } = existing
-    ? await supabase
-        .from('bookings')
-        .update({ status, waitlist_position: hasSpace ? null : (confirmedCount ?? 0) + 1 })
-        .eq('id', existing.id)
-    : await supabase
-        .from('bookings')
-        .insert({ session_id: sessionId, profile_id: user.id, status,
-          waitlist_position: hasSpace ? null : (confirmedCount ?? 0) + 1 })
-
-  if (error) return { error: 'Buchung fehlgeschlagen. Bitte versuche es erneut.' }
+  const status = result?.status ?? 'confirmed'
 
   revalidatePath('/buchen')
   revalidatePath('/dashboard')
