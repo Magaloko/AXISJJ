@@ -2,9 +2,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getAdminDashboard } from '@/app/actions/admin'
+import { getOwnerInsights } from '@/app/actions/owner-insights'
 import { AdminStatCard } from '@/components/admin/AdminStatCard'
 import { PromotionsWidget } from '@/components/admin/PromotionsWidget'
 import { LeadsMiniKanban } from '@/components/admin/LeadsMiniKanban'
+import { UtilizationChart } from '@/components/admin/UtilizationChart'
+import { TopClassesChart } from '@/components/admin/TopClassesChart'
+import { RevenueWidget } from '@/components/admin/RevenueWidget'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard | Admin' }
@@ -14,7 +18,10 @@ export default async function AdminDashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const data = await getAdminDashboard()
+  const [data, ownerInsights] = await Promise.all([
+    getAdminDashboard(),
+    getOwnerInsights().catch(() => null),
+  ])
 
   if (data.error) {
     return (
@@ -128,6 +135,26 @@ export default async function AdminDashboardPage() {
           </ul>
         )}
       </div>
+
+      {/* Owner only: Business insights */}
+      {role === 'owner' && ownerInsights && !ownerInsights.error && (
+        <>
+          <div className="mt-6 grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <UtilizationChart data={ownerInsights.utilizationTrend} />
+            </div>
+            <RevenueWidget
+              estimatedMonthlyRevenue={ownerInsights.estimatedMonthlyRevenue}
+              activeMembers={ownerInsights.activeMembers}
+              breakdown={ownerInsights.revenueBreakdown}
+            />
+          </div>
+
+          <div className="mt-6">
+            <TopClassesChart data={ownerInsights.topClasses} />
+          </div>
+        </>
+      )}
 
       {/* Owner only: LeadsMiniKanban */}
       {role === 'owner' && data.leadsByStatus && (
