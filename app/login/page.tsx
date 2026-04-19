@@ -2,7 +2,6 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { createClient } from '@/lib/supabase/client'
 import { logPasswordLogin } from '@/app/actions/auth-events'
@@ -15,7 +14,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMsg, setErrorMsg] = useState('')
-  const router = useRouter()
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,8 +45,8 @@ export default function LoginPage() {
       setStatus('error')
     } else {
       await logPasswordLogin()
-      router.push('/dashboard')
-      router.refresh()
+      // Hard navigation so server picks up fresh session cookies
+      window.location.assign('/dashboard')
     }
   }
 
