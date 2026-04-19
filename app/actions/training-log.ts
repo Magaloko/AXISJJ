@@ -5,8 +5,6 @@ import { revalidatePath } from 'next/cache'
 import { trainingLogSchema, type TrainingLogInput } from './training-log.schema'
 import { computeStats, type TrainingStats } from './training-log-stats'
 
-export type { TrainingStats }
-
 export async function logTraining(
   data: TrainingLogInput,
 ): Promise<{ success?: true; id?: string; error?: string }> {
