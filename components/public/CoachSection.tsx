@@ -9,7 +9,7 @@ export function CoachSection() {
           Team · Coach
         </p>
 
-        <div className="mt-8 grid items-center gap-12 lg:grid-cols-2">
+        <div className="mt-8 grid items-start gap-12 lg:grid-cols-2">
 
           <div>
             <div className="mb-2 flex items-center gap-3">
@@ -66,13 +66,13 @@ export function CoachSection() {
 
           <div className="relative">
             <div className="absolute -right-4 -top-4 h-full w-3/4 bg-primary/5 blur-2xl" />
-            <div className="relative overflow-hidden">
+            <div className="relative overflow-hidden rounded-sm">
               <Image
-                src="/images/Artboard-2-2-1170x536.png"
+                src="/images/coach-portrait.jpg"
                 alt="Shamsudin Baisarov — Head Coach AXIS Jiu-Jitsu Vienna"
                 width={600}
-                height={500}
-                className="w-full object-cover object-top"
+                height={800}
+                className="w-full object-cover object-top"                style={{ aspectRatio: '3/4' }}                style={{ aspectRatio: '3/4' }}
               />
               <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-card to-transparent" />
             </div>
