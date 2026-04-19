@@ -109,10 +109,14 @@ Return only the JSON, no other text.`
   }
 }
 
+function escapeSql(s: string) {
+  return s.replace(/'/g, "''")
+}
+
 async function main() {
   const files = fs.readdirSync(BOOKS_DIR)
-  let created = 0
-  let skipped = 0
+  const sqlLines: string[] = []
+  let generated = 0
 
   for (const file of files) {
     const filePath = path.join(BOOKS_DIR, file)
@@ -138,32 +142,26 @@ async function main() {
       if (!article) { console.log('  DeepSeek returned null, skipping chunk'); continue }
 
       const slug = slugify(article.title)
-      const { data: existing } = await supabase.from('blog_posts').select('id').eq('slug', slug).single()
-      if (existing) { skipped++; console.log(`  Skipped (duplicate): ${article.title}`); continue }
+      const readingTime = estimateReadingTime(article.body)
+      const tags = `ARRAY[${article.tags.map(t => `'${escapeSql(t)}'`).join(',')}]`
 
-      const { error } = await supabase.from('blog_posts').insert({
-        slug,
-        title: article.title,
-        excerpt: article.excerpt,
-        body: article.body,
-        category: article.category,
-        tags: article.tags,
-        reading_time_min: estimateReadingTime(article.body),
-        published: false,
-      })
+      sqlLines.push(
+        `INSERT INTO blog_posts (slug, title, excerpt, body, category, tags, reading_time_min, published) VALUES ` +
+        `('${escapeSql(slug)}', '${escapeSql(article.title)}', '${escapeSql(article.excerpt)}', ` +
+        `'${escapeSql(article.body)}', '${escapeSql(article.category)}', ${tags}, ${readingTime}, false) ` +
+        `ON CONFLICT (slug) DO NOTHING;`
+      )
 
-      if (error) {
-        console.log(`  Error inserting "${article.title}": ${error.message}`)
-      } else {
-        created++
-        console.log(`  Created: ${article.title}`)
-      }
-
-      await new Promise(r => setTimeout(r, 1000))
+      generated++
+      console.log(`  Generated: ${article.title}`)
+      await new Promise(r => setTimeout(r, 800))
     }
   }
 
-  console.log(`\nDone. Created: ${created}, Skipped (duplicates): ${skipped}`)
+  const outputPath = path.resolve(process.cwd(), 'scripts/seed-blog.sql')
+  fs.writeFileSync(outputPath, sqlLines.join('\n\n'), 'utf-8')
+  console.log(`\nDone. Generated ${generated} articles → ${outputPath}`)
+  console.log('Paste scripts/seed-blog.sql into the Supabase SQL Editor to insert all posts.')
 }
 
 main().catch(console.error)
