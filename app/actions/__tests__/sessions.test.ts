@@ -96,7 +96,7 @@ describe('upsertSession', () => {
   it('returns error when not authenticated', async () => {
     mockSupabase.auth.getUser.mockResolvedValue({ data: { user: null }, error: null })
     const result = await upsertSession({
-      class_type_id: 'ct-1', starts_at: '2026-04-18T18:00:00Z',
+      class_type_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', starts_at: '2026-04-18T18:00:00Z',
       ends_at: '2026-04-18T19:30:00Z', capacity: 16, location: 'AXIS Gym',
     })
     expect(result.error).toBeTruthy()
@@ -110,14 +110,14 @@ describe('upsertSession', () => {
     }
     mockSupabase.from.mockReturnValue(callerChain)
     const result = await upsertSession({
-      class_type_id: 'ct-1', starts_at: '2026-04-18T18:00:00Z',
+      class_type_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', starts_at: '2026-04-18T18:00:00Z',
       ends_at: '2026-04-18T19:30:00Z', capacity: 16, location: 'AXIS Gym',
     })
     expect(result.error).toBeTruthy()
   })
 
   it('inserts new session and returns it', async () => {
-    const newSession = { id: 's-new', class_type_id: 'ct-1', starts_at: '2026-04-18T18:00:00Z', ends_at: '2026-04-18T19:30:00Z', capacity: 16, location: 'AXIS Gym', cancelled: false }
+    const newSession = { id: 's-new', class_type_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', starts_at: '2026-04-18T18:00:00Z', ends_at: '2026-04-18T19:30:00Z', capacity: 16, location: 'AXIS Gym', cancelled: false }
     const callerChain = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
@@ -138,7 +138,7 @@ describe('upsertSession', () => {
       .mockReturnValueOnce(upsertChain)
       .mockReturnValueOnce(classTypeChain)
     const result = await upsertSession({
-      class_type_id: 'ct-1', starts_at: '2026-04-18T18:00:00Z',
+      class_type_id: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', starts_at: '2026-04-18T18:00:00Z',
       ends_at: '2026-04-18T19:30:00Z', capacity: 16, location: 'AXIS Gym',
     })
     expect(result.success).toBe(true)

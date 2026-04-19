@@ -28,6 +28,7 @@ function makeChain(finalResult: unknown): ChainMock {
 
 const mockSupabase = {
   from: vi.fn(),
+  rpc: vi.fn(),
   auth: { getUser: vi.fn() },
 }
 
@@ -60,31 +61,13 @@ describe('bookClass', () => {
   })
 
   it('returns error when session does not exist', async () => {
-    // existing booking check: no existing booking
-    const existingChain = makeChain({ data: null, error: null })
-    // count query returns 0
-    const countChain = makeChain({ count: 0, error: null })
-    countChain.select.mockReturnValue(countChain)
-    countChain.eq.mockReturnValue(countChain)
-    // session query returns null (session not found)
-    const sessionChain = makeChain({ data: null, error: null })
-
-    let callCount = 0
-    mockSupabase.from.mockImplementation(() => {
-      callCount++
-      if (callCount === 1) return existingChain // existing booking check
-      if (callCount === 2) return countChain    // confirmed count
-      return sessionChain                        // session lookup
-    })
-
+    mockSupabase.rpc.mockResolvedValue({ data: { error: 'Klasse nicht gefunden.' }, error: null })
     const result = await bookClass('session-1')
     expect(result.error).toBeDefined()
   })
 
   it('returns error when already booked (non-cancelled)', async () => {
-    const chain = makeChain({ data: { id: 'b-1', status: 'confirmed' }, error: null })
-    mockSupabase.from.mockReturnValue(chain)
-
+    mockSupabase.rpc.mockResolvedValue({ data: { error: 'Du hast diese Klasse bereits gebucht.' }, error: null })
     const result = await bookClass('session-1')
     expect(result.error).toBeDefined()
   })
