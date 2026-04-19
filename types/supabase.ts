@@ -24,7 +24,7 @@ export interface Database {
       }
       class_types: {
         Row: { id: string; name: string; description: string | null; level: 'beginner' | 'all' | 'advanced' | 'kids'; gi: boolean }
-        Insert: Omit<Database['public']['Tables']['class_types']['Row'], 'id'>
+        Insert: { id?: string; name: string; description?: string | null; level?: 'beginner' | 'all' | 'advanced' | 'kids'; gi?: boolean }
         Update: Partial<Database['public']['Tables']['class_types']['Insert']>
         Relationships: []
       }

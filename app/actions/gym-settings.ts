@@ -6,16 +6,7 @@ import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
 import type { OpeningHours } from '@/lib/gym-settings'
 import { DAY_KEYS } from '@/lib/opening-hours'
-
-async function assertOwner(): Promise<true | { error: string }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Nicht eingeloggt.' }
-  const { data: caller } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single()
-  if (caller?.role !== 'owner') return { error: 'Keine Berechtigung.' }
-  return true
-}
+import { assertOwner } from '@/lib/auth'
 
 export interface GymInfoUpdate {
   name: string
@@ -31,7 +22,7 @@ export interface GymInfoUpdate {
 
 export async function updateGymInfo(data: GymInfoUpdate): Promise<{ success?: true; error?: string }> {
   const ok = await assertOwner()
-  if (ok !== true) return { error: ok.error }
+  if ('error' in ok) return { error: ok.error }
   if (!data.name?.trim()) return { error: 'Name ist Pflicht.' }
 
   const supabase = await createClient()
@@ -69,7 +60,7 @@ function validateHours(hours: OpeningHours): string | null {
 
 export async function updateOpeningHours(hours: OpeningHours): Promise<{ success?: true; error?: string }> {
   const ok = await assertOwner()
-  if (ok !== true) return { error: ok.error }
+  if ('error' in ok) return { error: ok.error }
 
   const validationError = validateHours(hours)
   if (validationError) return { error: validationError }
@@ -92,7 +83,7 @@ export interface PoliciesUpdate {
 
 export async function updatePolicies(data: PoliciesUpdate): Promise<{ success?: true; error?: string }> {
   const ok = await assertOwner()
-  if (ok !== true) return { error: ok.error }
+  if ('error' in ok) return { error: ok.error }
 
   const supabase = await createClient()
   const payload: Record<string, unknown> = { updated_at: new Date().toISOString() }

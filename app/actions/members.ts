@@ -4,16 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
-
-async function assertOwner(): Promise<{ userId: string } | { error: string }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Nicht eingeloggt.' }
-  const { data: caller } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single()
-  if (caller?.role !== 'owner') return { error: 'Keine Berechtigung.' }
-  return { userId: user.id }
-}
+import { assertOwner } from '@/lib/auth'
 
 export interface MemberUpdate {
   full_name?: string

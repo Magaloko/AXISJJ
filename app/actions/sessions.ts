@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
+import { assertStaff } from '@/lib/auth'
 
 export interface SessionFormData {
   id?: string
@@ -17,20 +18,10 @@ export interface SessionFormData {
 export async function upsertSession(
   data: SessionFormData
 ): Promise<{ success?: boolean; session?: { id: string }; error?: string }> {
+  const auth = await assertStaff()
+  if ('error' in auth) return { error: auth.error }
+
   const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) return { error: 'Nicht eingeloggt' }
-
-  const { data: callerProfile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!callerProfile || !['coach', 'owner'].includes(callerProfile.role)) {
-    return { error: 'Keine Berechtigung.' }
-  }
-
   const isNew = !data.id
 
   const { data: session, error } = await supabase
@@ -79,19 +70,10 @@ export async function upsertSession(
 export async function cancelSession(
   sessionId: string
 ): Promise<{ success?: boolean; error?: string }> {
+  const auth = await assertStaff()
+  if ('error' in auth) return { error: auth.error }
+
   const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) return { error: 'Nicht eingeloggt' }
-
-  const { data: callerProfile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!callerProfile || !['coach', 'owner'].includes(callerProfile.role)) {
-    return { error: 'Keine Berechtigung.' }
-  }
 
   // Fetch session info for notification before updating
   const { data: sessionInfo } = await supabase

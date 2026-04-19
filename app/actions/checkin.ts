@@ -3,25 +3,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
+import { assertStaff } from '@/lib/auth'
 
 export async function checkIn(
   profileId: string,
   sessionId: string
 ): Promise<{ success?: boolean; memberName?: string; error?: string }> {
+  const auth = await assertStaff()
+  if ('error' in auth) return { error: auth.error }
+
   const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) return { error: 'Nicht eingeloggt' }
-
-  // Verify caller is a coach or owner
-  const { data: callerProfile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!callerProfile || !['coach', 'owner'].includes(callerProfile.role)) {
-    return { error: 'Keine Berechtigung.' }
-  }
 
   // Verify profile exists and get member name
   const { data: profile } = await supabase
