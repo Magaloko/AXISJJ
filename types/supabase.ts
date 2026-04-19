@@ -210,6 +210,40 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['gym_settings']['Row']>
         Relationships: []
       }
+      training_logs: {
+        Row: {
+          id: string
+          profile_id: string
+          session_id: string | null
+          mood_before: number
+          mood_after: number | null
+          energy: number | null
+          technique: number | null
+          conditioning: number | null
+          mental: number | null
+          focus_areas: string[]
+          notes: string | null
+          next_goal: string | null
+          logged_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          session_id?: string | null
+          mood_before: number
+          mood_after?: number | null
+          energy?: number | null
+          technique?: number | null
+          conditioning?: number | null
+          mental?: number | null
+          focus_areas?: string[]
+          notes?: string | null
+          next_goal?: string | null
+          logged_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['training_logs']['Insert']>
+        Relationships: []
+      }
     }
     Views: { [_ in never]: never }
     Functions: {
