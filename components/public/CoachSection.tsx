@@ -72,7 +72,7 @@ export function CoachSection() {
                 alt="Shamsudin Baisarov — Head Coach AXIS Jiu-Jitsu Vienna"
                 width={600}
                 height={800}
-                className="w-full object-cover object-top"                style={{ aspectRatio: '3/4' }}                style={{ aspectRatio: '3/4' }}
+                className="w-full object-cover object-top"                style={{ aspectRatio: '3/4' }} 
               />
               <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-card to-transparent" />
             </div>
