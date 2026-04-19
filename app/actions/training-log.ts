@@ -82,6 +82,10 @@ export function computeStats(logs: {
   mental: number | null
   next_goal: string | null
 }[]): TrainingStats {
+  if (logs.length === 0) {
+    return { totalSessions: 0, currentStreak: 0, avgMoodLift: null, lastSessionDate: null, weeklyFrequency: [], moodTrend: [], radarAvg: null, lastGoal: null }
+  }
+
   const totalSessions = logs.length
   const lastSessionDate = logs[0].logged_at
   const lastGoal = logs.find(l => l.next_goal)?.next_goal ?? null
@@ -139,9 +143,9 @@ export function computeStats(logs: {
   const withScores = recent.filter(l => l.technique || l.conditioning || l.mental)
   const avg = (arr: number[]) => arr.length ? Math.round((arr.reduce((a, b) => a + b, 0) / arr.length) * 10) / 10 : 0
   const radarAvg = withScores.length > 0 ? {
-    technique:    avg(withScores.map(l => l.technique ?? 0).filter(Boolean)),
-    conditioning: avg(withScores.map(l => l.conditioning ?? 0).filter(Boolean)),
-    mental:       avg(withScores.map(l => l.mental ?? 0).filter(Boolean)),
+    technique:    avg(withScores.map(l => l.technique).filter((v): v is number => v !== null)),
+    conditioning: avg(withScores.map(l => l.conditioning).filter((v): v is number => v !== null)),
+    mental:       avg(withScores.map(l => l.mental).filter((v): v is number => v !== null)),
   } : null
 
   return { totalSessions, currentStreak: streak, avgMoodLift, lastSessionDate, weeklyFrequency, moodTrend, radarAvg, lastGoal }
