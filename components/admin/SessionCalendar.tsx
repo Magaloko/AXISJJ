@@ -2,16 +2,16 @@
 'use client'
 
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, X } from 'lucide-react'
 import { addWeeks, subWeeks, startOfWeek, addDays, format, isSameDay, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
-import { X } from 'lucide-react'
 import { SessionDetailPanel } from './SessionDetailPanel'
 import { SessionForm } from './SessionForm'
 
+export interface Coach { id: string; name: string }
 interface ClassType { id: string; name: string }
 
-interface Session {
+export interface Session {
   id: string
   starts_at: string
   ends_at: string
@@ -21,14 +21,17 @@ interface Session {
   confirmedCount: number
   class_types: { name: string } | null
   class_type_id?: string
+  coach_id?: string | null
+  coach_name?: string | null
 }
 
 interface Props {
   initialSessions: Session[]
   classTypes: ClassType[]
+  coaches: Coach[]
 }
 
-export function SessionCalendar({ initialSessions, classTypes }: Props) {
+export function SessionCalendar({ initialSessions, classTypes, coaches }: Props) {
   const [currentWeekStart, setCurrentWeekStart] = useState(() =>
     startOfWeek(new Date(), { weekStartsOn: 1 })
   )
@@ -52,9 +55,8 @@ export function SessionCalendar({ initialSessions, classTypes }: Props) {
     setSessions(prev => prev.filter(s => s.id !== sessionId))
   }
 
-  function handleCreateSuccess(newSession: Record<string, unknown>) {
-    const session = newSession as unknown as Session
-    setSessions(prev => [...prev, session].sort((a, b) => a.starts_at.localeCompare(b.starts_at)))
+  function handleCreateSuccess(newSession: Session) {
+    setSessions(prev => [...prev, newSession].sort((a, b) => a.starts_at.localeCompare(b.starts_at)))
     setShowCreateForm(false)
   }
 
@@ -96,7 +98,7 @@ export function SessionCalendar({ initialSessions, classTypes }: Props) {
       </div>
 
       {/* 7-column week grid */}
-      <div className="grid grid-cols-7 gap-px border border-border bg-border overflow-x-auto">
+      <div className="grid grid-cols-7 gap-px overflow-x-auto border border-border bg-border">
         {/* Day headers */}
         {days.map(day => {
           const isToday = isSameDay(day, new Date())
@@ -126,18 +128,23 @@ export function SessionCalendar({ initialSessions, classTypes }: Props) {
                   <button
                     key={session.id}
                     onClick={() => { setShowCreateForm(false); setSelectedSession(session) }}
-                    className={`mb-1 w-full text-left px-2 py-1.5 text-[11px] transition-colors ${
+                    className={`mb-1 w-full px-2 py-1.5 text-left text-[11px] transition-colors ${
                       session.cancelled
                         ? 'bg-muted text-muted-foreground line-through'
                         : isFull
-                        ? 'bg-amber-50 border border-amber-200 text-amber-800 dark:bg-amber-950/20 dark:border-amber-800 dark:text-amber-300 hover:opacity-80'
-                        : 'bg-primary/5 border border-primary/20 text-foreground hover:bg-primary/10'
+                        ? 'border border-amber-200 bg-amber-50 text-amber-800 hover:opacity-80 dark:border-amber-800 dark:bg-amber-950/20 dark:text-amber-300'
+                        : 'border border-primary/20 bg-primary/5 text-foreground hover:bg-primary/10'
                     }`}
                   >
-                    <div className="font-bold truncate">{session.class_types?.name ?? 'Session'}</div>
+                    <div className="truncate font-bold">{session.class_types?.name ?? 'Session'}</div>
                     <div className="font-mono text-[10px] text-muted-foreground">
-                      {formatTime(session.starts_at)}
+                      {formatTime(session.starts_at)}–{formatTime(session.ends_at)}
                     </div>
+                    {session.coach_name && (
+                      <div className="truncate text-[10px] text-muted-foreground">
+                        {session.coach_name}
+                      </div>
+                    )}
                     <div className="text-[10px] text-muted-foreground">
                       {session.confirmedCount}/{session.capacity}
                     </div>
@@ -154,6 +161,7 @@ export function SessionCalendar({ initialSessions, classTypes }: Props) {
         <SessionDetailPanel
           session={selectedSession}
           classTypes={classTypes}
+          coaches={coaches}
           onClose={() => setSelectedSession(null)}
           onSessionUpdated={handleSessionUpdated}
           onSessionCancelled={handleSessionCancelled}
@@ -172,6 +180,7 @@ export function SessionCalendar({ initialSessions, classTypes }: Props) {
           <div className="flex-1 overflow-y-auto p-6">
             <SessionForm
               classTypes={classTypes}
+              coaches={coaches}
               onSuccess={handleCreateSuccess}
               onCancel={() => setShowCreateForm(false)}
             />

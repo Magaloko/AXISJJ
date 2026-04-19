@@ -10,6 +10,7 @@ import { sessionFormSchema } from './sessions.schema'
 export type SessionFormData = {
   id?: string
   class_type_id: string
+  coach_id?: string | null
   starts_at: string
   ends_at: string
   capacity: number
@@ -33,6 +34,7 @@ export async function upsertSession(
     .upsert({
       ...(parsed.data.id ? { id: parsed.data.id } : {}),
       class_type_id: parsed.data.class_type_id,
+      coach_id: parsed.data.coach_id ?? null,
       starts_at: parsed.data.starts_at,
       ends_at: parsed.data.ends_at,
       capacity: parsed.data.capacity,
