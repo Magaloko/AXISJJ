@@ -169,7 +169,7 @@ export interface Database {
       }
       profile_ranks: {
         Row: { id: string; profile_id: string; belt_rank_id: string; promoted_at: string; promoted_by: string | null; notes: string | null }
-        Insert: Omit<Database['public']['Tables']['profile_ranks']['Row'], 'id'>
+        Insert: { id?: string; profile_id: string; belt_rank_id: string; promoted_at?: string; promoted_by?: string | null; notes?: string | null }
         Update: Partial<Database['public']['Tables']['profile_ranks']['Insert']>
         Relationships: [
           {
@@ -242,6 +242,46 @@ export interface Database {
           logged_at?: string
         }
         Update: Partial<Database['public']['Tables']['training_logs']['Insert']>
+        Relationships: []
+      }
+      bot_users: {
+        Row: {
+          chat_id: number
+          profile_id: string
+          bot_role: 'admin' | 'moderator' | 'coach' | 'member'
+          telegram_username: string | null
+          first_name: string | null
+          linked_at: string
+        }
+        Insert: {
+          chat_id: number
+          profile_id: string
+          bot_role?: 'admin' | 'moderator' | 'coach' | 'member'
+          telegram_username?: string | null
+          first_name?: string | null
+          linked_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['bot_users']['Insert']>
+        Relationships: []
+      }
+      bot_link_codes: {
+        Row: {
+          code: string
+          profile_id: string
+          created_at: string
+          expires_at: string
+          used_at: string | null
+          used_by_chat_id: number | null
+        }
+        Insert: {
+          code: string
+          profile_id: string
+          created_at?: string
+          expires_at?: string
+          used_at?: string | null
+          used_by_chat_id?: number | null
+        }
+        Update: Partial<Database['public']['Tables']['bot_link_codes']['Insert']>
         Relationships: []
       }
     }
