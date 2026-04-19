@@ -1,0 +1,123 @@
+{
+  "nav": {
+    "schedule": "Schedule",
+    "team": "Team",
+    "programs": "Programs",
+    "pricing": "Pricing",
+    "blog": "Blog",
+    "contact": "Contact",
+    "login": "Login",
+    "trial": "1 WEEK FREE",
+    "menu_open": "Open menu",
+    "menu_close": "Close menu",
+    "home_aria": "AXIS JIU JITSU — Go to homepage"
+  },
+  "footer": {
+    "tagline": "Discipline · Technique · Progress",
+    "opening_hours": "Opening Hours",
+    "navigation": "Navigation",
+    "pricing": "Pricing",
+    "contact": "Contact",
+    "schedule": "Schedule",
+    "team": "Team",
+    "programs": "Programs",
+    "trial": "Try 1 week for free",
+    "rights": "All rights reserved.",
+    "imprint": "Imprint",
+    "privacy": "Privacy Policy"
+  },
+  "hero": {
+    "cta_trial": "1 WEEK FREE",
+    "cta_schedule": "SCHEDULE"
+  },
+  "pricing_page": {
+    "title": "Pricing",
+    "subtitle": "All prices incl. VAT · No registration fee.",
+    "cta_heading": "Not sure which plan fits?",
+    "cta_text": "Come to a free trial class and get to know us.",
+    "cta_button": "Book trial class"
+  },
+  "contact_page": {
+    "title": "Contact",
+    "opening_hours": "Opening Hours"
+  },
+  "trial_page": {
+    "title": "Free Trial Class",
+    "subtitle": "Sign up for a free trial session.",
+    "name_label": "Your name",
+    "email_label": "Email",
+    "phone_label": "Phone (optional)",
+    "message_label": "Message (optional)",
+    "submit": "SIGN UP NOW",
+    "success": "Thank you! We will be in touch soon.",
+    "error": "Something went wrong. Please try again."
+  },
+  "blog_page": {
+    "title": "Blog",
+    "subtitle": "Articles about Brazilian Jiu-Jitsu, training & more.",
+    "read_more": "Read more",
+    "all_categories": "All",
+    "min_read": "min read",
+    "featured": "Featured",
+    "back_to_blog": "← Back to Blog",
+    "published": "Published",
+    "no_posts": "No articles found."
+  },
+  "login_page": {
+    "title": "AXIS Member Portal",
+    "subtitle": "Member Login",
+    "magic_link_tab": "MAGIC LINK",
+    "password_tab": "PASSWORD",
+    "email_label": "EMAIL",
+    "email_placeholder": "your@email.com",
+    "password_label": "PASSWORD",
+    "forgot": "FORGOT?",
+    "send_link": "SEND LINK →",
+    "login_button": "LOG IN →",
+    "error_invalid": "Invalid email or password.",
+    "error_generic": "An error occurred.",
+    "magic_sent": "Magic link sent! Please check your inbox."
+  },
+  "reset_password_page": {
+    "title": "Reset Password",
+    "subtitle": "Enter your email. We will send you a link.",
+    "email_label": "EMAIL",
+    "send_button": "SEND LINK →",
+    "back_to_login": "← BACK TO LOGIN",
+    "success": "Link sent! Please check your inbox.",
+    "error": "Error sending link. Please try again."
+  },
+  "update_password_page": {
+    "title": "Set New Password",
+    "password_label": "NEW PASSWORD",
+    "confirm_label": "CONFIRM PASSWORD",
+    "submit": "SAVE PASSWORD →",
+    "success": "Password changed successfully!",
+    "error_mismatch": "Passwords do not match.",
+    "error_generic": "Error saving password."
+  },
+  "coach_section": {
+    "label": "Team · Coach"
+  },
+  "programs_grid": {
+    "label": "Programs"
+  },
+  "stats_bar": {
+    "years": "Years of BJJ",
+    "members": "Members",
+    "classes_week": "Classes/Week",
+    "belts": "Belts"
+  },
+  "trial_cta": {
+    "heading": "Start Your Journey",
+    "text": "Try one week for free. No commitment.",
+    "button": "SIGN UP NOW"
+  },
+  "lang": {
+    "de": "Deutsch",
+    "en": "English",
+    "ru": "Русский",
+    "sr": "Srpski",
+    "tr": "Türkçe"
+  }
+}
