@@ -29,7 +29,7 @@ export async function getAllPosts() {
   const check = await assertOwner()
   if ('error' in check) return { error: check.error, data: null }
   const supabase = await createClient()
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('blog_posts')
     .select('id,slug,title,category,published,published_at,featured,created_at')
     .order('created_at', { ascending: false })
@@ -43,10 +43,10 @@ export async function createPost(input: BlogPostInput): Promise<{ success?: bool
   const supabase = await createClient()
 
   if (input.featured) {
-    await supabase.from('blog_posts').update({ featured: false }).eq('featured', true)
+    await (supabase as any).from('blog_posts').update({ featured: false }).eq('featured', true)
   }
 
-  const { error } = await supabase.from('blog_posts').insert({
+  const { error } = await (supabase as any).from('blog_posts').insert({
     ...input,
     cover_image_url: input.cover_image_url || null,
     published_at: input.published ? new Date().toISOString() : null,
@@ -62,10 +62,10 @@ export async function updatePost(id: string, input: Partial<BlogPostInput>): Pro
   const supabase = await createClient()
 
   if (input.featured) {
-    await supabase.from('blog_posts').update({ featured: false }).eq('featured', true)
+    await (supabase as any).from('blog_posts').update({ featured: false }).eq('featured', true)
   }
 
-  const { error } = await supabase.from('blog_posts').update(input).eq('id', id)
+  const { error } = await (supabase as any).from('blog_posts').update(input).eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/blog')
   return { success: true }
@@ -76,11 +76,11 @@ export async function togglePublished(id: string): Promise<{ success?: boolean; 
   if ('error' in check) return { error: check.error }
   const supabase = await createClient()
 
-  const { data: post } = await supabase.from('blog_posts').select('published,published_at').eq('id', id).single()
+  const { data: post } = await (supabase as any).from('blog_posts').select('published,published_at').eq('id', id).single()
   if (!post) return { error: 'Post nicht gefunden.' }
 
   const nowPublished = !post.published
-  const { error } = await supabase.from('blog_posts').update({
+  const { error } = await (supabase as any).from('blog_posts').update({
     published: nowPublished,
     published_at: nowPublished && !post.published_at ? new Date().toISOString() : post.published_at,
   }).eq('id', id)
@@ -94,7 +94,7 @@ export async function deletePost(id: string): Promise<{ success?: boolean; error
   const check = await assertOwner()
   if ('error' in check) return { error: check.error }
   const supabase = await createClient()
-  const { error } = await supabase.from('blog_posts').delete().eq('id', id)
+  const { error } = await (supabase as any).from('blog_posts').delete().eq('id', id)
   if (error) return { error: error.message }
   revalidatePath('/blog')
   return { success: true }
@@ -104,6 +104,6 @@ export async function getPostById(id: string) {
   const check = await assertOwner()
   if ('error' in check) return null
   const supabase = await createClient()
-  const { data } = await supabase.from('blog_posts').select('*').eq('id', id).single()
+  const { data } = await (supabase as any).from('blog_posts').select('*').eq('id', id).single()
   return data
 }

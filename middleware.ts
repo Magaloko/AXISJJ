@@ -25,7 +25,8 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Protect member routes - (members) group = /dashboard, /buchen, /gurtel, /konto, /skills
-  const memberPaths = ['/dashboard', '/buchen', '/gurtel', '/konto', '/skills']
+  // /update-password is also protected: only accessible with a valid (recovery) session.
+  const memberPaths = ['/dashboard', '/buchen', '/gurtel', '/konto', '/skills', '/update-password']
   const isMemberPath = memberPaths.some(p => pathname.startsWith(p))
   if (isMemberPath && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
@@ -46,6 +47,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }
+
   if (pathname === '/login' && user) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }

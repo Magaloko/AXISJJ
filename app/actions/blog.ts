@@ -18,7 +18,7 @@ export interface BlogPost {
 
 export async function getPosts(category?: string): Promise<BlogPost[]> {
   const supabase = await createClient()
-  let query = supabase
+  let query = (supabase as any)
     .from('blog_posts')
     .select('id,slug,title,excerpt,category,tags,cover_image_url,reading_time_min,featured,published_at,created_at')
     .eq('published', true)
@@ -34,7 +34,7 @@ export async function getPosts(category?: string): Promise<BlogPost[]> {
 
 export async function getPost(slug: string): Promise<BlogPost | null> {
   const supabase = await createClient()
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('blog_posts')
     .select('*')
     .eq('slug', slug)
@@ -47,7 +47,7 @@ export async function getPost(slug: string): Promise<BlogPost | null> {
 
 export async function getFeaturedPost(): Promise<BlogPost | null> {
   const supabase = await createClient()
-  const { data } = await supabase
+  const { data } = await (supabase as any)
     .from('blog_posts')
     .select('id,slug,title,excerpt,category,tags,cover_image_url,reading_time_min,published_at')
     .eq('published', true)
@@ -59,7 +59,7 @@ export async function getFeaturedPost(): Promise<BlogPost | null> {
 
 export async function getRelatedPosts(category: string, excludeSlug: string): Promise<BlogPost[]> {
   const supabase = await createClient()
-  const { data } = await supabase
+  const { data } = await (supabase as any)
     .from('blog_posts')
     .select('id,slug,title,category,reading_time_min,published_at')
     .eq('published', true)
