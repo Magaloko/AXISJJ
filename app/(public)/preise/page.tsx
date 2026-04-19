@@ -33,6 +33,35 @@ export default function PreisePage() {
           Probetraining buchen
         </Link>
       </div>
+
+      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+        <div className="border border-border bg-card p-8">
+          <p className="mb-2 text-lg font-black text-foreground">Jetzt Mitglied werden</p>
+          <p className="mb-6 text-sm text-muted-foreground">
+            Formular online ausfüllen — wir bereiten alles vor. Unterschrift beim ersten Training.
+          </p>
+          <Link
+            href="/anmelden"
+            className="inline-block bg-primary px-8 py-3 text-sm font-bold uppercase tracking-wider text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            Online anmelden →
+          </Link>
+        </div>
+
+        <div className="border border-border bg-card p-8">
+          <p className="mb-2 text-lg font-black text-foreground">Vertrag herunterladen</p>
+          <p className="mb-6 text-sm text-muted-foreground">
+            Vertrag ausdrucken, ausfüllen und beim Training mitbringen oder an office@axisjj.at senden.
+          </p>
+          <a
+            href="/vertrag.pdf"
+            download="AXIS_Mitgliedsvertrag.pdf"
+            className="inline-block border border-primary px-8 py-3 text-sm font-bold uppercase tracking-wider text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
+          >
+            PDF herunterladen
+          </a>
+        </div>
+      </div>
     </div>
   )
 }
