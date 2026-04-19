@@ -27,7 +27,7 @@
           "lucide-react": "^1.8.0",
           "motion": "^12.38.0",
           "next": "16.2.4",
-          "next-intl": "^3.26.3",
+          "next-intl": "^4.9.1",
           "nodemailer": "^8.0.5",
           "openai": "^6.34.0",
           "pdf-parse": "^1.1.1",
