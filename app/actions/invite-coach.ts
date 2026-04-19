@@ -123,23 +123,48 @@ export async function inviteCoach(
   if (createError) {
     const msg = createError.message.toLowerCase()
     if (msg.includes('already') || msg.includes('registered') || msg.includes('exists')) {
-      // Already exists — promote existing profile to coach
-      const { data: existing } = await admin
-        .from('profiles')
-        .select('id')
-        .eq('email', parsed.data.email)
-        .single()
-      if (!existing) return { error: 'E-Mail existiert in Auth, aber kein Profil gefunden.' }
+      // Already exists — find auth user, reset password, promote profile to coach, send credentials
+      const { data: listData, error: listError } = await admin.auth.admin.listUsers()
+      if (listError) {
+        console.error('[invite-coach] list users error:', listError)
+        return { error: `Konnte vorhandenen User nicht finden: ${listError.message}` }
+      }
+      const existingAuth = listData.users.find(u => u.email?.toLowerCase() === parsed.data.email.toLowerCase())
+      if (!existingAuth) return { error: 'E-Mail nicht gefunden.' }
 
-      const { error: updateError } = await admin
-        .from('profiles')
-        .update({ role: 'coach', full_name: parsed.data.full_name })
-        .eq('id', existing.id)
-      if (updateError) return { error: `Profil-Update fehlgeschlagen: ${updateError.message}` }
+      // Reset password to new random value
+      const { error: pwError } = await admin.auth.admin.updateUserById(existingAuth.id, {
+        password,
+        email_confirm: true,
+        user_metadata: { full_name: parsed.data.full_name },
+      })
+      if (pwError) {
+        console.error('[invite-coach] password reset error:', pwError)
+        return { error: `Passwort-Reset fehlgeschlagen: ${pwError.message}` }
+      }
+
+      // Upsert profile with coach role
+      const { error: upsertError } = await admin.from('profiles').upsert({
+        id: existingAuth.id,
+        email: parsed.data.email,
+        full_name: parsed.data.full_name,
+        role: 'coach',
+        language: 'de',
+      })
+      if (upsertError) {
+        console.error('[invite-coach] profile upsert error:', upsertError)
+        return { error: `Profil-Update fehlgeschlagen: ${upsertError.message}` }
+      }
+
+      const emailSent = await sendCredentialsEmail(parsed.data.full_name, parsed.data.email, password)
 
       revalidatePath('/admin/einstellungen')
       revalidatePath('/admin/mitglieder')
-      return { success: true, message: 'Bestehendes Profil wurde zu Coach aktualisiert (kein neues Passwort gesendet).' }
+
+      if (!emailSent) {
+        return { success: true, message: `Bestehendes Konto zu Coach aktualisiert. E-Mail-Versand fehlgeschlagen, Passwort manuell weitergeben: ${password}` }
+      }
+      return { success: true, message: `Bestehendes Konto aktualisiert — neues Passwort per E-Mail an ${parsed.data.email} gesendet.` }
     }
     console.error('[invite-coach] create error:', createError)
     return { error: `Coach-Erstellung fehlgeschlagen: ${createError.message}` }
