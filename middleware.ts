@@ -1,9 +1,21 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import createMiddleware from 'next-intl/middleware'
+import { locales, defaultLocale } from './i18n'
+
+const intlMiddleware = createMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: 'as-needed',
+})
 
 export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+  const { pathname } = request.nextUrl
 
+  const localePrefix = locales.find(l => l !== defaultLocale && pathname.startsWith(`/${l}/`))
+  const canonicalPath = localePrefix ? pathname.replace(`/${localePrefix}`, '') : pathname
+
+  let supabaseResponse = NextResponse.next({ request })
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -17,46 +29,35 @@ export async function middleware(request: NextRequest) {
             supabaseResponse.cookies.set(name, value, options)
           )
         },
-      }
+      },
     }
   )
 
   const { data: { user } } = await supabase.auth.getUser()
-  const { pathname } = request.nextUrl
+  const prefix = localePrefix ? `/${localePrefix}` : ''
 
-  // Protect member routes - (members) group = /dashboard, /buchen, /gurtel, /konto, /skills
-  // /update-password is also protected: only accessible with a valid (recovery) session.
   const memberPaths = ['/dashboard', '/buchen', '/gurtel', '/konto', '/skills', '/update-password']
-  const isMemberPath = memberPaths.some(p => pathname.startsWith(p))
-  if (isMemberPath && !user) {
-    return NextResponse.redirect(new URL('/login', request.url))
+  if (memberPaths.some(p => canonicalPath.startsWith(p)) && !user) {
+    return NextResponse.redirect(new URL(`${prefix}/login`, request.url))
   }
 
-  if (pathname.startsWith('/admin')) {
-    if (!user) {
-      return NextResponse.redirect(new URL('/login', request.url))
-    }
-    // Fetch role – single lightweight query, cached by Supabase connection pooler
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
+  if (canonicalPath.startsWith('/admin')) {
+    if (!user) return NextResponse.redirect(new URL(`${prefix}/login`, request.url))
+    const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
     if (!profile || !['coach', 'owner'].includes(profile.role)) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+      return NextResponse.redirect(new URL(`${prefix}/dashboard`, request.url))
     }
   }
 
-  if (pathname === '/login' && user) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+  if (canonicalPath === '/login' && user) {
+    return NextResponse.redirect(new URL(`${prefix}/dashboard`, request.url))
   }
 
-  return supabaseResponse
+  return intlMiddleware(request)
 }
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|images/|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
