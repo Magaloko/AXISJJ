@@ -24,6 +24,6 @@ export default async function HomePage() {
                 <ProgramsGrid />
                 <LandingPricing />
                 <TrialCTA />
-          </>>
+          </>
         )
 }
