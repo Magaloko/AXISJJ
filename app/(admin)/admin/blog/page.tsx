@@ -17,6 +17,18 @@ interface AdminPost {
   created_at: string
 }
 
+// Wrap the server actions so the returned shape matches Next's form action
+// signature (must return Promise<void>).
+async function togglePublishedAction(id: string): Promise<void> {
+  'use server'
+  await togglePublished(id)
+}
+
+async function deletePostAction(id: string): Promise<void> {
+  'use server'
+  await deletePost(id)
+}
+
 export default async function AdminBlogPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -68,12 +80,12 @@ export default async function AdminBlogPage() {
                 <td className="py-3">
                   <div className="flex gap-2">
                     <Link href={`/admin/blog/${post.id}/edit`} className="text-xs font-bold text-primary hover:underline">Edit</Link>
-                    <form action={togglePublished.bind(null, post.id)}>
+                    <form action={togglePublishedAction.bind(null, post.id)}>
                       <button type="submit" className="text-xs font-bold text-muted-foreground hover:text-foreground">
                         {post.published ? 'Unpublish' : 'Publish'}
                       </button>
                     </form>
-                    <form action={deletePost.bind(null, post.id)} onSubmit={e => { if (!confirm('Post löschen?')) e.preventDefault() }}>
+                    <form action={deletePostAction.bind(null, post.id)}>
                       <button type="submit" className="text-xs font-bold text-destructive hover:underline">Delete</button>
                     </form>
                   </div>
