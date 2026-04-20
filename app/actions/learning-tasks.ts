@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { assertOwner } from '@/lib/auth'
+import { awardXp, checkAndGrantBadges } from '@/lib/gamification'
 
 const saveTaskSchema = z.object({
   id:          z.string().uuid().optional(),
@@ -85,22 +86,52 @@ export async function deleteLearningTask(
 export async function completeTask(
   taskId: string,
   notes?: string,
-): Promise<{ success?: true; error?: string }> {
+): Promise<{ success?: true; xpEarned?: number; newBadges?: string[]; error?: string }> {
   if (!z.string().uuid().safeParse(taskId).success) return { error: 'Ungültige ID.' }
 
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Nicht eingeloggt.' }
 
+  // Was it already completed? We only award XP on first completion.
+  const { data: existing } = await supabase
+    .from('task_completions')
+    .select('task_id')
+    .eq('profile_id', user.id)
+    .eq('task_id', taskId)
+    .maybeSingle()
+
   const { error } = await supabase
     .from('task_completions')
     .upsert({
-      profile_id: user.id,
-      task_id:    taskId,
-      notes:      notes?.trim() || null,
+      profile_id:   user.id,
+      task_id:      taskId,
+      notes:        notes?.trim() || null,
       completed_at: new Date().toISOString(),
     })
 
   if (error) return { error: `Abgeschlossen-Markieren fehlgeschlagen: ${error.message}` }
-  return { success: true }
+
+  let xpEarned = 0
+  let newBadges: string[] = []
+  if (!existing) {
+    const { data: task } = await supabase
+      .from('learning_tasks')
+      .select('xp_reward, title')
+      .eq('id', taskId)
+      .single()
+    if (task && task.xp_reward > 0) {
+      xpEarned = task.xp_reward
+      await awardXp(supabase, {
+        profileId:   user.id,
+        source:      'task_complete',
+        sourceId:    taskId,
+        amount:      task.xp_reward,
+        description: `Task: ${task.title}`,
+      })
+    }
+    newBadges = await checkAndGrantBadges(supabase, user.id)
+  }
+
+  return { success: true, xpEarned, newBadges }
 }

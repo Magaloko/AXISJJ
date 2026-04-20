@@ -480,7 +480,22 @@ export interface Database {
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['curriculum_tracks']['Insert']>
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_tracks_curriculum_id_fkey"
+            columns: ["curriculum_id"]
+            isOneToOne: false
+            referencedRelation: "curricula"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "curriculum_tracks_class_type_id_fkey"
+            columns: ["class_type_id"]
+            isOneToOne: false
+            referencedRelation: "class_types"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       techniques: {
         Row: {
@@ -550,7 +565,15 @@ export interface Database {
           updated_at?: string
         }
         Update: Partial<Database['public']['Tables']['curriculum_sessions']['Insert']>
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "curriculum_sessions_track_id_fkey"
+            columns: ["track_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_tracks"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       session_techniques: {
         Row: {
@@ -750,6 +773,96 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['rule_cards']['Insert']>
         Relationships: []
       }
+      xp_events: {
+        Row: {
+          id: string
+          profile_id: string
+          source: 'quiz_pass' | 'quiz_attempt' | 'task_complete' | 'rule_correct' | 'attendance' | 'streak_bonus' | 'badge_earned' | 'manual'
+          source_id: string | null
+          amount: number
+          description: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          source: 'quiz_pass' | 'quiz_attempt' | 'task_complete' | 'rule_correct' | 'attendance' | 'streak_bonus' | 'badge_earned' | 'manual'
+          source_id?: string | null
+          amount: number
+          description?: string | null
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['xp_events']['Insert']>
+        Relationships: []
+      }
+      badges: {
+        Row: {
+          id: string
+          code: string
+          name: string
+          description: string
+          icon: string
+          rarity: 'common' | 'uncommon' | 'rare' | 'legendary'
+          xp_reward: number
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          code: string
+          name: string
+          description: string
+          icon?: string
+          rarity?: 'common' | 'uncommon' | 'rare' | 'legendary'
+          xp_reward?: number
+          sort_order?: number
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['badges']['Insert']>
+        Relationships: []
+      }
+      member_badges: {
+        Row: {
+          profile_id: string
+          badge_id: string
+          earned_at: string
+        }
+        Insert: {
+          profile_id: string
+          badge_id: string
+          earned_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['member_badges']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: "member_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      rule_card_attempts: {
+        Row: {
+          id: string
+          profile_id: string
+          rule_card_id: string
+          selected_index: number
+          is_correct: boolean
+          answered_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          rule_card_id: string
+          selected_index: number
+          is_correct: boolean
+          answered_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['rule_card_attempts']['Insert']>
+        Relationships: []
+      }
     }
     Views: {
       public_coaches: {
@@ -771,6 +884,10 @@ export interface Database {
       promote_waitlist: {
         Args: { p_session_id: string }
         Returns: string | null
+      }
+      leaderboard_top: {
+        Args: { n?: number }
+        Returns: { profile_id: string; full_name: string; total_xp: number; badge_count: number }[]
       }
     }
     Enums: { [_ in never]: never }

@@ -14,6 +14,7 @@ import { CompetitionsWidget } from '@/components/members/CompetitionsWidget'
 import { LeaderboardWidget } from '@/components/members/LeaderboardWidget'
 import { TrainingPartnersWidget } from '@/components/members/TrainingPartnersWidget'
 import { MySubscriptionCard } from '@/components/members/MySubscriptionCard'
+import { XpWidget } from '@/components/members/XpWidget'
 import { calcReadiness } from '@/lib/utils/belt'
 import { differenceInMonths } from 'date-fns'
 import { translations } from '@/lib/i18n'
@@ -119,6 +120,10 @@ export default async function DashboardPage() {
       </div>
 
       {showBanner && <TrainingLogBanner sessionId={latestAtt.session_id} />}
+
+      <div className="mb-6">
+        <XpWidget profileId={userId} />
+      </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Card>

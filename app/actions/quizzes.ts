@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { assertOwner } from '@/lib/auth'
+import { awardXp, checkAndGrantBadges } from '@/lib/gamification'
 
 // ─── Quiz ─────────────────────────────────────────────────────
 
@@ -202,7 +203,7 @@ const submitAttemptSchema = z.object({
 
 export async function submitQuizAttempt(
   data: z.infer<typeof submitAttemptSchema>,
-): Promise<{ score?: number; passed?: boolean; error?: string }> {
+): Promise<{ score?: number; passed?: boolean; xpEarned?: number; newBadges?: string[]; error?: string }> {
   const parsed = submitAttemptSchema.safeParse(data)
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Ungültig.' }
 
@@ -212,7 +213,7 @@ export async function submitQuizAttempt(
 
   const { data: quiz } = await supabase
     .from('quizzes')
-    .select('passing_score, active')
+    .select('passing_score, active, xp_reward')
     .eq('id', parsed.data.quiz_id)
     .single()
   if (!quiz || !quiz.active) return { error: 'Quiz nicht aktiv.' }
@@ -238,14 +239,36 @@ export async function submitQuizAttempt(
   const score = Math.round((correct / questions.length) * 100)
   const passed = score >= quiz.passing_score
 
-  const { error } = await supabase.from('quiz_attempts').insert({
+  const { data: attempt, error } = await supabase.from('quiz_attempts').insert({
     profile_id: user.id,
     quiz_id:    parsed.data.quiz_id,
     score,
     passed,
     answers:    parsed.data.answers,
-  })
+  }).select('id').single()
   if (error) return { error: `Abgabe fehlgeschlagen: ${error.message}` }
 
-  return { score, passed }
+  // Award XP only on pass, attempt-bonus of 2 XP either way
+  let xpEarned = 2
+  await awardXp(supabase, {
+    profileId:   user.id,
+    source:      'quiz_attempt',
+    sourceId:    attempt?.id ?? null,
+    amount:      2,
+    description: `Quiz-Versuch (${score}%)`,
+  })
+  if (passed) {
+    xpEarned += quiz.xp_reward
+    await awardXp(supabase, {
+      profileId:   user.id,
+      source:      'quiz_pass',
+      sourceId:    parsed.data.quiz_id,
+      amount:      quiz.xp_reward,
+      description: `Quiz bestanden (${score}%)`,
+    })
+  }
+
+  const newBadges = await checkAndGrantBadges(supabase, user.id)
+
+  return { score, passed, xpEarned, newBadges }
 }

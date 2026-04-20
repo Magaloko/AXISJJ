@@ -3,7 +3,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Calendar, Award, BookOpen, Settings, LogOut } from 'lucide-react'
+import { LayoutDashboard, Calendar, Award, BookOpen, Settings, LogOut, GraduationCap, Scale, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { translations, type Lang } from '@/lib/i18n'
 import { createClient } from '@/lib/supabase/client'
@@ -17,11 +17,14 @@ interface NavItem {
 function navItems(lang: Lang): NavItem[] {
   const t = translations[lang].nav
   return [
-    { href: '/dashboard', label: t.dashboard, Icon: LayoutDashboard },
-    { href: '/buchen',    label: t.buchen,    Icon: Calendar },
-    { href: '/gurtel',    label: t.gurtel,    Icon: Award },
-    { href: '/skills',    label: t.skills,    Icon: BookOpen },
-    { href: '/konto',     label: t.konto,     Icon: Settings },
+    { href: '/dashboard',     label: t.dashboard, Icon: LayoutDashboard },
+    { href: '/buchen',        label: t.buchen,    Icon: Calendar },
+    { href: '/mein-training', label: 'Training',  Icon: GraduationCap },
+    { href: '/bjj-rules',     label: 'BJJ Regeln', Icon: Scale },
+    { href: '/leaderboard',   label: 'Leaderboard', Icon: Trophy },
+    { href: '/gurtel',        label: t.gurtel,    Icon: Award },
+    { href: '/skills',        label: t.skills,    Icon: BookOpen },
+    { href: '/konto',         label: t.konto,     Icon: Settings },
   ]
 }
 
