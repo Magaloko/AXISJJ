@@ -13,6 +13,7 @@ export type ClassTypeData = {
   description?: string
   level: 'beginner' | 'all' | 'advanced' | 'kids'
   gi: boolean
+  image_url?: string | null
 }
 
 export async function upsertClassType(data: ClassTypeData): Promise<{ success?: true; error?: string }> {
@@ -31,6 +32,7 @@ export async function upsertClassType(data: ClassTypeData): Promise<{ success?: 
     description: parsed.data.description?.trim() || null,
     level: parsed.data.level,
     gi: parsed.data.gi,
+    image_url: parsed.data.image_url ?? null,
   })
   if (error) return { error: 'Speichern fehlgeschlagen.' }
 

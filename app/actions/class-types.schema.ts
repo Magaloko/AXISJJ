@@ -6,4 +6,5 @@ export const classTypeSchema = z.object({
   description: z.string().max(500).optional(),
   level: z.enum(['beginner', 'all', 'advanced', 'kids']),
   gi: z.boolean(),
+  image_url: z.string().url().nullable().optional(),
 })
