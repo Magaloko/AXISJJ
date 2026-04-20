@@ -153,6 +153,38 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['leads']['Insert']>
         Relationships: []
       }
+      coach_profiles: {
+        Row: {
+          id: string
+          profile_id: string
+          specialization: string | null
+          bio: string | null
+          achievements: string | null
+          show_on_website: boolean
+          display_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          specialization?: string | null
+          bio?: string | null
+          achievements?: string | null
+          show_on_website?: boolean
+          display_order?: number
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['coach_profiles']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: "coach_profiles_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       documents: {
         Row: { id: string; profile_id: string; type: 'waiver' | 'contract'; signed_at: string | null; content_url: string | null }
         Insert: Omit<Database['public']['Tables']['documents']['Row'], 'id'>
