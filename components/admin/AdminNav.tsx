@@ -88,7 +88,7 @@ function NavContent({ role, roleBadge, userName, pathname, onItemClick, onLogout
             {managementItems.map(({ href, label, Icon }) => {
               const active = isActive(href)
               return (
-                <Linkh
+                <Link
                   key={href}
                   href={href}
                   onClick={onItemClick}
