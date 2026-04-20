@@ -5,6 +5,10 @@
       "schedule": "0 10 * * *"
     },
     {
+      "path": "/api/cron/send-birthday-wishes",
+      "schedule": "30 9 * * *"
+    },
+    {
       "path": "/api/cron/send-monthly-reports",
       "schedule": "0 9 1 * *"
     }

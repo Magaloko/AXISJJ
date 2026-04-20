@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import { upsertCompetition, deleteCompetition, getMyCompetitions, type Competition } from '@/app/actions/competitions'
+import { ShareButton } from './ShareButton'
 
 const PLACEMENTS = ['1st', '2nd', '3rd', 'Top 4', 'DNP', 'Gold', 'Silber', 'Bronze']
 
@@ -169,6 +170,10 @@ export function CompetitionsWidget() {
                     </span>
                   )}
                   <div className="flex gap-2 text-[10px]">
+                    <ShareButton
+                      text={`${c.placement ? `${c.placement} bei ` : 'Teilnahme: '}${c.name}${c.location ? ` (${c.location})` : ''} — AXIS Jiu-Jitsu Vienna`}
+                      url="https://axisjj.vercel.app"
+                    />
                     <button onClick={() => startEdit(c)} className="text-muted-foreground hover:text-foreground">Bearbeiten</button>
                     <button onClick={() => handleDelete(c.id)} className="text-destructive hover:opacity-70">Löschen</button>
                   </div>

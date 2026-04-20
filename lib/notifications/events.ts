@@ -22,6 +22,7 @@ export type NotificationEvent =
   | { type: 'member.belt_promoted'; data: { memberName: string; memberEmail: string; fromBelt: string; toBelt: string } }
   | { type: 'trial.confirmation'; data: { fullName: string; email: string } }
   | { type: 'monthly.report'; data: { memberName: string; memberEmail: string; month: string; trainings: number; streak: number; avgMoodLift: number | null } }
+  | { type: 'birthday.wish'; data: { memberName: string; memberEmail: string; age: number } }
 
 export interface FormattedNotification {
   emailSubject: string
@@ -370,6 +371,38 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
           <p style="color:#999;font-size:12px">${escapeHtml(timeLine)}</p>
         </div>`,
         telegramMarkdown: buildTelegram('🎉', title, rows),
+        emailToOverride: memberEmail,
+      }
+    }
+    case 'birthday.wish': {
+      const { memberName, memberEmail, age } = event.data
+      const title = `Alles Gute zum ${age}. Geburtstag! 🎂`
+      return {
+        emailSubject: title,
+        emailText: buildEmailText(
+          `Hallo ${memberName}!`,
+          [
+            `alles Gute zum ${age}. Geburtstag!`,
+            '',
+            'Feier schön und bleib auf der Matte.',
+            '',
+            'Dein AXIS-Team',
+          ],
+          timeLine
+        ),
+        emailHtml: `<div style="font-family:system-ui;max-width:600px;margin:0 auto;color:#111">
+          <div style="background:#111;padding:24px 32px;margin-bottom:24px">
+            <h1 style="color:#fff;margin:0;font-size:22px;letter-spacing:2px">AXIS JIU-JITSU VIENNA</h1>
+            <p style="color:#888;margin:4px 0 0;font-size:13px">Herzlichen Glückwunsch</p>
+          </div>
+          <div style="padding:0 32px">
+            <h2 style="color:#e63946">🎂 Hey ${escapeHtml(memberName)}!</h2>
+            <p style="font-size:16px">Alles Gute zum <strong>${age}. Geburtstag</strong>!</p>
+            <p>Feier schön und bleib auf der Matte.</p>
+            <p style="color:#999;font-size:13px;margin-top:32px">Dein AXIS-Team 🥋</p>
+          </div>
+        </div>`,
+        telegramMarkdown: `🎂 *${escapeMdV2(title)}*\n${escapeMdV2('An: ' + memberName)}`,
         emailToOverride: memberEmail,
       }
     }

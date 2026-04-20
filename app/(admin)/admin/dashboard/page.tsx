@@ -13,6 +13,8 @@ import { RevenueWidget } from '@/components/admin/RevenueWidget'
 import { CoachTodaySchedule } from '@/components/admin/CoachTodaySchedule'
 import { MyStudentsWidget } from '@/components/admin/MyStudentsWidget'
 import { InactiveMembersWidget } from '@/components/admin/InactiveMembersWidget'
+import { BirthdaysWidget } from '@/components/admin/BirthdaysWidget'
+import { getUpcomingBirthdays } from '@/app/actions/birthdays'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard | Admin' }
@@ -22,10 +24,11 @@ export default async function AdminDashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [data, ownerInsights, coachInsights] = await Promise.all([
+  const [data, ownerInsights, coachInsights, birthdays] = await Promise.all([
     getAdminDashboard(),
     getOwnerInsights().catch(() => null),
     getCoachInsights().catch(() => null),
+    getUpcomingBirthdays(14).catch(() => []),
   ])
 
   if (data.error) {
@@ -176,6 +179,12 @@ export default async function AdminDashboardPage() {
             <TopClassesChart data={ownerInsights.topClasses} />
             <InactiveMembersWidget members={ownerInsights.inactiveMembers} />
           </div>
+
+          {birthdays.length > 0 && (
+            <div className="mt-6">
+              <BirthdaysWidget birthdays={birthdays} />
+            </div>
+          )}
         </>
       )}
 
