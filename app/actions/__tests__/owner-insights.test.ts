@@ -50,6 +50,10 @@ describe('getOwnerInsights', () => {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockResolvedValue({ count: 0, error: null }),
     }
+    const subsChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ data: [], error: null }),
+    }
     const memberListChain = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
@@ -68,8 +72,9 @@ describe('getOwnerInsights', () => {
       if (callCount === 2) return sessionsChain
       if (callCount === 3) return attendancesChain
       if (callCount === 4) return membersCountChain
-      if (callCount === 5) return memberListChain
-      if (callCount === 6) return recentAttChain
+      if (callCount === 5) return subsChain
+      if (callCount === 6) return memberListChain
+      if (callCount === 7) return recentAttChain
       return memberListChain
     })
 

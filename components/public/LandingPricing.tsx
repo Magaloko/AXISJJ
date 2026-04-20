@@ -9,7 +9,7 @@ import { Baby, CheckCheck, GraduationCap, Sparkles, Swords, type LucideIcon } fr
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRef, useState } from 'react'
-import { PRICING_PLANS, type PricingCategory, type PricingPlan, type PricingTier } from '@/lib/pricing'
+import { type PricingCategory, type PricingPlan, type PricingTier } from '@/lib/pricing'
 
 const CATEGORY_ICONS: Record<PricingCategory, LucideIcon> = {
   students: GraduationCap,
@@ -75,7 +75,9 @@ function tierFor(plan: PricingPlan, duration: Duration): PricingTier {
   return plan.tiers.find((t) => t.durationMonths === duration) ?? plan.tiers[0]
 }
 
-export function LandingPricing() {
+interface LandingPricingProps { plans: PricingPlan[] }
+
+export function LandingPricing({ plans: PRICING_PLANS }: LandingPricingProps) {
   const [duration, setDuration] = useState<Duration>(12)
   const pricingRef = useRef<HTMLDivElement>(null)
 

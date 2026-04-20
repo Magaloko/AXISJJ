@@ -6,6 +6,7 @@ import { ProgramsGrid } from '@/components/public/ProgramsGrid'
 import { LandingPricing } from '@/components/public/LandingPricing'
 import { TrialCTA } from '@/components/public/TrialCTA'
 import { createClient } from '@/lib/supabase/server'
+import { getPricingPlans } from '@/lib/pricing'
 import { startOfWeek, endOfWeek, addDays, format, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
 import type { Metadata } from 'next'
@@ -83,7 +84,10 @@ async function getWeekSchedule(): Promise<PublicDaySchedule[]> {
 }
 
 export default async function HomePage() {
-  const schedule = await getWeekSchedule()
+  const [schedule, pricingPlans] = await Promise.all([
+    getWeekSchedule(),
+    getPricingPlans(),
+  ])
 
   return (
     <>
@@ -91,7 +95,7 @@ export default async function HomePage() {
       <StatsBar />
       <CoachSection />
       <ProgramsGrid />
-      <LandingPricing />
+      <LandingPricing plans={pricingPlans} />
       <ScheduleWidget schedule={schedule} />
       <Hero />
     </>

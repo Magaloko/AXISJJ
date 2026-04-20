@@ -24,7 +24,6 @@ export default async function MitgliederPage() {
   const { data: profilesData, error: profilesError } = await supabase
     .from('profiles')
     .select('id, full_name, created_at, phone, date_of_birth, role')
-    .eq('role', 'member')
     .order('full_name', { ascending: true, nullsFirst: false })
 
   if (profilesError) {

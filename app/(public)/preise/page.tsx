@@ -1,11 +1,12 @@
 import Link from 'next/link'
-import { PRICING_PLANS } from '@/lib/pricing'
+import { getPricingPlans } from '@/lib/pricing'
 import { PricingCard } from '@/components/public/PricingCard'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Preise | AXIS Jiu-Jitsu' }
 
-export default function PreisePage() {
+export default async function PreisePage() {
+  const plans = await getPricingPlans()
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
       <h1 className="mb-2 text-3xl font-black text-foreground">Preise</h1>
@@ -14,7 +15,7 @@ export default function PreisePage() {
       </p>
 
       <div className="grid gap-6 md:grid-cols-3">
-        {PRICING_PLANS.map(plan => (
+        {plans.map(plan => (
           <PricingCard key={plan.category} plan={plan} />
         ))}
       </div>

@@ -41,7 +41,7 @@ export function RevenueWidget({ estimatedMonthlyRevenue, activeMembers, breakdow
       </div>
 
       <p className="mt-4 text-[10px] text-muted-foreground">
-        Schätzung basiert auf Mitglieder-Anzahl × Ø Tarif. Echte Zahlen verfügbar sobald Abos hinterlegt sind.
+        Basiert auf aktiven Abonnements. Bei {activeMembers} Mitgliedern, davon {breakdown.reduce((sum, b) => sum + b.members, 0)} mit aktivem Abo.
       </p>
     </div>
   )

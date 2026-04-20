@@ -264,6 +264,60 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['bot_users']['Insert']>
         Relationships: []
       }
+      pricing_plans: {
+        Row: {
+          id: string
+          category: 'students' | 'adults' | 'kids'
+          duration_months: number
+          price_per_month: number
+          total_price: number | null
+          highlighted: boolean
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          category: 'students' | 'adults' | 'kids'
+          duration_months: number
+          price_per_month: number
+          total_price?: number | null
+          highlighted?: boolean
+          updated_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['pricing_plans']['Insert']>
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          id: string
+          profile_id: string
+          category: 'students' | 'adults' | 'kids'
+          duration_months: number
+          price_per_month: number
+          start_date: string
+          end_date: string | null
+          status: 'active' | 'paused' | 'cancelled' | 'expired'
+          payment_method: 'sepa' | 'bar' | 'ueberweisung' | 'karte' | null
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          category: 'students' | 'adults' | 'kids'
+          duration_months: number
+          price_per_month: number
+          start_date?: string
+          end_date?: string | null
+          status?: 'active' | 'paused' | 'cancelled' | 'expired'
+          payment_method?: 'sepa' | 'bar' | 'ueberweisung' | 'karte' | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['subscriptions']['Insert']>
+        Relationships: []
+      }
       session_notes: {
         Row: {
           id: string

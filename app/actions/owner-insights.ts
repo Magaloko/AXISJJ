@@ -113,24 +113,34 @@ export async function getOwnerInsights(): Promise<OwnerInsights> {
     .sort((a, b) => b.attendances - a.attendances)
     .slice(0, 5)
 
-  // ── Revenue estimate ──
+  // ── Real revenue from active subscriptions ──
   const activeMembers = membersResult.count ?? 0
-  const avgPlanPrice = PRICING_PLANS.reduce((sum, plan) => {
-    const tier = plan.tiers.find(t => t.durationMonths === 12) ?? plan.tiers[0]
-    return sum + (tier?.pricePerMonth ?? 0)
-  }, 0) / (PRICING_PLANS.length || 1)
+  const { data: activeSubs } = await supabase
+    .from('subscriptions')
+    .select('category, price_per_month')
+    .eq('status', 'active')
 
-  const estimatedMonthlyRevenue = Math.round(activeMembers * avgPlanPrice)
-
-  const revenueBreakdown = PRICING_PLANS.map(plan => {
-    const tier = plan.tiers.find(t => t.durationMonths === 12) ?? plan.tiers[0]
-    const estMembers = Math.round(activeMembers / PRICING_PLANS.length)
-    return {
-      category: plan.category,
-      members: estMembers,
-      revenue: Math.round(estMembers * (tier?.pricePerMonth ?? 0)),
+  let estimatedMonthlyRevenue = 0
+  const revenueByCat: Record<string, { members: number; revenue: number }> = {
+    students: { members: 0, revenue: 0 },
+    adults:   { members: 0, revenue: 0 },
+    kids:     { members: 0, revenue: 0 },
+  }
+  for (const s of activeSubs ?? []) {
+    const price = Number(s.price_per_month)
+    estimatedMonthlyRevenue += price
+    if (revenueByCat[s.category]) {
+      revenueByCat[s.category].members += 1
+      revenueByCat[s.category].revenue += price
     }
-  })
+  }
+  estimatedMonthlyRevenue = Math.round(estimatedMonthlyRevenue)
+
+  const revenueBreakdown = PRICING_PLANS.map(plan => ({
+    category: plan.category,
+    members: revenueByCat[plan.category]?.members ?? 0,
+    revenue: Math.round(revenueByCat[plan.category]?.revenue ?? 0),
+  }))
 
   // ── Inactive members — no training in last 30 days ──
   const thirtyDaysAgoIso = thirtyDaysAgo.toISOString()

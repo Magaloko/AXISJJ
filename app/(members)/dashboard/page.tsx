@@ -13,6 +13,7 @@ import { TrainingLogButton } from '@/components/members/TrainingLogButton'
 import { CompetitionsWidget } from '@/components/members/CompetitionsWidget'
 import { LeaderboardWidget } from '@/components/members/LeaderboardWidget'
 import { TrainingPartnersWidget } from '@/components/members/TrainingPartnersWidget'
+import { MySubscriptionCard } from '@/components/members/MySubscriptionCard'
 import { calcReadiness } from '@/lib/utils/belt'
 import { differenceInMonths } from 'date-fns'
 import { translations } from '@/lib/i18n'
@@ -191,6 +192,9 @@ export default async function DashboardPage() {
             monthsInGrade={monthsInGrade}
             lang={lang}
           />
+        </div>
+        <div>
+          <MySubscriptionCard />
         </div>
         <div className="lg:col-span-2">
           <LeaderboardWidget />
