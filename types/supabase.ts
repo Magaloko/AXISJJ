@@ -379,7 +379,17 @@ export interface Database {
         Relationships: []
       }
     }
-    Views: { [_ in never]: never }
+    Views: {
+      public_coaches: {
+        Row: {
+          id: string
+          full_name: string
+          role: 'coach' | 'owner'
+          avatar_url: string | null
+        }
+        Relationships: []
+      }
+    }
     Functions: {
       get_my_role: { Args: Record<PropertyKey, never>; Returns: string }
       book_class: {

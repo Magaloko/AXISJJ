@@ -21,17 +21,33 @@ async function getWeekSchedule(): Promise<PublicDaySchedule[]> {
   const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 })
   const weekEnd   = endOfWeek(weekStart, { weekStartsOn: 1 })
 
+  // Fetch sessions + class_types without joining profiles (RLS-safe).
+  // Coach names come from a separate public_coaches VIEW that exposes ONLY
+  // name + avatar (no email/phone) to unauthenticated users.
   const { data } = await supabase
     .from('class_sessions')
     .select(`
       id, starts_at, ends_at, coach_id,
-      class_types(name, level, gi),
-      profiles!class_sessions_coach_id_fkey(full_name)
+      class_types(name, level, gi)
     `)
     .eq('cancelled', false)
     .gte('starts_at', weekStart.toISOString())
     .lte('starts_at', weekEnd.toISOString())
     .order('starts_at', { ascending: true })
+
+  const coachIds = Array.from(
+    new Set((data ?? []).map(s => s.coach_id).filter((id): id is string => !!id))
+  )
+  const coachNameById = new Map<string, string>()
+  if (coachIds.length > 0) {
+    const { data: coaches } = await supabase
+      .from('public_coaches')
+      .select('id, full_name')
+      .in('id', coachIds)
+    for (const c of coaches ?? []) {
+      if (c.full_name) coachNameById.set(c.id, c.full_name)
+    }
+  }
 
   const days: PublicDaySchedule[] = Array.from({ length: 7 }, (_, i) => {
     const day = addDays(weekStart, i)
@@ -50,7 +66,7 @@ async function getWeekSchedule(): Promise<PublicDaySchedule[]> {
     if (dayIndex < 0 || dayIndex > 6) continue
 
     const classType = Array.isArray(s.class_types) ? s.class_types[0] : s.class_types
-    const coachProfile = Array.isArray(s.profiles) ? s.profiles[0] : s.profiles
+    const coachName = s.coach_id ? coachNameById.get(s.coach_id) : null
 
     days[dayIndex].sessions.push({
       id:      s.id,
@@ -59,7 +75,7 @@ async function getWeekSchedule(): Promise<PublicDaySchedule[]> {
       endTime: format(parseISO(s.ends_at), 'HH:mm'),
       level:   (classType?.level ?? 'all') as PublicDaySchedule['sessions'][number]['level'],
       gi:      classType?.gi ?? true,
-      trainer: coachProfile?.full_name ?? 'AXIS Coach',
+      trainer: coachName ?? 'AXIS Coach',
     })
   }
 
