@@ -99,6 +99,11 @@ describe('getOwnerInsights', () => {
 })
 
 describe('getOwnerInsights — new metrics', () => {
+  beforeEach(() => {
+    vi.resetAllMocks()
+    mockSupabase.auth.getUser.mockResolvedValue({ data: { user: { id: 'owner-1' } }, error: null })
+  })
+
   function makeOwnerChain() {
     return {
       select: vi.fn().mockReturnThis(),
