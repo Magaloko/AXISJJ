@@ -264,6 +264,32 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['bot_users']['Insert']>
         Relationships: []
       }
+      competitions: {
+        Row: {
+          id: string
+          profile_id: string
+          name: string
+          date: string
+          location: string | null
+          category: string | null
+          placement: string | null
+          notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          name: string
+          date: string
+          location?: string | null
+          category?: string | null
+          placement?: string | null
+          notes?: string | null
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['competitions']['Insert']>
+        Relationships: []
+      }
       coach_notes: {
         Row: {
           id: string

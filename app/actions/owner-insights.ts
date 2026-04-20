@@ -16,12 +16,20 @@ export interface TopClass {
   attendances: number
 }
 
+export interface InactiveMember {
+  profileId: string
+  fullName: string
+  email: string
+  daysSinceLastVisit: number | null  // null if never visited
+}
+
 export interface OwnerInsights {
   utilizationTrend: UtilizationWeek[]
   topClasses: TopClass[]
   estimatedMonthlyRevenue: number
   activeMembers: number
   revenueBreakdown: { category: string; members: number; revenue: number }[]
+  inactiveMembers: InactiveMember[]
   error?: string
 }
 
@@ -29,6 +37,7 @@ export async function getOwnerInsights(): Promise<OwnerInsights> {
   const empty: OwnerInsights = {
     utilizationTrend: [], topClasses: [],
     estimatedMonthlyRevenue: 0, activeMembers: 0, revenueBreakdown: [],
+    inactiveMembers: [],
   }
 
   const auth = await assertOwner()
@@ -123,11 +132,72 @@ export async function getOwnerInsights(): Promise<OwnerInsights> {
     }
   })
 
+  // ── Inactive members — no training in last 30 days ──
+  const thirtyDaysAgoIso = thirtyDaysAgo.toISOString()
+  const [memberListResult, recentAttendancesResult] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('id, full_name, email')
+      .eq('role', 'member')
+      .order('full_name', { ascending: true, nullsFirst: false }),
+    supabase
+      .from('attendances')
+      .select('profile_id, checked_in_at')
+      .gte('checked_in_at', thirtyDaysAgoIso)
+      .order('checked_in_at', { ascending: false }),
+  ])
+
+  const activeMemberIds = new Set(
+    (recentAttendancesResult.data ?? []).map(a => a.profile_id)
+  )
+
+  // For inactive members, fetch their ALL-TIME last attendance to show "X days ago"
+  const inactiveIds = (memberListResult.data ?? [])
+    .filter(m => !activeMemberIds.has(m.id))
+    .map(m => m.id)
+
+  const lastSeenMap = new Map<string, string>()
+  if (inactiveIds.length > 0) {
+    const { data: lastSeenData } = await supabase
+      .from('attendances')
+      .select('profile_id, checked_in_at')
+      .in('profile_id', inactiveIds)
+      .order('checked_in_at', { ascending: false })
+    for (const a of lastSeenData ?? []) {
+      if (!lastSeenMap.has(a.profile_id)) {
+        lastSeenMap.set(a.profile_id, a.checked_in_at)
+      }
+    }
+  }
+
+  const nowMs = now.getTime()
+  const inactiveMembers: InactiveMember[] = (memberListResult.data ?? [])
+    .filter(m => !activeMemberIds.has(m.id))
+    .map(m => {
+      const lastIso = lastSeenMap.get(m.id) ?? null
+      const daysSinceLastVisit = lastIso
+        ? Math.floor((nowMs - new Date(lastIso).getTime()) / (1000 * 60 * 60 * 24))
+        : null
+      return {
+        profileId: m.id,
+        fullName: m.full_name ?? 'Unbekannt',
+        email: m.email,
+        daysSinceLastVisit,
+      }
+    })
+    .sort((a, b) => {
+      if (a.daysSinceLastVisit === null) return 1
+      if (b.daysSinceLastVisit === null) return -1
+      return a.daysSinceLastVisit - b.daysSinceLastVisit
+    })
+    .slice(0, 20)
+
   return {
     utilizationTrend,
     topClasses,
     estimatedMonthlyRevenue,
     activeMembers,
     revenueBreakdown,
+    inactiveMembers,
   }
 }

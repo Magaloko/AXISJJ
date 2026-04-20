@@ -53,6 +53,15 @@ export async function submitTrialLead(
       source: 'website',
     },
   }))
+
+  // Auto-confirmation email to the prospect
+  waitUntil(notify({
+    type: 'trial.confirmation',
+    data: {
+      fullName: parsed.data.full_name,
+      email: parsed.data.email,
+    },
+  }))
   return { success: true }
 }
 

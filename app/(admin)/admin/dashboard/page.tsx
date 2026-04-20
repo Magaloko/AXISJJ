@@ -12,6 +12,7 @@ import { TopClassesChart } from '@/components/admin/TopClassesChart'
 import { RevenueWidget } from '@/components/admin/RevenueWidget'
 import { CoachTodaySchedule } from '@/components/admin/CoachTodaySchedule'
 import { MyStudentsWidget } from '@/components/admin/MyStudentsWidget'
+import { InactiveMembersWidget } from '@/components/admin/InactiveMembersWidget'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard | Admin' }
@@ -171,8 +172,9 @@ export default async function AdminDashboardPage() {
             />
           </div>
 
-          <div className="mt-6">
+          <div className="mt-6 grid gap-6 lg:grid-cols-2">
             <TopClassesChart data={ownerInsights.topClasses} />
+            <InactiveMembersWidget members={ownerInsights.inactiveMembers} />
           </div>
         </>
       )}

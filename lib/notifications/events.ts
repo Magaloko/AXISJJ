@@ -20,6 +20,7 @@ export type NotificationEvent =
   | { type: 'waitlist.promoted'; data: { memberName: string; memberEmail: string; className: string; startsAt: string } }
   | { type: 'training.reminder'; data: { memberName: string; memberEmail: string; className: string; startsAt: string; location: string | null } }
   | { type: 'member.belt_promoted'; data: { memberName: string; memberEmail: string; fromBelt: string; toBelt: string } }
+  | { type: 'trial.confirmation'; data: { fullName: string; email: string } }
 
 export interface FormattedNotification {
   emailSubject: string
@@ -369,6 +370,64 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         </div>`,
         telegramMarkdown: buildTelegram('🎉', title, rows),
         emailToOverride: memberEmail,
+      }
+    }
+    case 'trial.confirmation': {
+      const { fullName, email } = event.data
+      const title = 'Danke für deine Anmeldung!'
+      return {
+        emailSubject: 'AXIS Jiu-Jitsu — Deine Probetraining-Anmeldung ist eingegangen',
+        emailText: buildEmailText(
+          `Hallo ${fullName}!`,
+          [
+            'deine kostenlose Probetrainings-Woche ist bei uns angekommen.',
+            '',
+            'Nächste Schritte:',
+            '1. Wir melden uns innerhalb von 24 Stunden zurück',
+            '2. Wir fixieren gemeinsam deinen ersten Termin',
+            '3. Komm einfach in Trainingskleidung — Matten-Equipment kannst du bei uns leihen',
+            '',
+            'Trainingszeiten: axisjj.vercel.app/#trainingsplan',
+            'Ort: Strindberggasse 1/R01, 1110 Wien',
+            'Kontakt: office@axisjj.at',
+            '',
+            'Bis bald auf der Matte!',
+            '',
+            'Axis Jiu-Jitsu Vienna',
+          ],
+          timeLine
+        ),
+        emailHtml: `<div style="font-family:system-ui;max-width:600px;margin:0 auto;color:#111">
+          <div style="background:#111;padding:24px 32px;margin-bottom:24px">
+            <h1 style="color:#fff;margin:0;font-size:22px;letter-spacing:2px">AXIS JIU-JITSU VIENNA</h1>
+            <p style="color:#888;margin:4px 0 0;font-size:13px">Probetraining-Bestätigung</p>
+          </div>
+          <div style="padding:0 32px">
+            <h2 style="color:#e63946">Danke ${escapeHtml(fullName)}! 🥋</h2>
+            <p>deine kostenlose Probetrainings-Woche ist bei uns angekommen.</p>
+
+            <h3 style="margin-top:24px;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:#555">Nächste Schritte</h3>
+            <ol style="padding-left:20px;line-height:1.7">
+              <li>Wir melden uns <strong>innerhalb von 24 Stunden</strong> zurück</li>
+              <li>Wir fixieren gemeinsam deinen ersten Termin</li>
+              <li>Komm in Trainingskleidung — Equipment stellen wir</li>
+            </ol>
+
+            <div style="background:#f5f5f5;border-left:3px solid #e63946;padding:16px 20px;margin:20px 0;font-size:14px">
+              <p style="margin:0 0 8px"><strong>📍 Ort:</strong> Strindberggasse 1/R01, 1110 Wien</p>
+              <p style="margin:0 0 8px"><strong>📞 Kontakt:</strong> office@axisjj.at</p>
+              <p style="margin:0"><strong>🕐 Trainingszeiten:</strong> <a href="https://axisjj.vercel.app/#trainingsplan" style="color:#e63946">axisjj.vercel.app</a></p>
+            </div>
+
+            <p>Bis bald auf der Matte!</p>
+            <p style="color:#999;font-size:13px;margin-top:32px">Dein AXIS-Team</p>
+          </div>
+          <div style="margin-top:32px;padding:16px 32px;background:#f5f5f5;font-size:11px;color:#999;text-align:center">
+            Du hast diese E-Mail erhalten weil du dich auf axisjj.vercel.app/trial angemeldet hast.
+          </div>
+        </div>`,
+        telegramMarkdown: `🥋 *${escapeMdV2(title)}*\n${escapeMdV2('An: ' + fullName)}`,
+        emailToOverride: email,
       }
     }
     case 'member.belt_promoted': {

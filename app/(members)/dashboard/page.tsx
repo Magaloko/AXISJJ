@@ -10,6 +10,7 @@ import { MoodTrendChart } from '@/components/members/MoodTrendChart'
 import { SkillRadarChart } from '@/components/members/SkillRadarChart'
 import { MotivationWidget } from '@/components/members/MotivationWidget'
 import { TrainingLogButton } from '@/components/members/TrainingLogButton'
+import { CompetitionsWidget } from '@/components/members/CompetitionsWidget'
 import { calcReadiness } from '@/lib/utils/belt'
 import { differenceInMonths } from 'date-fns'
 import { translations } from '@/lib/i18n'
@@ -188,6 +189,9 @@ export default async function DashboardPage() {
             monthsInGrade={monthsInGrade}
             lang={lang}
           />
+        </div>
+        <div className="sm:col-span-2 lg:col-span-3">
+          <CompetitionsWidget />
         </div>
         <div className="sm:col-span-2 lg:col-span-3">
           <MemberQRCode profileId={userId} />
