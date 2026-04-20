@@ -1,12 +1,12 @@
 #!/usr/bin/env tsx
 /**
  * Migrates German blog markdown files from content/blog/*.md into the
- * Supabase blog_posts table. Run once to seed the database; safe to re-run
- * (truncates blog_posts first).
+ * Supabase blog_posts table. Safe to re-run — uses UPSERT on slug so
+ * existing rows (e.g. translated posts) are preserved / updated in place.
  *
  * Required env vars (via .env.local or shell):
  *   NEXT_PUBLIC_SUPABASE_URL
- *   SUPABASE_SERVICE_ROLE_KEY   - service role, bypasses RLS (NEVER commit)
+ *   SUPABASE_SERVICE_ROLE_KEY   - service role, bypasses RLS (never commit)
  *
  * Usage:
  *   npx tsx scripts/migrate-md-to-supabase.ts
@@ -22,7 +22,7 @@ import { createClient } from '@supabase/supabase-js'
 config({ path: '.env.local' })
 config()
 
-const DRY = process.argv.includes('--dry-run')
+const dry = process.argv.includes('--dry-run')
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -65,22 +65,22 @@ function readingTime(body: string): number {
 
 function deriveTags(slug: string, zielgruppe: string, typ: string): string[] {
   const tags = new Set<string>()
-  for (const z of zielgruppe.split(/[,;]/).map(s => s.trim()).filter(Boolean)) {
+  for (const z of zielgruppe.split(/[,/]/).map((s) => s.trim()).filter(Boolean)) {
     tags.add(z)
   }
-  if (/kinder/.test(slug)) tags.add('kinder')
-  if (/frauen/.test(slug)) tags.add('frauen')
-  if (/wien/.test(slug)) tags.add('wien')
-  if (/einsteiger|anfaenger|erstes/.test(slug)) tags.add('einsteiger')
-  if (/gurt|weissgurt|blaugurt/.test(slug)) tags.add('guertel')
-  if (/preis|mitglied/.test(slug)) tags.add('preise')
-  if (/coach|trainer/.test(slug)) tags.add('team')
+  if (/kinder/.test(slug)) tags.add('Kinder')
+  if (/frauen/.test(slug)) tags.add('Frauen')
+  if (/wien/.test(slug)) tags.add('Wien')
+  if (/einsteiger|anfaenger|erstes/.test(slug)) tags.add('Einsteiger')
+  if (/gurt|weissgurt|blaugurt/.test(slug)) tags.add('Guertel')
+  if (/preis|mitglied/.test(slug)) tags.add('Preise')
+  if (/coach|trainer/.test(slug)) tags.add('Team')
   tags.add(typ.replace(/-artikel$/, '').replace(/-/g, ' '))
   return Array.from(tags).slice(0, 5)
 }
 
 async function main() {
-  const files = (await fs.readdir(BLOG_DIR)).filter(f => f.endsWith('.md'))
+  const files = (await fs.readdir(BLOG_DIR)).filter((f) => f.endsWith('.md'))
   console.log(`Found ${files.length} markdown files in ${BLOG_DIR}`)
 
   const rows = await Promise.all(
@@ -107,7 +107,7 @@ async function main() {
         published: true,
         published_at: new Date(datum + 'T10:00:00Z').toISOString(),
       }
-    })
+    }),
   )
 
   console.log('Prepared rows:')
@@ -115,7 +115,7 @@ async function main() {
     console.log(`  ${r.slug.padEnd(40)} [${r.category}] ${r.reading_time_min}min  tags=${JSON.stringify(r.tags)}`)
   }
 
-  if (DRY) {
+  if (dry) {
     console.log('\n--dry-run: no database writes made.')
     return
   }
@@ -124,28 +124,18 @@ async function main() {
     auth: { persistSession: false, autoRefreshToken: false },
   })
 
-  console.log('\nDeleting all existing rows from blog_posts ...')
-  const { error: delErr } = await supabase
+  console.log(`\nUpserting ${rows.length} German articles (onConflict=slug) ...`)
+  const { error: upErr, data: upserted } = await supabase
     .from('blog_posts')
-    .delete()
-    .not('id', 'is', null)
-  if (delErr) {
-    console.error('Delete failed:', delErr)
-    process.exit(1)
-  }
-
-  console.log(`Inserting ${rows.length} German articles ...`)
-  const { error: insErr, data: inserted } = await supabase
-    .from('blog_posts')
-    .insert(rows)
+    .upsert(rows, { onConflict: 'slug' })
     .select('slug')
-  if (insErr) {
-    console.error('Insert failed:', insErr)
+  if (upErr) {
+    console.error('Upsert failed:', upErr)
     process.exit(1)
   }
 
-  console.log(`OK — inserted ${inserted?.length ?? 0} posts:`)
-  for (const p of inserted ?? []) console.log('  ' + p.slug)
+  console.log(`OK — upserted ${upserted?.length ?? 0} posts:`)
+  for (const p of upserted ?? []) console.log('  ' + p.slug)
 }
 
 main().catch((e) => {
