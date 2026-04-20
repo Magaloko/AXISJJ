@@ -7,7 +7,7 @@ import {
   ClipboardList, Settings, LogOut, Building2, ScrollText,
   BookOpen, MonitorPlay, FileText, GraduationCap, MoreHorizontal, X,
 } from 'lucide-react'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { createClient } from '@/lib/supabase/client'
 
@@ -169,7 +169,6 @@ interface BottomBarProps {
   role: Role
   pathname: string
   onMoreClick: () => void
-  onLogout: () => void
 }
 
 function BottomBar({ role, pathname, onMoreClick }: BottomBarProps) {
@@ -216,6 +215,14 @@ interface MoreSheetProps {
 }
 
 function MoreSheet({ pathname, onClose, onLogout }: MoreSheetProps) {
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [onClose])
+
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(href + '/')
   }
@@ -223,7 +230,7 @@ function MoreSheet({ pathname, onClose, onLogout }: MoreSheetProps) {
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="absolute bottom-0 left-0 right-0 rounded-t-2xl border-t border-border bg-card pb-safe">
+      <div className="absolute bottom-0 left-0 right-0 rounded-t-2xl border-t border-border bg-card pb-6">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <span className="text-sm font-bold text-foreground">Mehr</span>
           <button onClick={onClose} className="p-1 text-muted-foreground">
@@ -298,7 +305,6 @@ export function AdminNav({ role, userName }: Props) {
         role={role}
         pathname={pathname}
         onMoreClick={() => setMoreOpen(true)}
-        onLogout={handleLogout}
       />
 
       {/* Owner "Mehr" sheet */}
