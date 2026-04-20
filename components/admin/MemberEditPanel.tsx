@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { updateMember } from '@/app/actions/members'
+import { getCoachProfile, upsertCoachProfile } from '@/app/actions/coach-profile-admin'
 import { useRouter } from 'next/navigation'
 import { CoachNotesPanel } from './CoachNotesPanel'
 import { MemberCompetitionsView } from './MemberCompetitionsView'
@@ -30,9 +31,50 @@ export function MemberEditPanel({ member, viewerRole, onClose }: Props) {
     date_of_birth: member.date_of_birth ?? '',
   })
   const [error, setError] = useState<string | null>(null)
+  const [coachForm, setCoachForm] = useState({
+    specialization: '',
+    bio: '',
+    achievements: '',
+    showOnWebsite: false,
+    displayOrder: 99,
+  })
+  const [coachSaveError, setCoachSaveError] = useState<string | null>(null)
+  const [coachSaved, setCoachSaved] = useState(false)
+  const [isCoachPending, startCoachTransition] = useTransition()
+  const isCoach = member.role === 'coach' || member.role === 'owner'
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
   const readOnly = viewerRole !== 'owner'
+
+  useEffect(() => {
+    if (!isCoach || readOnly) return
+    getCoachProfile(member.id).then(profile => {
+      if (!profile) return
+      setCoachForm({
+        specialization: profile.specialization ?? '',
+        bio: profile.bio ?? '',
+        achievements: profile.achievements ?? '',
+        showOnWebsite: profile.showOnWebsite,
+        displayOrder: profile.displayOrder,
+      })
+    })
+  }, [member.id, isCoach, readOnly])
+
+  function saveCoachProfile() {
+    setCoachSaveError(null)
+    setCoachSaved(false)
+    startCoachTransition(async () => {
+      const result = await upsertCoachProfile(member.id, {
+        specialization: coachForm.specialization || null,
+        bio: coachForm.bio || null,
+        achievements: coachForm.achievements || null,
+        showOnWebsite: coachForm.showOnWebsite,
+        displayOrder: coachForm.displayOrder,
+      })
+      if (result.error) { setCoachSaveError(result.error); return }
+      setCoachSaved(true)
+    })
+  }
 
   function save() {
     setError(null)
@@ -109,6 +151,79 @@ export function MemberEditPanel({ member, viewerRole, onClose }: Props) {
       <div className="mt-6 border-t border-border pt-6">
         <CoachNotesPanel profileId={member.id} />
       </div>
+
+      {isCoach && !readOnly && (
+        <div className="mt-6 border-t border-border pt-6">
+          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            Website-Profil
+          </p>
+          {coachSaveError && <p className="mb-3 text-xs text-destructive">{coachSaveError}</p>}
+          {coachSaved && <p className="mb-3 text-xs text-primary">Gespeichert.</p>}
+
+          <div className="space-y-3">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={coachForm.showOnWebsite}
+                onChange={e => setCoachForm({ ...coachForm, showOnWebsite: e.target.checked })}
+                className="h-4 w-4"
+              />
+              <span className="text-sm">Auf Landing Page anzeigen</span>
+            </label>
+
+            <div>
+              <label className="mb-1 block text-xs text-muted-foreground">Spezialisierung</label>
+              <input
+                className="w-full border border-border bg-background p-2 text-sm"
+                placeholder="z.B. Gi & No-Gi · Head Coach"
+                value={coachForm.specialization}
+                onChange={e => setCoachForm({ ...coachForm, specialization: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs text-muted-foreground">Bio</label>
+              <textarea
+                className="w-full border border-border bg-background p-2 text-sm resize-none"
+                rows={3}
+                value={coachForm.bio}
+                onChange={e => setCoachForm({ ...coachForm, bio: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs text-muted-foreground">Erfolge</label>
+              <textarea
+                className="w-full border border-border bg-background p-2 text-sm resize-none"
+                rows={2}
+                placeholder="z.B. IBJJF European Silver · Österreichischer Champion"
+                value={coachForm.achievements}
+                onChange={e => setCoachForm({ ...coachForm, achievements: e.target.value })}
+              />
+            </div>
+
+            <div>
+              <label className="mb-1 block text-xs text-muted-foreground">Reihenfolge (1 = zuerst)</label>
+              <input
+                type="number"
+                min={1}
+                max={99}
+                className="w-24 border border-border bg-background p-2 text-sm"
+                value={coachForm.displayOrder}
+                onChange={e => setCoachForm({ ...coachForm, displayOrder: Number(e.target.value) || 99 })}
+              />
+            </div>
+
+            <button
+              onClick={saveCoachProfile}
+              disabled={isCoachPending}
+              className="bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-50"
+            >
+              {isCoachPending ? 'Speichern…' : 'Website-Profil speichern'}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
