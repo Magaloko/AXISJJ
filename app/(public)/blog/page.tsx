@@ -7,7 +7,7 @@ import { BlogPostCard } from '@/components/public/BlogPostCard'
 
 export const metadata: Metadata = {
   title: 'BJJ Blog | AXIS JIU JITSU',
-  description: 'Techniques, rules, history, and more — everything you need to know about Brazilian Jiu-Jitsu.',
+  description: 'Techniken, Regeln, Geschichte und mehr — alles, was du über Brazilian Jiu-Jitsu wissen musst.',
 }
 
 interface Props {
@@ -16,7 +16,7 @@ interface Props {
 
 export default async function BlogPage({ searchParams }: Props) {
   const { category } = await searchParams
-  const activeCategory = category ?? 'All'
+  const activeCategory = category ?? 'Alle'
 
   const [featured, posts] = await Promise.all([
     getFeaturedPost(),
