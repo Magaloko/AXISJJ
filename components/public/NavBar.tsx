@@ -18,7 +18,7 @@ export function NavBar() {
   const [open, setOpen] = useState(false)
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b border-border bg-white/95 backdrop-blur-md">
+    <nav className="fixed top-0 z-50 w-full border-b border-white/10 bg-black/95 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <Link href="/" aria-label="AXIS JIU JITSU — Zur Startseite">
           <Image
@@ -36,14 +36,14 @@ export function NavBar() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="text-sm text-white/70 transition-colors hover:text-white"
             >
               {link.label}
             </Link>
           ))}
           <Link
             href="/login"
-            className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="text-sm text-white/70 transition-colors hover:text-white"
           >
             Login
           </Link>
@@ -56,7 +56,7 @@ export function NavBar() {
         </div>
 
         <button
-          className="text-muted-foreground md:hidden"
+          className="text-white/70 md:hidden"
           onClick={() => setOpen(v => !v)}
           aria-label="Toggle menu"
           aria-expanded={open}
@@ -69,7 +69,7 @@ export function NavBar() {
         aria-hidden={!open}
         className={
           open
-            ? 'block border-t border-border bg-white px-4 py-4 md:hidden'
+            ? 'block border-t border-white/10 bg-black px-4 py-4 md:hidden'
             : 'hidden'
         }
       >
@@ -78,7 +78,7 @@ export function NavBar() {
             <Link
               key={link.href}
               href={link.href}
-              className="text-sm text-muted-foreground"
+              className="text-sm text-white/70"
               onClick={() => setOpen(false)}
             >
               {link.label}
@@ -86,7 +86,7 @@ export function NavBar() {
           ))}
           <Link
             href="/login"
-            className="text-sm text-muted-foreground"
+            className="text-sm text-white/70"
             onClick={() => setOpen(false)}
           >
             Login
