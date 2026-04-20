@@ -19,8 +19,9 @@ function navItems(lang: Lang): NavItem[] {
   return [
     { href: '/dashboard',     label: t.dashboard, Icon: LayoutDashboard },
     { href: '/buchen',        label: t.buchen,    Icon: Calendar },
-    { href: '/mein-training', label: 'Training',  Icon: GraduationCap },
-    { href: '/bjj-rules',     label: 'BJJ Regeln', Icon: Scale },
+    { href: '/mein-training',      label: 'Training',   Icon: GraduationCap },
+    { href: '/dashboard/turniere', label: 'Turniere',   Icon: Trophy },
+    { href: '/bjj-rules',          label: 'BJJ Regeln', Icon: Scale },
     { href: '/leaderboard',   label: 'Leaderboard', Icon: Trophy },
     { href: '/gurtel',        label: t.gurtel,    Icon: Award },
     { href: '/skills',        label: t.skills,    Icon: BookOpen },

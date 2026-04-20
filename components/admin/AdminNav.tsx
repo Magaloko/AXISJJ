@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, CheckSquare, CalendarDays, Users, Award,
   ClipboardList, Settings, LogOut, Building2, ScrollText,
-  BookOpen, MonitorPlay, FileText, GraduationCap, MoreHorizontal, X,
+  BookOpen, MonitorPlay, FileText, GraduationCap, MoreHorizontal, X, Trophy,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils/cn'
@@ -25,6 +25,7 @@ const opsItems: NavItem[] = [
   { href: '/admin/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
   { href: '/admin/checkin',   label: 'Check-In',  Icon: CheckSquare },
   { href: '/admin/klassen',   label: 'Training',  Icon: CalendarDays },
+  { href: '/admin/turniere',  label: 'Turniere',  Icon: Trophy },
 ]
 
 const mitgliederItems: NavItem[] = [
@@ -52,10 +53,10 @@ const systemItems: NavItem[] = [
 // ── Mobile bottom tabs ───────────────────────────────────────────────────────
 
 const coachBottomTabs: NavItem[] = [
-  { href: '/admin/dashboard',  label: 'Dashboard', Icon: LayoutDashboard },
-  { href: '/admin/checkin',    label: 'Check-In',  Icon: CheckSquare },
-  { href: '/admin/klassen',    label: 'Training',  Icon: CalendarDays },
-  { href: '/admin/mitglieder', label: 'Schüler',   Icon: Users },
+  { href: '/admin/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
+  { href: '/admin/checkin',   label: 'Check-In',  Icon: CheckSquare },
+  { href: '/admin/klassen',   label: 'Training',  Icon: CalendarDays },
+  { href: '/admin/turniere',  label: 'Turniere',  Icon: Trophy },
 ]
 
 const ownerBottomTabs: NavItem[] = [
@@ -66,6 +67,7 @@ const ownerBottomTabs: NavItem[] = [
 ]
 
 const ownerMoreItems: NavItem[] = [
+  { href: '/admin/turniere', label: 'Turniere', Icon: Trophy },
   ...mitgliederItems.filter(i => i.href !== '/admin/mitglieder'),
   ...contentItems,
   ...systemItems,
