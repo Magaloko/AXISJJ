@@ -6,6 +6,7 @@ import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
 import { assertStaff } from '@/lib/auth'
 import { sessionFormSchema } from './sessions.schema'
+import { z } from 'zod'
 
 export type SessionFormData = {
   id?: string
@@ -109,4 +110,66 @@ export async function cancelSession(
   }
 
   return { success: true }
+}
+
+// ────────── Recurring / bulk-create ──────────
+
+const recurringSchema = z.object({
+  class_type_id: z.string().uuid('Ungültiger Klassentyp'),
+  coach_id:      z.string().uuid().nullable().optional(),
+  start_date:    z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ungültiges Startdatum'),
+  end_date:      z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ungültiges Enddatum'),
+  start_time:    z.string().regex(/^\d{2}:\d{2}$/, 'Ungültige Startzeit'),
+  end_time:      z.string().regex(/^\d{2}:\d{2}$/, 'Ungültige Endzeit'),
+  weekdays:      z.array(z.number().int().min(0).max(6)).min(1, 'Mindestens einen Wochentag auswählen'),
+  capacity:      z.number().int().min(1).max(200),
+  location:      z.string().min(1).max(200),
+})
+
+export type RecurringSessionInput = z.infer<typeof recurringSchema>
+
+export async function createRecurringSessions(
+  data: RecurringSessionInput,
+): Promise<{ success?: true; count?: number; error?: string }> {
+  const parsed = recurringSchema.safeParse(data)
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Ungültige Eingabe.' }
+  if (parsed.data.start_date > parsed.data.end_date) return { error: 'Enddatum muss nach Startdatum liegen.' }
+  if (parsed.data.start_time >= parsed.data.end_time) return { error: 'Endzeit muss nach Startzeit liegen.' }
+
+  const auth = await assertStaff()
+  if ('error' in auth) return { error: auth.error }
+
+  const supabase = await createClient()
+
+  // Generate all target dates between start_date and end_date on matching weekdays
+  const start = new Date(parsed.data.start_date + 'T00:00:00')
+  const end   = new Date(parsed.data.end_date + 'T00:00:00')
+  const weekdaySet = new Set(parsed.data.weekdays)
+  const dates: string[] = []
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+    if (weekdaySet.has(d.getDay())) dates.push(d.toISOString().slice(0, 10))
+  }
+
+  if (dates.length === 0) return { error: 'Keine passenden Tage im angegebenen Zeitraum.' }
+  if (dates.length > 200) return { error: 'Zu viele Sessions (>200). Bitte Zeitraum kürzen.' }
+
+  const groupId = crypto.randomUUID()
+  const rows = dates.map(date => ({
+    class_type_id: parsed.data.class_type_id,
+    coach_id:      parsed.data.coach_id ?? null,
+    starts_at:     `${date}T${parsed.data.start_time}:00`,
+    ends_at:       `${date}T${parsed.data.end_time}:00`,
+    capacity:      parsed.data.capacity,
+    location:      parsed.data.location,
+    recurring_group_id: groupId,
+  }))
+
+  const { error } = await supabase.from('class_sessions').insert(rows)
+  if (error) {
+    console.error('[sessions] createRecurring error:', error)
+    return { error: `Erstellen fehlgeschlagen: ${error.message}` }
+  }
+
+  revalidatePath('/admin/klassen')
+  return { success: true, count: dates.length }
 }

@@ -5,7 +5,7 @@ import { subMonths, addMonths } from 'date-fns'
 import { SessionCalendar } from '@/components/admin/SessionCalendar'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Klassen | Admin' }
+export const metadata: Metadata = { title: 'Training | Admin' }
 
 export default async function KlassenPage() {
   const supabase = await createClient()
@@ -72,7 +72,7 @@ export default async function KlassenPage() {
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="mb-6 text-2xl font-black text-foreground">Klassen</h1>
+      <h1 className="mb-6 text-2xl font-black text-foreground">Training</h1>
       <SessionCalendar initialSessions={sessions} classTypes={classTypes} coaches={coaches} />
     </div>
   )

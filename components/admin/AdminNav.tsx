@@ -19,7 +19,7 @@ interface NavItem {
 const opsItems: NavItem[] = [
   { href: '/admin/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
   { href: '/admin/checkin',   label: 'Check-In',  Icon: CheckSquare },
-  { href: '/admin/klassen',   label: 'Klassen',   Icon: CalendarDays },
+  { href: '/admin/klassen',   label: 'Training',  Icon: CalendarDays },
 ]
 
 const managementItems: NavItem[] = [

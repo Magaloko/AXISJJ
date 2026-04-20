@@ -26,7 +26,7 @@ export function SessionDetailPanel({
   onSessionUpdated,
   onSessionCancelled,
 }: Props) {
-  const [mode, setMode] = useState<'detail' | 'edit'>('detail')
+  const [mode, setMode] = useState<'detail' | 'edit' | 'duplicate'>('detail')
   const [confirmCancel, setConfirmCancel] = useState(false)
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -52,7 +52,11 @@ export function SessionDetailPanel({
     <div className="fixed right-0 top-0 z-40 flex h-full w-full max-w-sm flex-col border-l border-border bg-card shadow-xl">
       <div className="flex items-center justify-between border-b border-border px-6 py-4">
         <h2 className="text-base font-black text-foreground">
-          {mode === 'edit' ? 'Session bearbeiten' : (session.class_types?.name ?? 'Session')}
+          {mode === 'edit'
+            ? 'Session bearbeiten'
+            : mode === 'duplicate'
+            ? 'Session duplizieren'
+            : (session.class_types?.name ?? 'Session')}
         </h2>
         <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Panel schließen">
           <X size={20} />
@@ -103,6 +107,12 @@ export function SessionDetailPanel({
                 >
                   Bearbeiten
                 </button>
+                <button
+                  onClick={() => setMode('duplicate')}
+                  className="w-full border border-border bg-background py-2.5 text-sm font-bold text-foreground hover:bg-muted"
+                >
+                  Duplizieren
+                </button>
 
                 {!confirmCancel ? (
                   <button
@@ -136,8 +146,9 @@ export function SessionDetailPanel({
               </div>
             )}
           </>
-        ) : (
+        ) : mode === 'edit' ? (
           <SessionForm
+            isEdit
             initialData={{
               id: session.id,
               class_type_id: session.class_type_id,
@@ -150,6 +161,30 @@ export function SessionDetailPanel({
             classTypes={classTypes}
             coaches={coaches}
             onSuccess={(updated) => { onSessionUpdated(updated); onClose() }}
+            onCancel={() => setMode('detail')}
+          />
+        ) : (
+          /* duplicate mode — prefill all fields except id; defaults to next-week same weekday */
+          <SessionForm
+            initialData={{
+              class_type_id: session.class_type_id,
+              coach_id: session.coach_id,
+              starts_at: (() => {
+                const d = new Date(session.starts_at)
+                d.setDate(d.getDate() + 7)
+                return d.toISOString()
+              })(),
+              ends_at: (() => {
+                const d = new Date(session.ends_at)
+                d.setDate(d.getDate() + 7)
+                return d.toISOString()
+              })(),
+              capacity: session.capacity,
+              location: session.location ?? 'Strindberggasse 1, 1110 Wien',
+            }}
+            classTypes={classTypes}
+            coaches={coaches}
+            onSuccess={(newSession) => { onSessionUpdated(newSession); onClose() }}
             onCancel={() => setMode('detail')}
           />
         )}
