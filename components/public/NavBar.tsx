@@ -27,7 +27,7 @@ export function NavBar() {
             width={160}
             height={48}
             priority
-            className="h-10 w-auto object-contain sm:h-12"
+            className="h-10 w-auto object-contain sm:h-12 mix-blend-multiply"
           />
         </Link>
 
