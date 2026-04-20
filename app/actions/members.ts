@@ -110,5 +110,12 @@ export async function updateMemberRole(
     }))
   }
 
+  // Auto-create coach_profiles row when promoting to coach
+  if (role === 'coach') {
+    await supabase
+      .from('coach_profiles')
+      .upsert({ profile_id: profileId }, { onConflict: 'profile_id' })
+  }
+
   return { success: true }
 }

@@ -76,8 +76,27 @@ describe('updateMemberRole', () => {
     mockSupabase.from.mockReturnValueOnce(existing)
     const upd = { update: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ error: null }) }
     mockSupabase.from.mockReturnValueOnce(upd)
+    // 4th call: coach_profiles upsert (only when new role is 'coach')
+    const coachProfileUpsert = { upsert: vi.fn().mockResolvedValue({ error: null }) }
+    mockSupabase.from.mockReturnValueOnce(coachProfileUpsert)
     const res = await updateMemberRole('p-1', 'coach')
     expect(res.success).toBe(true)
     expect(upd.update).toHaveBeenCalledWith({ role: 'coach' })
+  })
+
+  it('does not upsert coach_profiles when role is member', async () => {
+    mockSupabase.from.mockReturnValueOnce(callerChain('owner'))
+    const existing = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { full_name: 'Max', role: 'coach' }, error: null }),
+    }
+    mockSupabase.from.mockReturnValueOnce(existing)
+    const upd = { update: vi.fn().mockReturnThis(), eq: vi.fn().mockResolvedValue({ error: null }) }
+    mockSupabase.from.mockReturnValueOnce(upd)
+    const res = await updateMemberRole('p-1', 'member')
+    expect(res.success).toBe(true)
+    // from() should have been called exactly 3 times (no coach_profiles upsert)
+    expect(mockSupabase.from).toHaveBeenCalledTimes(3)
   })
 })
