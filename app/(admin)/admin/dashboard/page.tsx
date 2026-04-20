@@ -2,19 +2,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getAdminDashboard } from '@/app/actions/admin'
-import { getOwnerInsights } from '@/app/actions/owner-insights'
 import { getCoachInsights } from '@/app/actions/coach-insights'
 import { AdminStatCard } from '@/components/admin/AdminStatCard'
 import { PromotionsWidget } from '@/components/admin/PromotionsWidget'
-import { LeadsMiniKanban } from '@/components/admin/LeadsMiniKanban'
-import { UtilizationChart } from '@/components/admin/UtilizationChart'
-import { TopClassesChart } from '@/components/admin/TopClassesChart'
-import { RevenueWidget } from '@/components/admin/RevenueWidget'
 import { CoachTodaySchedule } from '@/components/admin/CoachTodaySchedule'
 import { MyStudentsWidget } from '@/components/admin/MyStudentsWidget'
-import { InactiveMembersWidget } from '@/components/admin/InactiveMembersWidget'
-import { BirthdaysWidget } from '@/components/admin/BirthdaysWidget'
-import { getUpcomingBirthdays } from '@/app/actions/birthdays'
 import type { TodaySession } from '@/app/actions/admin'
 import type { Metadata } from 'next'
 
@@ -97,11 +89,9 @@ export default async function AdminDashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const [data, ownerInsights, coachInsights, birthdays] = await Promise.all([
+  const [data, coachInsights] = await Promise.all([
     getAdminDashboard(),
-    getOwnerInsights().catch(() => null),
     getCoachInsights().catch(() => null),
-    getUpcomingBirthdays(14).catch(() => []),
   ])
 
   if (data.error) {
@@ -150,75 +140,32 @@ export default async function AdminDashboardPage() {
     )
   }
 
-  // ── Owner view ──────────────────────────────────────────────────────────────
-  const insights = ownerInsights && !ownerInsights.error ? ownerInsights : null
-
+  // ── Owner view (coach layout with gym-wide data) ──────────────────────────
   return (
     <div className="p-6 sm:p-8">
       <h1 className="mb-6 text-2xl font-black text-foreground">Dashboard</h1>
 
-      {/* Stat strip: 4 primary KPIs */}
+      {/* Stat strip: 4 gym-wide KPIs */}
       <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <AdminStatCard label="Mitglieder" value={data.activeMembers ?? 0} />
-        <AdminStatCard label="Neue Leads" value={data.newLeads ?? 0} highlight />
+        <AdminStatCard label="Klassen heute" value={data.todaySessions?.length ?? 0} highlight />
+        <AdminStatCard label="Buchungen heute" value={data.bookingsToday} />
+        <AdminStatCard label="Alle Mitglieder" value={data.activeMembers ?? 0} />
         <AdminStatCard label="Check-Ins heute" value={data.checkinsToday} />
-        <AdminStatCard
-          label="Umsatz (Monat)"
-          value={insights ? `${insights.estimatedMonthlyRevenue.toLocaleString('de-DE')} €` : '—'}
-        />
       </div>
-
-      {/* Secondary metrics row */}
-      {insights && (
-        <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-3">
-          <AdminStatCard
-            label="Lead-Konversion"
-            value={`${insights.leadConversionRate} %`}
-          />
-          <AdminStatCard
-            label="Umsatz vs. Vormonat"
-            value={`${insights.revenueVsLastMonthPct > 0 ? '+' : ''}${insights.revenueVsLastMonthPct} %`}
-          />
-          <AdminStatCard
-            label="Ø Auslastung (30T)"
-            value={`${insights.avgClassFillRate} %`}
-          />
-        </div>
-      )}
 
       {/* Next class */}
-      {upcomingSession && <NextClassCard session={upcomingSession} formatTime={formatTime} />}
+      {upcomingSession && (
+        <NextClassCard session={upcomingSession} formatTime={formatTime} />
+      )}
 
-      {/* Promotions + Birthdays */}
-      <div className="mb-6 grid gap-6 lg:grid-cols-2">
-        {data.promotionsReady && <PromotionsWidget promotions={data.promotionsReady} />}
-        {birthdays.length > 0 && <BirthdaysWidget birthdays={birthdays} />}
-      </div>
-
-      {/* Today's schedule */}
+      {/* Today's full schedule */}
       <TodayScheduleCard sessions={data.todaySessions ?? []} formatTime={formatTime} />
 
-      {/* Charts row */}
-      {insights && (
-        <>
-          <div className="mb-6 grid gap-6 lg:grid-cols-2">
-            <UtilizationChart data={insights.utilizationTrend} />
-            <TopClassesChart data={insights.topClasses} />
-          </div>
-
-          {/* Inactive members + Leads kanban */}
-          <div className="mb-6 grid gap-6 lg:grid-cols-2">
-            <InactiveMembersWidget members={insights.inactiveMembers} />
-            {data.leadsByStatus && <LeadsMiniKanban data={data.leadsByStatus} />}
-          </div>
-
-          {/* Revenue breakdown */}
-          <RevenueWidget
-            estimatedMonthlyRevenue={insights.estimatedMonthlyRevenue}
-            activeMembers={insights.activeMembers}
-            breakdown={insights.revenueBreakdown}
-          />
-        </>
+      {/* Promotions ready */}
+      {data.promotionsReady && data.promotionsReady.length > 0 && (
+        <div className="mt-6">
+          <PromotionsWidget promotions={data.promotionsReady} />
+        </div>
       )}
     </div>
   )
