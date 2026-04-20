@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
 import { assertOwner } from '@/lib/auth'
+import { logAudit } from '@/lib/audit'
 
 export async function promoteToNextBelt(profileId: string): Promise<{
   success?: true
@@ -67,6 +68,13 @@ export async function promoteToNextBelt(profileId: string): Promise<{
     waitUntil(notify({
       type: 'belt.promoted',
       data: { memberName, fromBelt: currentBelt.name, toBelt: nextBelt.name },
+    }))
+    waitUntil(logAudit({
+      action: 'belt.promoted',
+      targetType: 'profile',
+      targetId: profileId,
+      targetName: memberName,
+      meta: { fromBelt: currentBelt.name, toBelt: nextBelt.name },
     }))
     // Member notification
     if (memberProfile?.email) {

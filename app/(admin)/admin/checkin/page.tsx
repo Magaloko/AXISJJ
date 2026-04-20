@@ -5,6 +5,7 @@ import { getTodaySessions, getSessionBookings } from '@/app/actions/admin'
 import Link from 'next/link'
 import { CheckInScanner } from '@/components/admin/CheckInScanner'
 import { CheckInList } from '@/components/admin/CheckInList'
+import { MemberCheckInSearch } from '@/components/admin/MemberCheckInSearch'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Check-In | Admin' }
@@ -72,6 +73,10 @@ export default async function CheckInPage({ searchParams }: Props) {
         <>
           <div className="mb-4 text-sm font-semibold text-muted-foreground">
             {selectedSession.class_types?.name} · {formatTime(selectedSession.starts_at)} – {formatTime(selectedSession.ends_at)} · {selectedSession.location ?? 'AXIS Gym'}
+          </div>
+
+          <div className="mb-6">
+            <MemberCheckInSearch sessionId={selectedSession.id} />
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">

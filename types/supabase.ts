@@ -290,6 +290,32 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['competitions']['Insert']>
         Relationships: []
       }
+      audit_log: {
+        Row: {
+          id: string
+          actor_id: string | null
+          actor_name: string | null
+          action: string
+          target_type: string | null
+          target_id: string | null
+          target_name: string | null
+          meta: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          actor_id?: string | null
+          actor_name?: string | null
+          action: string
+          target_type?: string | null
+          target_id?: string | null
+          target_name?: string | null
+          meta?: Json | null
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['audit_log']['Insert']>
+        Relationships: []
+      }
       coach_notes: {
         Row: {
           id: string

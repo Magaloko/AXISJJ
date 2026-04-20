@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { ClassTypeTable } from '@/components/admin/ClassTypeTable'
 import { RoleManager } from '@/components/admin/RoleManager'
 import { InviteCoachForm } from '@/components/admin/InviteCoachForm'
+import { BulkEmailForm } from '@/components/admin/BulkEmailForm'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Einstellungen | Admin' }
@@ -36,6 +37,10 @@ export default async function EinstellungenPage() {
           <InviteCoachForm />
           <RoleManager coaches={coaches} members={members} />
         </div>
+      </div>
+
+      <div className="mt-6">
+        <BulkEmailForm />
       </div>
     </div>
   )

@@ -6,6 +6,7 @@ import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
 import { assertStaff } from '@/lib/auth'
 import { sessionFormSchema } from './sessions.schema'
+import { logAudit } from '@/lib/audit'
 import { z } from 'zod'
 
 export type SessionFormData = {
@@ -61,10 +62,24 @@ export async function upsertSession(
         type: 'session.created',
         data: { className, startsAt: data.starts_at, capacity: data.capacity },
       }))
+      waitUntil(logAudit({
+        action: 'session.created',
+        targetType: 'class_session',
+        targetId: session.id,
+        targetName: className,
+        meta: { startsAt: data.starts_at, capacity: data.capacity },
+      }))
     } else {
       waitUntil(notify({
         type: 'session.updated',
         data: { className, startsAt: data.starts_at },
+      }))
+      waitUntil(logAudit({
+        action: 'session.updated',
+        targetType: 'class_session',
+        targetId: session.id,
+        targetName: className,
+        meta: { startsAt: data.starts_at },
       }))
     }
   } catch {
@@ -106,6 +121,13 @@ export async function cancelSession(
     waitUntil(notify({
       type: 'session.cancelled',
       data: { className, startsAt },
+    }))
+    waitUntil(logAudit({
+      action: 'session.cancelled',
+      targetType: 'class_session',
+      targetId: sessionId,
+      targetName: className,
+      meta: { startsAt },
     }))
   }
 

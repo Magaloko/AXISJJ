@@ -6,6 +6,7 @@ import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
 import { assertOwner } from '@/lib/auth'
 import { memberUpdateSchema, memberRoleSchema } from './members.schema'
+import { logAudit } from '@/lib/audit'
 
 export type MemberUpdate = {
   full_name?: string
@@ -52,6 +53,13 @@ export async function updateMember(
       type: 'member.updated',
       data: { memberName, changedFields },
     }))
+    waitUntil(logAudit({
+      action: 'member.updated',
+      targetType: 'profile',
+      targetId: profileId,
+      targetName: memberName,
+      meta: { changedFields },
+    }))
   } catch {
     // best-effort
   }
@@ -92,6 +100,13 @@ export async function updateMemberRole(
     waitUntil(notify({
       type: 'member.role_changed',
       data: { memberName, oldRole, newRole: role },
+    }))
+    waitUntil(logAudit({
+      action: 'member.role_changed',
+      targetType: 'profile',
+      targetId: profileId,
+      targetName: memberName,
+      meta: { oldRole, newRole: role },
     }))
   }
 
