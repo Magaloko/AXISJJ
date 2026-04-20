@@ -264,6 +264,26 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['bot_users']['Insert']>
         Relationships: []
       }
+      coach_notes: {
+        Row: {
+          id: string
+          profile_id: string
+          author_id: string | null
+          content: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          author_id?: string | null
+          content: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['coach_notes']['Insert']>
+        Relationships: []
+      }
       bot_link_codes: {
         Row: {
           code: string
