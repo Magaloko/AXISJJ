@@ -162,6 +162,7 @@ export interface Database {
           achievements: string | null
           show_on_website: boolean
           display_order: number
+          is_pinned: boolean
           created_at: string
         }
         Insert: {
@@ -172,6 +173,7 @@ export interface Database {
           achievements?: string | null
           show_on_website?: boolean
           display_order?: number
+          is_pinned?: boolean
           created_at?: string
         }
         Update: Partial<Database['public']['Tables']['coach_profiles']['Insert']>

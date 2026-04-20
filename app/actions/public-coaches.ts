@@ -23,6 +23,7 @@ export async function getPublicCoaches(): Promise<CoachPublicProfile[]> {
       bio,
       achievements,
       display_order,
+      is_pinned,
       profiles!inner(
         full_name,
         avatar_url,
@@ -32,7 +33,7 @@ export async function getPublicCoaches(): Promise<CoachPublicProfile[]> {
         )
       )
     `)
-    .eq('show_on_website', true)
+    .or('show_on_website.eq.true,is_pinned.eq.true')
     .order('display_order', { ascending: true })
 
   if (error || !data) return []
