@@ -568,6 +568,188 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['session_techniques']['Insert']>
         Relationships: []
       }
+      quizzes: {
+        Row: {
+          id: string
+          session_id: string | null
+          title: string
+          description: string | null
+          quiz_type: 'multiple_choice' | 'flashcard' | 'drag_match' | 'sequence'
+          passing_score: number
+          xp_reward: number
+          active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          session_id?: string | null
+          title: string
+          description?: string | null
+          quiz_type?: 'multiple_choice' | 'flashcard' | 'drag_match' | 'sequence'
+          passing_score?: number
+          xp_reward?: number
+          active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['quizzes']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: "quizzes_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "curriculum_sessions"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      quiz_questions: {
+        Row: {
+          id: string
+          quiz_id: string
+          question: string
+          question_type: 'multiple_choice' | 'true_false'
+          explanation: string | null
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          quiz_id: string
+          question: string
+          question_type?: 'multiple_choice' | 'true_false'
+          explanation?: string | null
+          sort_order?: number
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['quiz_questions']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      quiz_answers: {
+        Row: {
+          id: string
+          question_id: string
+          answer_text: string
+          is_correct: boolean
+          sort_order: number
+        }
+        Insert: {
+          id?: string
+          question_id: string
+          answer_text: string
+          is_correct?: boolean
+          sort_order?: number
+        }
+        Update: Partial<Database['public']['Tables']['quiz_answers']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: "quiz_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "quiz_questions"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      quiz_attempts: {
+        Row: {
+          id: string
+          profile_id: string
+          quiz_id: string
+          score: number
+          passed: boolean
+          answers: Json
+          completed_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          quiz_id: string
+          score: number
+          passed: boolean
+          answers?: Json
+          completed_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['quiz_attempts']['Insert']>
+        Relationships: []
+      }
+      learning_tasks: {
+        Row: {
+          id: string
+          session_id: string | null
+          title: string
+          description: string | null
+          task_type: 'reflection' | 'drill' | 'journal' | 'video' | 'reading'
+          xp_reward: number
+          active: boolean
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          session_id?: string | null
+          title: string
+          description?: string | null
+          task_type?: 'reflection' | 'drill' | 'journal' | 'video' | 'reading'
+          xp_reward?: number
+          active?: boolean
+          sort_order?: number
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['learning_tasks']['Insert']>
+        Relationships: []
+      }
+      task_completions: {
+        Row: {
+          profile_id: string
+          task_id: string
+          notes: string | null
+          completed_at: string
+        }
+        Insert: {
+          profile_id: string
+          task_id: string
+          notes?: string | null
+          completed_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['task_completions']['Insert']>
+        Relationships: []
+      }
+      rule_cards: {
+        Row: {
+          id: string
+          category: 'scoring' | 'illegal' | 'time' | 'belt' | 'etiquette'
+          question: string
+          options: string[]
+          correct_index: number
+          explanation: string
+          difficulty: 'white' | 'blue' | 'purple' | 'brown' | 'black'
+          xp_reward: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          category: 'scoring' | 'illegal' | 'time' | 'belt' | 'etiquette'
+          question: string
+          options: string[]
+          correct_index: number
+          explanation: string
+          difficulty?: 'white' | 'blue' | 'purple' | 'brown' | 'black'
+          xp_reward?: number
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['rule_cards']['Insert']>
+        Relationships: []
+      }
     }
     Views: {
       public_coaches: {

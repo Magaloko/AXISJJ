@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { Trash2, Plus } from 'lucide-react'
+import Link from 'next/link'
+import { Trash2, Plus, Pencil } from 'lucide-react'
 import {
   updateCurriculum,
   deleteCurriculum,
@@ -392,14 +393,23 @@ function TrackBlock({ track, curriculumId, durationWeeks, onDelete, disabled }: 
                       <span className="font-semibold text-foreground">{s.title}</span>
                       {s.theme && <span className="text-xs text-muted-foreground">· {s.theme}</span>}
                     </div>
-                    <button
-                      onClick={() => onDeleteSession(s.id)}
-                      disabled={isPending}
-                      aria-label="Session löschen"
-                      className="text-muted-foreground hover:text-destructive disabled:opacity-50"
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                    <div className="flex items-center gap-3">
+                      <Link
+                        href={`/admin/curriculum/session/${s.id}`}
+                        aria-label="Session bearbeiten"
+                        className="text-muted-foreground hover:text-primary"
+                      >
+                        <Pencil size={14} />
+                      </Link>
+                      <button
+                        onClick={() => onDeleteSession(s.id)}
+                        disabled={isPending}
+                        aria-label="Session löschen"
+                        className="text-muted-foreground hover:text-destructive disabled:opacity-50"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
