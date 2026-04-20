@@ -3,17 +3,17 @@
  * Translates all English blog_posts rows in Supabase to German in place.
  *
  * Detects English posts heuristically (common English stop-words in title/body
- * that would not appear in German). Each detected row is translated via
- * OpenAI gpt-4o-mini: title, excerpt and body are translated while slug, id,
- * tags, published/featured flags and timestamps are preserved. Category is
- * remapped to one of: Grundlagen | Wissen | Erfahrungen | Team.
+ * that would not appear in German). Each detected row is translated via the
+ * DeepSeek Chat API (OpenAI-compatible): title, excerpt and body are translated
+ * while slug, id, tags, published/featured flags and timestamps are preserved.
+ * Category is remapped to one of: Grundlagen | Wissen | Erfahrungen | Team.
  *
  * Safe to re-run: once a row is German the heuristic skips it.
  *
  * Required env vars (via .env.local or shell):
  *   NEXT_PUBLIC_SUPABASE_URL
  *   SUPABASE_SERVICE_ROLE_KEY   - service role, bypasses RLS (never commit)
- *   OPENAI_API_KEY              - used for translation
+ *   DEEPSEEK_API_KEY            - used for translation (https://platform.deepseek.com)
  *
  * Usage:
  *   npx tsx scripts/translate-blog-posts.ts
@@ -31,21 +31,27 @@ const dry = process.argv.includes('--dry-run')
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
-const OPENAI_KEY = process.env.OPENAI_API_KEY
+const DEEPSEEK_KEY = process.env.DEEPSEEK_API_KEY
 
 if (!SUPABASE_URL || !SERVICE_KEY) {
   console.error('Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY')
   process.exit(1)
 }
-if (!OPENAI_KEY) {
-  console.error('Missing OPENAI_API_KEY')
+if (!DEEPSEEK_KEY) {
+  console.error('Missing DEEPSEEK_API_KEY')
   process.exit(1)
 }
 
 const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
   auth: { persistSession: false, autoRefreshToken: false },
 })
-const openai = new OpenAI({ apiKey: OPENAI_KEY })
+
+// DeepSeek exposes an OpenAI-compatible Chat Completions API.
+const ai = new OpenAI({
+  apiKey: DEEPSEEK_KEY,
+  baseURL: 'https://api.deepseek.com',
+})
+const MODEL = 'deepseek-chat'
 
 type Post = {
   id: string
@@ -103,7 +109,7 @@ function looksEnglish(post: Post): boolean {
 
 async function translate(post: Post): Promise<{ title: string; excerpt: string; body: string }> {
   const system =
-    'You are a professional translator specialising in Brazilian Jiu-Jitsu (BJJ) and martial-arts content. Translate the provided JSON fields from English into natural, fluent German suitable for a BJJ school blog in Vienna, Austria. Preserve Markdown formatting (headings, lists, links, bold/italic, code blocks) exactly. Keep proper nouns, brand names and BJJ-specific terms (e.g. "Gi", "No-Gi", "Open Mat", "Mount", "Guard") as they are commonly used in German BJJ language. Do NOT translate the slug. Return ONLY valid JSON with the keys title, excerpt, body.'
+    'You are a professional translator specialising in Brazilian Jiu-Jitsu (BJJ) and martial-arts content. Translate the provided JSON fields from English into natural, fluent German suitable for a BJJ school blog in Vienna, Austria. Preserve Markdown formatting (headings, lists, links, bold/italic, code blocks) exactly. Keep proper nouns, brand names and BJJ-specific terms (e.g. "Gi", "No-Gi", "Open Mat", "Mount", "Guard") as they are commonly used in German BJJ language. Do NOT translate the slug. Return ONLY valid JSON with exactly the keys title, excerpt, body — no prose, no code fences.'
   const user = JSON.stringify({
     slug: post.slug,
     title: post.title,
@@ -111,8 +117,8 @@ async function translate(post: Post): Promise<{ title: string; excerpt: string; 
     body: post.body,
   })
 
-  const res = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
+  const res = await ai.chat.completions.create({
+    model: MODEL,
     temperature: 0.3,
     response_format: { type: 'json_object' },
     messages: [
@@ -157,7 +163,7 @@ async function main() {
   }
 
   if (dry) {
-    console.log('\n--dry-run: no OpenAI calls, no DB writes.')
+    console.log('\n--dry-run: no API calls, no DB writes.')
     return
   }
 
