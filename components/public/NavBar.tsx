@@ -1,5 +1,5 @@
 'use client'
-// navbar with PillNav component
+// navbar with PillNav component (v2)
 import Link from 'next/link'
 import { PillNav } from './PillNav'
 
