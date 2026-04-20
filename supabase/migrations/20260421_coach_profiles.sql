@@ -27,9 +27,13 @@ CREATE POLICY "coach_profiles_owner_read" ON coach_profiles
 CREATE POLICY "coach_profiles_owner_write" ON coach_profiles
   FOR ALL USING (
     EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'owner')
+  )
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'owner')
   );
 
--- Grant access to authenticated users (RLS enforces row-level restrictions)
+-- Grant: anon can SELECT for public landing page; authenticated users get full access (RLS limits writes to owners)
+GRANT SELECT ON coach_profiles TO anon;
 GRANT SELECT, INSERT, UPDATE, DELETE ON coach_profiles TO authenticated;
 
 -- Seed Shamsudin (finds by name; no-op if already exists)
