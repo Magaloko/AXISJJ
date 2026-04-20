@@ -15,7 +15,10 @@ export async function bookClass(sessionId: string): Promise<{ success?: boolean;
     p_user_id: user.id,
   })
 
-  if (rpcError) return { error: 'Buchung fehlgeschlagen. Bitte versuche es erneut.' }
+  if (rpcError) {
+    console.error('[bookings] book_class RPC error:', rpcError)
+    return { error: `Buchung fehlgeschlagen: ${rpcError.message}` }
+  }
   if (result?.error) return { error: result.error }
 
   const status = result?.status ?? 'confirmed'
