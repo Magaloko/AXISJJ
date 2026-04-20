@@ -292,6 +292,10 @@ export interface Database {
         Args: { p_session_id: string; p_user_id: string }
         Returns: { status?: 'confirmed' | 'waitlisted'; error?: string }
       }
+      promote_waitlist: {
+        Args: { p_session_id: string }
+        Returns: string | null
+      }
     }
     Enums: { [_ in never]: never }
   }

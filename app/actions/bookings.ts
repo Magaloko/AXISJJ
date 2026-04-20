@@ -67,45 +67,18 @@ export async function cancelBooking(bookingId: string): Promise<{ success?: bool
   if (error) return { error: 'Stornierung fehlgeschlagen. Bitte versuche es erneut.' }
   if (!cancelled || cancelled.length === 0) return { error: 'Buchung nicht gefunden.' }
 
-  // Promote first waitlisted booking for this session
+  // Atomic waitlist promotion via RPC — promotes first waitlisted and decrements
+  // all remaining positions in a single transaction.
   const sessionId = cancelled[0].session_id
+  let promotedProfileId: string | null = null
   if (sessionId) {
-    const { data: firstWaitlisted } = await supabase
-      .from('bookings')
-      .select('id, waitlist_position')
-      .eq('session_id', sessionId)
-      .eq('status', 'waitlisted')
-      .order('waitlist_position', { ascending: true })
-      .limit(1)
-      .single()
-
-    if (firstWaitlisted) {
-      const { error: promoteError } = await supabase
-        .from('bookings')
-        .update({ status: 'confirmed', waitlist_position: null })
-        .eq('id', firstWaitlisted.id)
-
-      if (promoteError) {
-        console.error('Waitlist promotion failed:', promoteError)
-      }
-
-      // Decrement remaining waitlist positions
-      // NOTE: N+1 loop acceptable at gym scale (< 20 waitlisted per session)
-      const { data: remaining } = await supabase
-        .from('bookings')
-        .select('id, waitlist_position')
-        .eq('session_id', sessionId)
-        .eq('status', 'waitlisted')
-        .gt('waitlist_position', 0)
-
-      if (remaining) {
-        for (const b of remaining) {
-          await supabase
-            .from('bookings')
-            .update({ waitlist_position: b.waitlist_position! - 1 })
-            .eq('id', b.id)
-        }
-      }
+    const { data: promoted, error: rpcError } = await supabase.rpc('promote_waitlist', {
+      p_session_id: sessionId,
+    })
+    if (rpcError) {
+      console.error('[bookings] waitlist promotion failed:', rpcError)
+    } else {
+      promotedProfileId = promoted
     }
   }
 
@@ -135,6 +108,26 @@ export async function cancelBooking(bookingId: string): Promise<{ success?: bool
         type: 'booking.cancelled',
         data: { memberName, className, startsAt },
       }))
+
+      // Notify auto-promoted waitlist member (if any)
+      if (promotedProfileId) {
+        const { data: promotedProfile } = await supabase
+          .from('profiles')
+          .select('full_name, email')
+          .eq('id', promotedProfileId)
+          .single()
+        if (promotedProfile) {
+          waitUntil(notify({
+            type: 'waitlist.promoted',
+            data: {
+              memberName: promotedProfile.full_name ?? 'Unbekannt',
+              memberEmail: promotedProfile.email,
+              className,
+              startsAt,
+            },
+          }))
+        }
+      }
     }
   } catch {
     // best-effort

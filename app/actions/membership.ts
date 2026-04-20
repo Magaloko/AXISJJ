@@ -3,7 +3,7 @@
 import nodemailer from 'nodemailer'
 import { membershipFormSchema, type MembershipFormData } from './membership.schema'
 
-const RECIPIENT = 'magomed.dadakaev@gmail.com'
+const RECIPIENT = process.env.MEMBERSHIP_RECIPIENT ?? 'magomed.dadakaev@gmail.com'
 
 export async function submitMembership(
   data: MembershipFormData,

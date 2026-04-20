@@ -59,14 +59,27 @@ export async function promoteToNextBelt(profileId: string): Promise<{
   try {
     const { data: memberProfile } = await supabase
       .from('profiles')
-      .select('full_name')
+      .select('full_name, email')
       .eq('id', profileId)
       .single()
     const memberName = memberProfile?.full_name ?? 'Unbekannt'
+    // Admin notification
     waitUntil(notify({
       type: 'belt.promoted',
       data: { memberName, fromBelt: currentBelt.name, toBelt: nextBelt.name },
     }))
+    // Member notification
+    if (memberProfile?.email) {
+      waitUntil(notify({
+        type: 'member.belt_promoted',
+        data: {
+          memberName,
+          memberEmail: memberProfile.email,
+          fromBelt: currentBelt.name,
+          toBelt: nextBelt.name,
+        },
+      }))
+    }
   } catch {
     // best-effort
   }

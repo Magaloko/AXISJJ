@@ -17,12 +17,17 @@ export type NotificationEvent =
   | { type: 'gym.info_updated'; data: Record<string, never> }
   | { type: 'gym.hours_updated'; data: Record<string, never> }
   | { type: 'gym.policies_updated'; data: Record<string, never> }
+  | { type: 'waitlist.promoted'; data: { memberName: string; memberEmail: string; className: string; startsAt: string } }
+  | { type: 'training.reminder'; data: { memberName: string; memberEmail: string; className: string; startsAt: string; location: string | null } }
+  | { type: 'member.belt_promoted'; data: { memberName: string; memberEmail: string; fromBelt: string; toBelt: string } }
 
 export interface FormattedNotification {
   emailSubject: string
   emailText: string
   emailHtml: string
   telegramMarkdown: string
+  /** If set, email goes directly to this address instead of NOTIFICATION_RECIPIENT */
+  emailToOverride?: string
 }
 
 const MDV2_RESERVED = /[_*[\]()~`>#+\-=|{}.!]/g
@@ -336,6 +341,93 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailText: buildEmailText(title, [], timeLine),
         emailHtml: buildEmailHtml(title, [], timeLine),
         telegramMarkdown: buildTelegram('⚙️', 'Richtlinien aktualisiert', []),
+      }
+    }
+    case 'waitlist.promoted': {
+      const { memberName, memberEmail, className, startsAt } = event.data
+      const title = 'Du bist eingeteilt! 🎉'
+      const rows: Array<[string, string]> = [
+        ['Kurs', className],
+        ['Beginn', formatDateDE(startsAt)],
+      ]
+      return {
+        emailSubject: `Gute Nachrichten: Du bist jetzt für ${className} bestätigt`,
+        emailText: buildEmailText(
+          `Hallo ${memberName}!`,
+          [
+            `Ein Platz ist frei geworden — du bist jetzt für ${className} am ${formatDateDE(startsAt)} bestätigt.`,
+            `Bis bald auf der Matte!`,
+          ],
+          timeLine
+        ),
+        emailHtml: `<div style="font-family:system-ui">
+          <h2 style="color:#e63946">Du bist eingeteilt! 🎉</h2>
+          <p>Hallo ${escapeHtml(memberName)},</p>
+          <p>ein Platz ist frei geworden — du bist jetzt für <strong>${escapeHtml(className)}</strong> am <strong>${escapeHtml(formatDateDE(startsAt))}</strong> bestätigt.</p>
+          <p>Bis bald auf der Matte!</p>
+          <p style="color:#999;font-size:12px">${escapeHtml(timeLine)}</p>
+        </div>`,
+        telegramMarkdown: buildTelegram('🎉', title, rows),
+        emailToOverride: memberEmail,
+      }
+    }
+    case 'member.belt_promoted': {
+      const { memberName, memberEmail, fromBelt, toBelt } = event.data
+      const title = 'Herzlichen Glückwunsch zur Beförderung! 🥋'
+      const rows: Array<[string, string]> = [
+        ['Von', fromBelt],
+        ['Nach', toBelt],
+      ]
+      return {
+        emailSubject: `Glückwunsch zur Beförderung: ${toBelt}`,
+        emailText: buildEmailText(
+          `Hallo ${memberName}!`,
+          [
+            `Du wurdest zum ${toBelt} befördert.`,
+            `Von: ${fromBelt} → ${toBelt}`,
+            `Weiter so — du hast es dir verdient!`,
+          ],
+          timeLine
+        ),
+        emailHtml: `<div style="font-family:system-ui">
+          <h2 style="color:#e63946">Herzlichen Glückwunsch! 🥋</h2>
+          <p>Hallo ${escapeHtml(memberName)},</p>
+          <p>du wurdest zum <strong>${escapeHtml(toBelt)}</strong> befördert.</p>
+          <p><strong>${escapeHtml(fromBelt)}</strong> → <strong>${escapeHtml(toBelt)}</strong></p>
+          <p>Weiter so — du hast es dir verdient!</p>
+        </div>`,
+        telegramMarkdown: buildTelegram('🥋', title, rows),
+        emailToOverride: memberEmail,
+      }
+    }
+    case 'training.reminder': {
+      const { memberName, memberEmail, className, startsAt, location } = event.data
+      const title = 'Dein Training morgen'
+      const rows: Array<[string, string]> = [
+        ['Kurs', className],
+        ['Beginn', formatDateDE(startsAt)],
+      ]
+      if (location) rows.push(['Ort', location])
+      return {
+        emailSubject: `Erinnerung: ${className} am ${formatDateDE(startsAt)}`,
+        emailText: buildEmailText(
+          `Hallo ${memberName}!`,
+          [
+            `Erinnerung: Du hast morgen ${className} gebucht — Beginn ${formatDateDE(startsAt)}.`,
+            location ? `Ort: ${location}` : '',
+            `Bis bald auf der Matte!`,
+          ].filter(Boolean),
+          timeLine
+        ),
+        emailHtml: `<div style="font-family:system-ui">
+          <h2 style="color:#e63946">Erinnerung: Training morgen 🥋</h2>
+          <p>Hallo ${escapeHtml(memberName)},</p>
+          <p>du hast morgen <strong>${escapeHtml(className)}</strong> gebucht.</p>
+          <p><strong>Beginn:</strong> ${escapeHtml(formatDateDE(startsAt))}${location ? `<br/><strong>Ort:</strong> ${escapeHtml(location)}` : ''}</p>
+          <p>Bis bald auf der Matte!</p>
+        </div>`,
+        telegramMarkdown: buildTelegram('🥋', title, rows),
+        emailToOverride: memberEmail,
       }
     }
   }

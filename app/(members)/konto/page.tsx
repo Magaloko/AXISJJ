@@ -23,14 +23,13 @@ export default async function KontoPage() {
 
   const gym = await getGymSettings()
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: botUser } = await (supabase as any)
+  const { data: botUser } = await supabase
     .from('bot_users')
     .select('chat_id, telegram_username')
     .eq('profile_id', user.id)
     .maybeSingle()
   const isLinked = !!botUser
-  const telegramUsername = (botUser as { telegram_username: string | null } | null)?.telegram_username ?? null
+  const telegramUsername = botUser?.telegram_username ?? null
 
   const [{ data: profile }, { data: documents }] = await Promise.all([
     supabase

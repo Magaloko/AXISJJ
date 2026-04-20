@@ -104,33 +104,12 @@ describe('cancelBooking', () => {
     expect(result.success).toBe(true)
   })
 
-  it('promotes first waitlisted booking after cancel', async () => {
-    // Mock: cancel succeeds, returns session_id
+  it('promotes first waitlisted booking via atomic RPC after cancel', async () => {
     const cancelChain = {
       update: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
       select: vi.fn().mockResolvedValue({ data: [{ id: 'b-1', session_id: 'sess-1' }], error: null }),
     }
-    // Mock: find first waitlisted
-    const waitlistChain = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockReturnThis(),
-      single: vi.fn().mockResolvedValue({ data: { id: 'w-1', waitlist_position: 1 }, error: null }),
-    }
-    // Mock: promote waitlisted (update to confirmed)
-    const promoteChain = {
-      update: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockResolvedValue({ error: null }),
-    }
-    // Mock: get remaining waitlisted
-    const remainingChain = {
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      gt: vi.fn().mockResolvedValue({ data: [], error: null }),
-    }
-
     const sessionInfoChain = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
@@ -141,21 +120,24 @@ describe('cancelBooking', () => {
       eq: vi.fn().mockReturnThis(),
       single: vi.fn().mockResolvedValue({ data: { full_name: 'Max' }, error: null }),
     }
+    const promotedProfileChain = {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { full_name: 'Anna', email: 'anna@example.com' }, error: null }),
+    }
 
     let callCount = 0
     mockSupabase.from.mockImplementation(() => {
       callCount++
       if (callCount === 1) return cancelChain
-      if (callCount === 2) return waitlistChain
-      if (callCount === 3) return promoteChain
-      if (callCount === 4) return remainingChain
-      if (callCount === 5) return sessionInfoChain
-      return memberProfileChain
+      if (callCount === 2) return sessionInfoChain
+      if (callCount === 3) return memberProfileChain
+      return promotedProfileChain
     })
+    mockSupabase.rpc.mockResolvedValue({ data: 'promoted-user-id', error: null })
 
     const result = await cancelBooking('b-1')
     expect(result.success).toBe(true)
-    expect(promoteChain.update).toHaveBeenCalledWith({ status: 'confirmed', waitlist_position: null })
-    expect(promoteChain.eq).toHaveBeenCalledWith('id', 'w-1')
+    expect(mockSupabase.rpc).toHaveBeenCalledWith('promote_waitlist', { p_session_id: 'sess-1' })
   })
 })
