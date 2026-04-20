@@ -2,10 +2,7 @@
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
-const CATEGORIES = [
-  'All', 'Techniques', 'Rules & Scoring', 'History', 'Belt System',
-  'Competition', 'Mindset', 'Nutrition', 'No-Gi', 'Kids BJJ',
-]
+const CATEGORIES = ['Alle', 'Grundlagen', 'Wissen', 'Erfahrungen', 'Team']
 
 export function BlogCategoryFilter({ active }: { active: string }) {
   const router = useRouter()
@@ -14,7 +11,7 @@ export function BlogCategoryFilter({ active }: { active: string }) {
 
   function handleSelect(cat: string) {
     const params = new URLSearchParams(searchParams.toString())
-    if (cat === 'All') {
+    if (cat === 'Alle') {
       params.delete('category')
     } else {
       params.set('category', cat)
