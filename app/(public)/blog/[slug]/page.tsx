@@ -1,112 +1,71 @@
-import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import type { Metadata } from 'next'
-import { getAllSlugs, getPostBySlug } from '@/lib/blog'
+import Link from 'next/link'
+import { getPost, getRelatedPosts } from '@/app/actions/blog'
+import { BlogArticleBody } from '@/components/public/BlogArticleBody'
+import { BlogSidebar } from '@/components/public/BlogSidebar'
 
-export async function generateStaticParams() {
-  const slugs = await getAllSlugs()
-  return slugs.map(slug => ({ slug }))
+interface Props {
+  params: Promise<{ slug: string }>
 }
 
-export async function generateMetadata(
-  { params }: { params: Promise<{ slug: string }> },
-): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const post = await getPostBySlug(slug)
-  if (!post) return { title: 'Artikel nicht gefunden' }
+  const post = await getPost(slug)
+  if (!post) return { title: 'Not Found' }
   return {
-    title: `${post.title} | AXIS Jiu-Jitsu Vienna`,
+    title: `${post.title} | AXIS JIU JITSU Blog`,
     description: post.excerpt,
-    openGraph: {
-      title: post.title,
-      description: post.excerpt,
-      type: 'article',
-      publishedTime: post.date,
-    },
+    openGraph: post.cover_image_url ? { images: [post.cover_image_url] } : undefined,
   }
 }
 
-function formatDate(iso: string): string {
-  if (!iso) return ''
-  try {
-    return new Date(iso).toLocaleDateString('de-AT', {
-      day: 'numeric', month: 'long', year: 'numeric',
-    })
-  } catch {
-    return iso
-  }
-}
-
-const TYPE_LABELS: Record<string, string> = {
-  erklaerungsartikel: 'Erklärt',
-  informationsartikel: 'Info',
-  anleitung: 'Anleitung',
-  artikel: 'Artikel',
-}
-
-export default async function BlogPostPage(
-  { params }: { params: Promise<{ slug: string }> },
-) {
+export default async function ArticlePage({ params }: Props) {
   const { slug } = await params
-  const post = await getPostBySlug(slug)
+  const post = await getPost(slug)
   if (!post) notFound()
 
+  const related = await getRelatedPosts(post.category, post.slug)
+
+  const publishedDate = post.published_at
+    ? new Date(post.published_at).toLocaleDateString('de-DE', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null
+
   return (
-    <article className="mx-auto max-w-3xl px-6 py-16">
+    <>
       {/* Breadcrumb */}
-      <Link
-        href="/blog"
-        className="mb-8 inline-block text-xs font-bold uppercase tracking-wider text-muted-foreground transition-colors hover:text-primary"
-      >
-        ← Zurück zum Blog
-      </Link>
-
-      {/* Header */}
-      <div className="mb-3 flex flex-wrap items-center gap-3 text-xs">
-        <span className="border border-primary/30 bg-primary/5 px-2 py-0.5 font-bold uppercase tracking-wider text-primary">
-          {TYPE_LABELS[post.type] ?? 'Artikel'}
-        </span>
-        <span className="text-muted-foreground">{formatDate(post.date)}</span>
-        <span className="text-muted-foreground">·</span>
-        <span className="capitalize text-muted-foreground">Für {post.audience}</span>
+      <div className="border-b border-border bg-muted px-4 py-2 text-[10px] text-muted-foreground sm:px-6">
+        <Link href="/blog" className="hover:text-foreground">Blog</Link>
+        {' → '}
+        <span>{post.category}</span>
+        {' → '}
+        <span className="text-foreground">{post.title}</span>
       </div>
 
-      <h1 className="mb-6 text-3xl font-black leading-tight text-foreground sm:text-5xl">
-        {post.title}
-      </h1>
-
-      {/* Content */}
-      <div className="prose-axis">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-          {post.content}
-        </ReactMarkdown>
-      </div>
-
-      {/* CTA */}
-      <div className="mt-16 border border-border bg-card p-8 text-center">
-        <p className="mb-2 text-xs font-bold uppercase tracking-widest text-primary">
-          Bereit es selbst auszuprobieren?
-        </p>
-        <p className="mb-6 text-lg font-black text-foreground">
-          Komm zum kostenlosen Probetraining
-        </p>
-        <div className="flex flex-wrap justify-center gap-3">
-          <Link
-            href="/trial"
-            className="inline-block bg-primary px-6 py-3 text-sm font-bold uppercase tracking-wider text-primary-foreground hover:opacity-90"
-          >
-            Probetraining buchen
-          </Link>
-          <Link
-            href="/anmelden"
-            className="inline-block border border-primary px-6 py-3 text-sm font-bold uppercase tracking-wider text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
-          >
-            Jetzt Mitglied werden
-          </Link>
+      {/* Hero */}
+      <div className="bg-primary px-6 py-10 sm:px-10">
+        <div className="mx-auto max-w-4xl">
+          <p className="text-[10px] font-black uppercase tracking-widest text-primary-foreground/70">
+            {post.category}
+            {publishedDate && ` · ${publishedDate}`}
+            {` · ${post.reading_time_min} min read`}
+          </p>
+          <h1 className="mt-3 text-2xl font-black leading-tight text-primary-foreground sm:text-3xl">{post.title}</h1>
+          <p className="mt-2 text-sm text-primary-foreground/80">{post.excerpt}</p>
         </div>
       </div>
-    </article>
-  )
-}
+
+      {/* Content */}
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+        <div className="flex flex-col gap-10 lg:flex-row">
+          <div className="min-w-0 flex-1">
+            <BlogArticleBody post={post} />
+          </div>
+          <div className="w-full lg:w-72 lg:flex-shrink-0">
+            <div className="lg:sticky lg:top-24">
+              <BlogSidebar related={related} />
+            </div>
+          </div>
+        </div>
+      </div>
+    </>

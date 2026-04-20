@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { logPasswordLogin } from '@/app/actions/auth-events'
 
@@ -69,7 +70,6 @@ export default function LoginPage() {
         <div className="mb-8 flex justify-center">
           <Image src="/images/logo.jpg" alt="AXIS JIU JITSU" width={56} height={56} className="object-contain" />
         </div>
-
         <h1 className="mb-1 text-center text-2xl font-black text-foreground">AXIS Member Portal</h1>
         <p className="mb-8 text-center text-sm text-muted-foreground">Mitglieder-Login</p>
 
@@ -77,7 +77,7 @@ export default function LoginPage() {
         <div className="mb-6 flex border border-border">
           <button
             type="button"
-            onClick={() => { setMode('magic'); setStatus('idle') }}
+            onClick={() => { setMode('magic'); setStatus('idle'); setErrorMsg('') }}
             className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
               mode === 'magic' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
@@ -86,7 +86,7 @@ export default function LoginPage() {
           </button>
           <button
             type="button"
-            onClick={() => { setMode('password'); setStatus('idle') }}
+            onClick={() => { setMode('password'); setStatus('idle'); setErrorMsg('') }}
             className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
               mode === 'password' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
             }`}
@@ -113,9 +113,17 @@ export default function LoginPage() {
 
           {mode === 'password' && (
             <div>
-              <label htmlFor="password" className="mb-1 block text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                Passwort
-              </label>
+              <div className="mb-1 flex items-center justify-between">
+                <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Passwort
+                </label>
+                <Link
+                  href="/reset-password"
+                  className="text-xs font-bold uppercase tracking-wider text-muted-foreground underline hover:text-foreground"
+                >
+                  Vergessen?
+                </Link>
+              </div>
               <input
                 id="password"
                 type="password"
@@ -135,11 +143,7 @@ export default function LoginPage() {
             disabled={status === 'loading'}
             className="w-full bg-primary py-4 text-sm font-black uppercase tracking-widest text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
           >
-            {status === 'loading'
-              ? 'Wird geladen ...'
-              : mode === 'magic'
-              ? 'Link senden →'
-              : 'Einloggen →'}
+            {status === 'loading' ? 'Wird geladen ...' : mode === 'magic' ? 'Link senden →' : 'Einloggen →'}
           </button>
         </form>
       </div>
