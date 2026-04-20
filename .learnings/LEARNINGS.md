@@ -75,3 +75,36 @@ if (error) {
 - Pattern-Key: harden.error-message-transparency
 
 ---
+
+## [LRN-20260421-001] best_practice
+
+**Logged**: 2026-04-21
+**Priority**: medium
+**Status**: resolved
+**Area**: infra
+
+### Summary
+Supabase SQL Editor kann PL/pgSQL-Funktionen mit lokalen Variablen (`DECLARE` + `SELECT INTO`) in bestimmten Fällen fehlinterpretieren — Fehler: `relation "v_variable_name" does not exist`. Workaround: `LANGUAGE sql` mit CTEs statt `LANGUAGE plpgsql` nutzen wann immer möglich.
+
+### Details
+Beim Ausführen einer `LANGUAGE plpgsql` Funktion mit `DECLARE v_foo int; BEGIN SELECT ... INTO v_foo ...` wirft Supabase SQL Editor den Fehler `42P01: relation "v_foo" does not exist`. Die exakt gleiche Syntax funktioniert mit `book_class`, schlägt aber bei `promote_waitlist` fehl — vermutlich ein Parser-Edge-Case.
+
+**Lösung:** Funktion in `LANGUAGE sql` neu schreiben mit CTEs (`WITH ... AS`). Das umgeht PL/pgSQL komplett und wird vom Editor zuverlässig geparst.
+
+### Suggested Action
+- Bei atomaren Multi-Step-Operationen zuerst `LANGUAGE sql` + CTEs versuchen
+- PL/pgSQL nur wenn wirklich nötig (komplexe Logik, FOR UPDATE Locks, EXCEPTION Handling)
+- Bei Supabase-Migration-Problemen: Syntax zuerst via MCP `execute_sql` gegen Test-DB validieren
+- Dollar-Tag `$function$` statt `$$` verwenden (Supabase-Konvention)
+
+### Resolution
+- **Resolved**: 2026-04-21
+- **Notes**: `promote_waitlist` von PL/pgSQL auf SQL-CTEs umgeschrieben. Nutzt `WITH promoted AS (UPDATE ... RETURNING)` für die Promotion und eine zweite CTE für die Positions-Dekrementierung. Atomarität bleibt erhalten (einzelne Transaktion).
+
+### Metadata
+- Source: user_feedback
+- Related Files: supabase/migrations/20260421_promote_waitlist_rpc.sql
+- Tags: supabase, plpgsql, sql-editor, migrations, parser-edge-case
+- Pattern-Key: supabase.prefer-sql-over-plpgsql
+
+---
