@@ -156,3 +156,31 @@ Im `/auth/callback/route.ts` nach erfolgreicher Session: Profil prüfen, anlegen
 - Pattern-Key: supabase.auto-create-profile
 
 ---
+
+## [LRN-20260420-001] best_practice
+
+**Logged**: 2026-04-20T00:00:00Z
+**Priority**: high
+**Status**: pending
+**Area**: infra
+
+### Summary
+Vor Push auf `main` immer `git fetch` + Divergenz-Check — parallel gepushte Commits von anderem Gerät/Kollaborator führen sonst zu Rebase-Konflikten mitten im Deploy-Flow.
+
+### Details
+In dieser Session war `main` lokal auf f2fb740, Remote hatte zwischenzeitlich 5 neue Commits (PillNav-Variante, Admin-Berichte-Feature, Logo-Updates). Push wurde rejected, Rebase produzierte Konflikt in `NavBar.tsx`, und es war unklar ob die Remote-Arbeit vom User oder Kollaborator stammte.
+
+Root-Cause: Session startete ohne `git fetch`. Tools wie `git status` zeigen nur den lokalen Stand — nicht was auf `origin/main` zwischenzeitlich dazugekommen ist.
+
+### Suggested Action
+- Bei Session-Start oder vor Commit/Push: `git fetch && git status -uno` laufen lassen
+- Bei Divergenz vor Push: User fragen welche Seite gewinnt, NICHT stumm rebasen/überschreiben
+- Vor `git reset --hard origin/main` immer lokale Commits als Branch sichern (`git branch backup-name <sha>`) — Stash reicht nicht für Commits
+- Bei Cherry-Pick-Konflikt: `git checkout --theirs <file>` nimmt die Version aus dem gepickten Commit (nicht die aus dem aktuellen Branch)
+
+### Metadata
+- Source: conversation
+- Related Files: -
+- Tags: git, deploy, divergence, rebase, cherry-pick
+
+---

@@ -43,3 +43,6 @@ next-env.d.ts
 # superpowers brainstorm artifacts
 .superpowers/
 .worktrees/
+
+# extracted book text (source PDFs are external; extracted text is copyrighted)
+.tmp/

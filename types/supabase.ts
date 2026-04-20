@@ -432,6 +432,142 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['bot_link_codes']['Insert']>
         Relationships: []
       }
+      curricula: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          description: string | null
+          duration_weeks: number
+          age_group: 'adults' | 'kids'
+          active: boolean
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          description?: string | null
+          duration_weeks?: number
+          age_group?: 'adults' | 'kids'
+          active?: boolean
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['curricula']['Insert']>
+        Relationships: []
+      }
+      curriculum_tracks: {
+        Row: {
+          id: string
+          curriculum_id: string
+          class_type_id: string
+          name: string
+          sessions_per_week: number
+          sort_order: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          curriculum_id: string
+          class_type_id: string
+          name: string
+          sessions_per_week?: number
+          sort_order?: number
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['curriculum_tracks']['Insert']>
+        Relationships: []
+      }
+      techniques: {
+        Row: {
+          id: string
+          name: string
+          slug: string
+          category: 'position' | 'takedown' | 'submission' | 'sweep' | 'guard-pass' | 'escape' | 'transition' | 'drill'
+          position: string | null
+          belt_level: 'white' | 'blue' | 'purple' | 'brown' | 'black'
+          gi: boolean
+          description: string | null
+          key_details: string[]
+          common_mistakes: string[]
+          video_url: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          slug: string
+          category: 'position' | 'takedown' | 'submission' | 'sweep' | 'guard-pass' | 'escape' | 'transition' | 'drill'
+          position?: string | null
+          belt_level?: 'white' | 'blue' | 'purple' | 'brown' | 'black'
+          gi?: boolean
+          description?: string | null
+          key_details?: string[]
+          common_mistakes?: string[]
+          video_url?: string | null
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['techniques']['Insert']>
+        Relationships: []
+      }
+      curriculum_sessions: {
+        Row: {
+          id: string
+          track_id: string
+          week_number: number
+          session_number: number
+          title: string
+          theme: string | null
+          objectives: string[]
+          warmup: string | null
+          drilling: string | null
+          sparring_focus: string | null
+          homework: string | null
+          duration_minutes: number
+          prerequisite_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          track_id: string
+          week_number: number
+          session_number: number
+          title: string
+          theme?: string | null
+          objectives?: string[]
+          warmup?: string | null
+          drilling?: string | null
+          sparring_focus?: string | null
+          homework?: string | null
+          duration_minutes?: number
+          prerequisite_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['curriculum_sessions']['Insert']>
+        Relationships: []
+      }
+      session_techniques: {
+        Row: {
+          session_id: string
+          technique_id: string
+          phase: 'warmup' | 'drilling' | 'main' | 'sparring' | 'review'
+          sort_order: number
+        }
+        Insert: {
+          session_id: string
+          technique_id: string
+          phase?: 'warmup' | 'drilling' | 'main' | 'sparring' | 'review'
+          sort_order?: number
+        }
+        Update: Partial<Database['public']['Tables']['session_techniques']['Insert']>
+        Relationships: []
+      }
     }
     Views: {
       public_coaches: {

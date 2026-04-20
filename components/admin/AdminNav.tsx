@@ -3,7 +3,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, CheckSquare, CalendarDays, Users, Award, ClipboardList, Settings, LogOut, Menu, X, Building2, ScrollText, BookOpen, MonitorPlay, FileText } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, CalendarDays, Users, Award, ClipboardList, Settings, LogOut, Menu, X, Building2, ScrollText, BookOpen, MonitorPlay, FileText, GraduationCap } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { createClient } from '@/lib/supabase/client'
@@ -28,7 +28,9 @@ const managementItems: NavItem[] = [
   { href: '/admin/guertel',       label: 'Gürtel',        Icon: Award },
   { href: '/admin/leads',         label: 'Leads',         Icon: ClipboardList },
   { href: '/admin/blog',          label: 'Blog',          Icon: BookOpen },
-  { href: '/admin/berichte',     label: 'Berichte',      Icon: FileText },    { href: '/admin/hero',         label: 'Hero Slider',   Icon: MonitorPlay },
+  { href: '/admin/curriculum',    label: 'Curriculum',    Icon: GraduationCap },
+  { href: '/admin/berichte',      label: 'Berichte',      Icon: FileText },
+  { href: '/admin/hero',          label: 'Hero Slider',   Icon: MonitorPlay },
   { href: '/admin/einstellungen', label: 'Einstellungen', Icon: Settings },
   { href: '/admin/audit',         label: 'Audit-Log',     Icon: ScrollText },
 ]
