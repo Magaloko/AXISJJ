@@ -32,10 +32,27 @@ export const metadata: Metadata = {
   description:
     'Trainiere Brazilian Jiu-Jitsu in Wien bei Österreichs erstem tschetschenischen Schwarzgurt. Gi, No-Gi, Kids. Jetzt 1 Woche kostenlos testen.',
   keywords: ['BJJ Wien', 'Brazilian Jiu-Jitsu Vienna', 'AXIS JJ', 'Grappling Wien'],
+  icons: {
+    icon: [
+      { url: '/images/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/images/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/images/android-chrome-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/images/android-chrome-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: { url: '/images/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+  },
   openGraph: {
     siteName: 'AXIS Jiu-Jitsu Vienna',
     locale: 'de_AT',
     type: 'website',
+    images: [
+      {
+        url: '/images/logo-full1.png',
+        width: 1632,
+        height: 624,
+        alt: 'AXIS Jiu-Jitsu Vienna',
+      },
+    ],
   },
 }
 
