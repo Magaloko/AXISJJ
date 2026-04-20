@@ -3,7 +3,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, CheckSquare, CalendarDays, Users, Award, ClipboardList, Settings, LogOut, Menu, X, Building2, ScrollText, BookOpen, MonitorPlay } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, CalendarDays, Users, Award, ClipboardList, Settings, LogOut, Menu, X, Building2, ScrollText, BookOpen, MonitorPlay, FileText } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { createClient } from '@/lib/supabase/client'
@@ -28,7 +28,7 @@ const managementItems: NavItem[] = [
   { href: '/admin/guertel',       label: 'Gürtel',        Icon: Award },
   { href: '/admin/leads',         label: 'Leads',         Icon: ClipboardList },
   { href: '/admin/blog',          label: 'Blog',          Icon: BookOpen },
-  { href: '/admin/hero',         label: 'Hero Slider',   Icon: MonitorPlay },
+  { href: '/admin/berichte',     label: 'Berichte',      Icon: FileText },    { href: '/admin/hero',         label: 'Hero Slider',   Icon: MonitorPlay },
   { href: '/admin/einstellungen', label: 'Einstellungen', Icon: Settings },
   { href: '/admin/audit',         label: 'Audit-Log',     Icon: ScrollText },
 ]
@@ -88,7 +88,7 @@ function NavContent({ role, roleBadge, userName, pathname, onItemClick, onLogout
             {managementItems.map(({ href, label, Icon }) => {
               const active = isActive(href)
               return (
-                <Link
+                <Linkh
                   key={href}
                   href={href}
                   onClick={onItemClick}
