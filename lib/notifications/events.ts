@@ -21,6 +21,7 @@ export type NotificationEvent =
   | { type: 'training.reminder'; data: { memberName: string; memberEmail: string; className: string; startsAt: string; location: string | null } }
   | { type: 'member.belt_promoted'; data: { memberName: string; memberEmail: string; fromBelt: string; toBelt: string } }
   | { type: 'trial.confirmation'; data: { fullName: string; email: string } }
+  | { type: 'monthly.report'; data: { memberName: string; memberEmail: string; month: string; trainings: number; streak: number; avgMoodLift: number | null } }
 
 export interface FormattedNotification {
   emailSubject: string
@@ -369,6 +370,61 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
           <p style="color:#999;font-size:12px">${escapeHtml(timeLine)}</p>
         </div>`,
         telegramMarkdown: buildTelegram('🎉', title, rows),
+        emailToOverride: memberEmail,
+      }
+    }
+    case 'monthly.report': {
+      const { memberName, memberEmail, month, trainings, streak, avgMoodLift } = event.data
+      const title = `Dein ${month} bei AXIS`
+      const motivation =
+        trainings === 0 ? 'Wir haben dich vermisst — komm gerne bald wieder auf die Matte! 💪'
+      : trainings >= 12 ? 'Mega Monat! Du zeigst was es heißt, wirklich committed zu sein. 🔥'
+      : trainings >= 6  ? 'Solider Monat — du bist auf dem richtigen Weg!'
+      : `${trainings} Training${trainings !== 1 ? 's' : ''} — jedes zählt. Nächster Monat wird stärker.`
+      return {
+        emailSubject: title,
+        emailText: buildEmailText(
+          `Hallo ${memberName}!`,
+          [
+            `Hier dein ${month}-Rückblick:`,
+            '',
+            `🥋 Trainings: ${trainings}`,
+            streak > 0 ? `🔥 Aktuelle Streak: ${streak} Tage` : '',
+            avgMoodLift !== null ? `😊 Ø Stimmungsveränderung: ${avgMoodLift > 0 ? '+' : ''}${avgMoodLift}` : '',
+            '',
+            motivation,
+            '',
+            'Bis bald auf der Matte!',
+          ].filter(Boolean),
+          timeLine
+        ),
+        emailHtml: `<div style="font-family:system-ui;max-width:600px;margin:0 auto;color:#111">
+          <div style="background:#111;padding:24px 32px;margin-bottom:24px">
+            <h1 style="color:#fff;margin:0;font-size:22px;letter-spacing:2px">AXIS JIU-JITSU VIENNA</h1>
+            <p style="color:#888;margin:4px 0 0;font-size:13px">Monatsrückblick · ${escapeHtml(month)}</p>
+          </div>
+          <div style="padding:0 32px">
+            <h2 style="color:#e63946">Hallo ${escapeHtml(memberName)}! 🥋</h2>
+            <p>hier ist dein ${escapeHtml(month)}-Rückblick:</p>
+
+            <div style="background:#f5f5f5;padding:20px;margin:20px 0;display:table;width:100%">
+              <div style="display:table-row">
+                <div style="display:table-cell;padding:8px;font-size:32px;font-weight:900;color:#e63946;text-align:center">${trainings}</div>
+                <div style="display:table-cell;padding:8px;font-size:32px;font-weight:900;color:${streak > 0 ? '#e63946' : '#999'};text-align:center">${streak > 0 ? `🔥 ${streak}` : '—'}</div>
+                <div style="display:table-cell;padding:8px;font-size:32px;font-weight:900;color:${avgMoodLift !== null && avgMoodLift > 0 ? '#e63946' : '#999'};text-align:center">${avgMoodLift !== null ? (avgMoodLift > 0 ? '+' : '') + avgMoodLift : '—'}</div>
+              </div>
+              <div style="display:table-row;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px">
+                <div style="display:table-cell;padding:0 8px 8px;text-align:center">Trainings</div>
+                <div style="display:table-cell;padding:0 8px 8px;text-align:center">Streak</div>
+                <div style="display:table-cell;padding:0 8px 8px;text-align:center">Ø Stimmung</div>
+              </div>
+            </div>
+
+            <p style="font-size:15px;color:#333;line-height:1.6">${escapeHtml(motivation)}</p>
+            <p>Bis bald auf der Matte!</p>
+          </div>
+        </div>`,
+        telegramMarkdown: `📊 *${escapeMdV2(title)}*\n${escapeMdV2('An: ' + memberName + ' | ' + trainings + ' Trainings')}`,
         emailToOverride: memberEmail,
       }
     }

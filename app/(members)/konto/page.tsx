@@ -7,6 +7,7 @@ import { LanguageToggle } from '@/components/members/LanguageToggle'
 import { formatDate } from '@/lib/utils/dates'
 import { PoliciesSection } from '@/components/members/PoliciesSection'
 import { BotLinkCard } from '@/components/members/BotLinkCard'
+import { DataPrivacySection } from '@/components/members/DataPrivacySection'
 import { getGymSettings } from '@/lib/gym-settings'
 import type { Metadata } from 'next'
 
@@ -108,6 +109,8 @@ export default async function KontoPage() {
         <BotLinkCard isLinked={isLinked} telegramUsername={telegramUsername} />
 
         <PoliciesSection settings={gym} />
+
+        <DataPrivacySection />
       </div>
     </div>
   )
