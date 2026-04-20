@@ -24,7 +24,7 @@ export async function getPosts(category?: string): Promise<BlogPost[]> {
     .eq('published', true)
     .order('published_at', { ascending: false })
 
-  if (category && category !== 'All') {
+  if (category && category !== 'Alle') {
     query = query.eq('category', category)
   }
 
