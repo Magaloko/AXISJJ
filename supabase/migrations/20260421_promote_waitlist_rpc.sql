@@ -2,16 +2,15 @@
 -- AND decrements all remaining waitlist positions in a single transaction.
 -- Returns the promoted booking's profile_id (for notifications) or NULL if no one waitlisted.
 
-CREATE OR REPLACE FUNCTION promote_waitlist(p_session_id UUID)
-RETURNS UUID
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
+CREATE OR REPLACE FUNCTION public.promote_waitlist(p_session_id uuid)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
 DECLARE
-  v_session_capacity INT;
-  v_promoted_profile_id UUID;
+  v_session_capacity int;
+  v_promoted_profile_id uuid;
 BEGIN
-  -- Lock the session row (fails silently if not found)
   SELECT capacity INTO v_session_capacity
   FROM class_sessions
   WHERE id = p_session_id AND cancelled = FALSE
@@ -21,7 +20,6 @@ BEGIN
     RETURN NULL;
   END IF;
 
-  -- Promote the first waitlisted booking and capture its profile_id atomically
   UPDATE bookings
   SET status = 'confirmed', waitlist_position = NULL
   WHERE id = (
@@ -36,7 +34,6 @@ BEGIN
     RETURN NULL;
   END IF;
 
-  -- Decrement remaining waitlist positions in a single statement
   UPDATE bookings
   SET waitlist_position = waitlist_position - 1
   WHERE session_id = p_session_id
@@ -45,4 +42,4 @@ BEGIN
 
   RETURN v_promoted_profile_id;
 END;
-$$;
+$function$;
