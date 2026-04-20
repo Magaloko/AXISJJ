@@ -897,6 +897,83 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['rule_card_attempts']['Insert']>
         Relationships: []
       }
+      tournaments: {
+        Row: {
+          id: string
+          name: string
+          date: string
+          end_date: string | null
+          location: string
+          type: 'internal' | 'external'
+          description: string | null
+          registration_deadline: string | null
+          coach_id: string | null
+          status: 'pending_approval' | 'approved' | 'cancelled'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          date: string
+          end_date?: string | null
+          location: string
+          type?: 'internal' | 'external'
+          description?: string | null
+          registration_deadline?: string | null
+          coach_id?: string | null
+          status?: 'pending_approval' | 'approved' | 'cancelled'
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['tournaments']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: "tournaments_coach_id_fkey"
+            columns: ["coach_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      tournament_registrations: {
+        Row: {
+          id: string
+          tournament_id: string
+          profile_id: string
+          weight_category: string | null
+          gi_nogi: 'gi' | 'nogi' | 'both' | null
+          notes: string | null
+          status: 'pending' | 'approved' | 'denied'
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          tournament_id: string
+          profile_id: string
+          weight_category?: string | null
+          gi_nogi?: 'gi' | 'nogi' | 'both' | null
+          notes?: string | null
+          status?: 'pending' | 'approved' | 'denied'
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['tournament_registrations']['Insert']>
+        Relationships: [
+          {
+            foreignKeyName: "tournament_registrations_tournament_id_fkey"
+            columns: ["tournament_id"]
+            isOneToOne: false
+            referencedRelation: "tournaments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tournament_registrations_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       public_coaches: {
