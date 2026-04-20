@@ -108,3 +108,51 @@ Beim Ausführen einer `LANGUAGE plpgsql` Funktion mit `DECLARE v_foo int; BEGIN 
 - Pattern-Key: supabase.prefer-sql-over-plpgsql
 
 ---
+
+## [LRN-20260421-002] project
+
+**Logged**: 2026-04-21
+**Priority**: high
+**Status**: resolved
+**Area**: backend
+
+### Summary
+Supabase Auth erstellt **kein** automatisches Profil in `public.profiles` — ohne Trigger oder Callback-Handler fehlen Profile komplett, und Users verschwinden aus allen Role-basierten Queries (`.eq('role', 'member')`).
+
+### Details
+AXISJJ-Bug-Report: Users `mbelgatto@gmail.com` und `nimmmeinauto@gmail.com` waren in Supabase Auth sichtbar, aber `/admin/mitglieder` zeigte 0 Mitglieder. Ursache:
+1. AXISJJ hat keinen `on_auth_user_created`-Trigger
+2. Auth-Callback versuchte nur Profil zu LESEN, nicht zu erstellen
+3. Users mit Magic-Link-Signup landeten in `auth.users` ohne `profiles`-Eintrag
+4. Alle Queries `.from('profiles').eq('role', 'member')` gaben 0 Ergebnisse zurück
+
+### Suggested Action
+Bei jedem Supabase-Projekt mit Auth: **einen von beiden Mechanismen** etablieren:
+
+**Option A — DB-Trigger (robuster):**
+```sql
+CREATE FUNCTION handle_new_user() RETURNS trigger SECURITY DEFINER AS $$
+BEGIN
+  INSERT INTO profiles (id, full_name, email, role)
+  VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email,'@',1)), NEW.email, 'member');
+  RETURN NEW;
+END $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER on_auth_user_created AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION handle_new_user();
+```
+
+**Option B — Auth-Callback-Handler (flexibler, app-controlled):**
+Im `/auth/callback/route.ts` nach erfolgreicher Session: Profil prüfen, anlegen falls fehlt.
+
+### Resolution
+- **Resolved**: 2026-04-21
+- **Notes**: Option B gewählt (weniger DB-Magic). Auch Backfill-SQL für existierende orphan auth.users hinzugefügt.
+
+### Metadata
+- Source: user_feedback
+- Related Files: app/auth/callback/route.ts, supabase/migrations/20260421_backfill_missing_profiles.sql
+- Tags: supabase, auth, profiles, trigger, magic-link
+- Pattern-Key: supabase.auto-create-profile
+
+---
