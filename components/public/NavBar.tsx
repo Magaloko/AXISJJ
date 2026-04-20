@@ -18,7 +18,7 @@ export function NavBar() {
   const [open, setOpen] = useState(false)
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b border-border bg-background/85 backdrop-blur-md">
+    <nav className="fixed top-0 z-50 w-full border-b border-border bg-white/95 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6">
         <Link href="/" aria-label="AXIS JIU JITSU — Zur Startseite">
           <Image
@@ -69,7 +69,7 @@ export function NavBar() {
         aria-hidden={!open}
         className={
           open
-            ? 'block border-t border-border bg-background px-4 py-4 md:hidden'
+            ? 'block border-t border-border bg-white px-4 py-4 md:hidden'
             : 'hidden'
         }
       >
