@@ -264,6 +264,28 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['bot_users']['Insert']>
         Relationships: []
       }
+      session_notes: {
+        Row: {
+          id: string
+          session_id: string
+          author_id: string | null
+          plan: string | null
+          reflection: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          session_id: string
+          author_id?: string | null
+          plan?: string | null
+          reflection?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['session_notes']['Insert']>
+        Relationships: []
+      }
       competitions: {
         Row: {
           id: string

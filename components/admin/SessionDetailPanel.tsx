@@ -6,6 +6,7 @@ import { X } from 'lucide-react'
 import { cancelSession } from '@/app/actions/sessions'
 import { SessionForm } from './SessionForm'
 import { SessionAttendeesList } from './SessionAttendeesList'
+import { SessionNotesPanel } from './SessionNotesPanel'
 import type { Session, Coach } from './SessionCalendar'
 
 interface ClassType { id: string; name: string }
@@ -100,6 +101,10 @@ export function SessionDetailPanel({
 
             <div className="mt-6 border-t border-border pt-6">
               <SessionAttendeesList sessionId={session.id} />
+            </div>
+
+            <div className="mt-6 border-t border-border pt-6">
+              <SessionNotesPanel sessionId={session.id} />
             </div>
 
             {error && <p className="mt-4 text-sm font-semibold text-destructive">{error}</p>}

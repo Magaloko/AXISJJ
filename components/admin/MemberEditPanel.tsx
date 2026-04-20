@@ -5,6 +5,8 @@ import { updateMember } from '@/app/actions/members'
 import { useRouter } from 'next/navigation'
 import { CoachNotesPanel } from './CoachNotesPanel'
 import { MemberCompetitionsView } from './MemberCompetitionsView'
+import { MemberProgressChart } from './MemberProgressChart'
+import { MemberSkillsManager } from './MemberSkillsManager'
 
 export interface MemberDetail {
   id: string
@@ -85,6 +87,14 @@ export function MemberEditPanel({ member, viewerRole, onClose }: Props) {
             <button onClick={onClose} className="border border-border px-4 py-2 text-sm">Abbrechen</button>
           </div>
         )}
+      </div>
+
+      <div className="mt-6 border-t border-border pt-6">
+        <MemberProgressChart profileId={member.id} />
+      </div>
+
+      <div className="mt-6 border-t border-border pt-6">
+        <MemberSkillsManager profileId={member.id} />
       </div>
 
       <div className="mt-6 border-t border-border pt-6">
