@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { updateMember } from '@/app/actions/members'
 import { useRouter } from 'next/navigation'
 import { CoachNotesPanel } from './CoachNotesPanel'
+import { MemberCompetitionsView } from './MemberCompetitionsView'
 
 export interface MemberDetail {
   id: string
@@ -84,6 +85,10 @@ export function MemberEditPanel({ member, viewerRole, onClose }: Props) {
             <button onClick={onClose} className="border border-border px-4 py-2 text-sm">Abbrechen</button>
           </div>
         )}
+      </div>
+
+      <div className="mt-6 border-t border-border pt-6">
+        <MemberCompetitionsView profileId={member.id} />
       </div>
 
       <div className="mt-6 border-t border-border pt-6">
