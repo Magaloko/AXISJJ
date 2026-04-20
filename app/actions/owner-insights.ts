@@ -183,7 +183,7 @@ export async function getOwnerInsights(): Promise<OwnerInsights> {
 
   // ── Avg class fill rate (30d sessions, reuse sessionsResult) ──
   const thirtyDaySessions = (sessionsResult.data ?? []).filter(s => {
-    if (!s.starts_at) return true
+    if (!s.starts_at) return false
     return new Date(s.starts_at) >= thirtyDaysAgo
   })
   const fillRates = thirtyDaySessions

@@ -222,10 +222,35 @@ describe('getOwnerInsights — new metrics', () => {
     expect(result.revenueVsLastMonthPct).toBe(0)
   })
 
+  it('computes revenueVsLastMonthPct correctly with non-zero delta', async () => {
+    let call = 0
+    mockSupabase.from.mockImplementation(() => {
+      call++
+      if (call === 1) return makeOwnerChain()
+      if (call === 2) return makeSessionsChain([])
+      if (call === 3) return makeEmptyChain()
+      if (call === 4) return makeCountChain(0)
+      // Current month: 2 subs × 100 = 200
+      if (call === 5) return makeSubsChain([
+        { category: 'adults', price_per_month: 100 },
+        { category: 'adults', price_per_month: 100 },
+      ])
+      // Last month: 1 sub × 100 = 100 → delta = (200-100)/100 × 100 = 100%
+      if (call === 6) return makeLastMonthSubsChain([{ price_per_month: 100 }])
+      if (call === 7) return makeLeadsChain([])
+      if (call === 8) return makeEmptyChain()
+      if (call === 9) return makeEmptyChain()
+      return makeEmptyChain()
+    })
+    const result = await getOwnerInsights()
+    expect(result.revenueVsLastMonthPct).toBe(100)
+  })
+
   it('computes avgClassFillRate from session data', async () => {
+    const recentDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
     const sessions = [
-      { capacity: 10, bookings: [{ status: 'confirmed' }, { status: 'confirmed' }, { status: 'cancelled' }] },
-      { capacity: 10, bookings: [{ status: 'confirmed' }, { status: 'confirmed' }, { status: 'confirmed' }, { status: 'confirmed' }] },
+      { starts_at: recentDate, capacity: 10, bookings: [{ status: 'confirmed' }, { status: 'confirmed' }, { status: 'cancelled' }] },
+      { starts_at: recentDate, capacity: 10, bookings: [{ status: 'confirmed' }, { status: 'confirmed' }, { status: 'confirmed' }, { status: 'confirmed' }] },
     ]
     // session 1: 2/10 = 20%, session 2: 4/10 = 40%, avg = 30%
     let call = 0
