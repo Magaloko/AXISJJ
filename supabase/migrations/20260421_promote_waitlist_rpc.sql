@@ -8,26 +8,33 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 DECLARE
-  v_promoted_id UUID;
+  v_session_capacity INT;
   v_promoted_profile_id UUID;
 BEGIN
-  -- Lock the session row to serialize concurrent promotions
-  PERFORM 1 FROM class_sessions WHERE id = p_session_id FOR UPDATE;
+  -- Lock the session row (fails silently if not found)
+  SELECT capacity INTO v_session_capacity
+  FROM class_sessions
+  WHERE id = p_session_id AND cancelled = FALSE
+  FOR UPDATE;
 
-  -- Find and promote the first waitlisted booking
-  SELECT id, profile_id INTO v_promoted_id, v_promoted_profile_id
-  FROM bookings
-  WHERE session_id = p_session_id AND status = 'waitlisted'
-  ORDER BY waitlist_position ASC
-  LIMIT 1;
-
-  IF v_promoted_id IS NULL THEN
+  IF v_session_capacity IS NULL THEN
     RETURN NULL;
   END IF;
 
+  -- Promote the first waitlisted booking and capture its profile_id atomically
   UPDATE bookings
   SET status = 'confirmed', waitlist_position = NULL
-  WHERE id = v_promoted_id;
+  WHERE id = (
+    SELECT id FROM bookings
+    WHERE session_id = p_session_id AND status = 'waitlisted'
+    ORDER BY waitlist_position ASC NULLS LAST
+    LIMIT 1
+  )
+  RETURNING profile_id INTO v_promoted_profile_id;
+
+  IF v_promoted_profile_id IS NULL THEN
+    RETURN NULL;
+  END IF;
 
   -- Decrement remaining waitlist positions in a single statement
   UPDATE bookings
