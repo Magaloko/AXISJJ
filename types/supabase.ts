@@ -23,8 +23,8 @@ export interface Database {
         Relationships: []
       }
       class_types: {
-        Row: { id: string; name: string; description: string | null; level: 'beginner' | 'all' | 'advanced' | 'kids'; gi: boolean }
-        Insert: { id?: string; name: string; description?: string | null; level?: 'beginner' | 'all' | 'advanced' | 'kids'; gi?: boolean }
+        Row: { id: string; name: string; description: string | null; level: 'beginner' | 'all' | 'advanced' | 'kids'; gi: boolean; image_url: string | null }
+        Insert: { id?: string; name: string; description?: string | null; level?: 'beginner' | 'all' | 'advanced' | 'kids'; gi?: boolean; image_url?: string | null }
         Update: Partial<Database['public']['Tables']['class_types']['Insert']>
         Relationships: []
       }
