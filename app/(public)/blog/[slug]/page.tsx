@@ -69,3 +69,5 @@ export default async function ArticlePage({ params }: Props) {
         </div>
       </div>
     </>
+  )
+}
