@@ -28,24 +28,35 @@ export default async function GuertelPage() {
       .order('promoted_at', { ascending: false }),
   ])
 
-  type BeltRow = { id: string; name: string; order: number; color_hex: string | null; min_sessions: number | null; min_time_months: number | null }
-  const beltList = (beltsResult.data ?? []) as BeltRow[]
+  const beltList = beltsResult.data ?? []
   const beltById = new Map(beltList.map(b => [b.id, b]))
   const beltByOrder = new Map(beltList.map(b => [b.order, b]))
 
-  const ranks = (ranksResult.data ?? []) as any[]
+  const ranks = ranksResult.data ?? []
 
   // Eligibility: most recent rank per profile
   const latestByProfile = new Map<string, { belt_rank_id: string; promoted_at: string; full_name: string }>()
   for (const row of ranks) {
-    if (latestByProfile.has(row.profile_id as string)) continue
+    if (latestByProfile.has(row.profile_id)) continue
     const rawProfile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
-    const profileObj = rawProfile as { full_name: string } | null
-    latestByProfile.set(row.profile_id as string, {
-      belt_rank_id: row.belt_rank_id as string,
-      promoted_at: row.promoted_at as string,
-      full_name: profileObj?.full_name ?? 'Unbekannt',
+    latestByProfile.set(row.profile_id, {
+      belt_rank_id: row.belt_rank_id,
+      promoted_at: row.promoted_at,
+      full_name: rawProfile?.full_name ?? 'Unbekannt',
     })
+  }
+
+  // Batch-fetch attendance counts for ALL profiles in one query (no more N+1)
+  const profileIds = Array.from(latestByProfile.keys())
+  const attendanceCounts = new Map<string, number>()
+  if (profileIds.length > 0) {
+    const { data: attendanceRows } = await supabase
+      .from('attendances')
+      .select('profile_id')
+      .in('profile_id', profileIds)
+    for (const row of attendanceRows ?? []) {
+      attendanceCounts.set(row.profile_id, (attendanceCounts.get(row.profile_id) ?? 0) + 1)
+    }
   }
 
   const now = new Date()
@@ -55,17 +66,16 @@ export default async function GuertelPage() {
     if (!currentBelt) continue
     const nextBelt = beltByOrder.get(currentBelt.order + 1)
     if (!nextBelt) continue
-    const { count: sessions } = await supabase
-      .from('attendances').select('*', { count: 'exact', head: true }).eq('profile_id', profileId)
+    const sessions = attendanceCounts.get(profileId) ?? 0
     const monthsElapsed = Math.floor((now.getTime() - new Date(latest.promoted_at).getTime()) / (1000 * 60 * 60 * 24 * 30))
-    const sessionsOk = !nextBelt.min_sessions || (sessions ?? 0) >= nextBelt.min_sessions
+    const sessionsOk = !nextBelt.min_sessions || sessions >= nextBelt.min_sessions
     const monthsOk = !nextBelt.min_time_months || monthsElapsed >= nextBelt.min_time_months
     if (!sessionsOk || !monthsOk) continue
     eligible.push({
       profileId, memberName: latest.full_name,
       currentBelt: currentBelt.name, currentBeltColor: currentBelt.color_hex,
       nextBelt: nextBelt.name, nextBeltColor: nextBelt.color_hex,
-      sessions: sessions ?? 0, months: monthsElapsed,
+      sessions, months: monthsElapsed,
     })
   }
   eligible.sort((a, b) => b.months - a.months)
@@ -73,37 +83,37 @@ export default async function GuertelPage() {
   // History: last 30 rows with "from" belt derived from the immediately-prior rank for the same profile
   const profileAscIndex = new Map<string, { belt_rank_id: string; promoted_at: string }[]>()
   for (const row of ranks) {
-    const list = profileAscIndex.get(row.profile_id as string) ?? []
-    list.push({ belt_rank_id: row.belt_rank_id as string, promoted_at: row.promoted_at as string })
-    profileAscIndex.set(row.profile_id as string, list)
+    const list = profileAscIndex.get(row.profile_id) ?? []
+    list.push({ belt_rank_id: row.belt_rank_id, promoted_at: row.promoted_at })
+    profileAscIndex.set(row.profile_id, list)
   }
   for (const list of profileAscIndex.values()) list.sort((a, b) => a.promoted_at.localeCompare(b.promoted_at))
 
-  const promoterIds = Array.from(new Set(ranks.map(r => r.promoted_by).filter(Boolean))) as string[]
+  const promoterIds = Array.from(new Set(ranks.map(r => r.promoted_by).filter((v): v is string => !!v)))
   const promoterMap = new Map<string, string>()
   if (promoterIds.length > 0) {
     const { data: promoters } = await supabase
       .from('profiles').select('id, full_name').in('id', promoterIds)
-    for (const p of (promoters ?? []) as { id: string; full_name: string }[]) {
+    for (const p of promoters ?? []) {
       promoterMap.set(p.id, p.full_name)
     }
   }
 
   const historyRows = ranks.slice(0, 30).map(row => {
-    const ascList = profileAscIndex.get(row.profile_id as string) ?? []
+    const ascList = profileAscIndex.get(row.profile_id) ?? []
     const currentIdx = ascList.findIndex(x => x.promoted_at === row.promoted_at && x.belt_rank_id === row.belt_rank_id)
     const prior = currentIdx > 0 ? ascList[currentIdx - 1] : null
     const priorBelt = prior ? beltById.get(prior.belt_rank_id) : null
-    const toBelt = beltById.get(row.belt_rank_id as string)
+    const toBelt = beltById.get(row.belt_rank_id)
     const rawProfile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
     return {
-      promotedAt: row.promoted_at as string,
-      memberName: (rawProfile as { full_name: string } | null)?.full_name ?? 'Unbekannt',
+      promotedAt: row.promoted_at,
+      memberName: rawProfile?.full_name ?? 'Unbekannt',
       fromBelt: priorBelt?.name ?? null,
       fromBeltColor: priorBelt?.color_hex ?? null,
       toBelt: toBelt?.name ?? '—',
       toBeltColor: toBelt?.color_hex ?? null,
-      promotedByName: row.promoted_by ? promoterMap.get(row.promoted_by as string) ?? null : null,
+      promotedByName: row.promoted_by ? promoterMap.get(row.promoted_by) ?? null : null,
     }
   })
 

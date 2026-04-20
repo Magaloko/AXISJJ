@@ -18,12 +18,7 @@ export async function generateBotLinkCode(): Promise<{ code?: string; error?: st
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { error: 'Nicht eingeloggt.' }
 
-  // Types for bot_users / bot_link_codes are not in the generated Database type yet.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sb = supabase as any
-
-  // Already linked?
-  const { data: existingLink } = await sb
+  const { data: existingLink } = await supabase
     .from('bot_users')
     .select('chat_id')
     .eq('profile_id', user.id)
@@ -34,7 +29,7 @@ export async function generateBotLinkCode(): Promise<{ code?: string; error?: st
 
   // Reuse existing unexpired, unused code if any
   const nowIso = new Date().toISOString()
-  const { data: existingCode } = await sb
+  const { data: existingCode } = await supabase
     .from('bot_link_codes')
     .select('code, expires_at')
     .eq('profile_id', user.id)
@@ -43,13 +38,13 @@ export async function generateBotLinkCode(): Promise<{ code?: string; error?: st
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle()
-  if (existingCode && typeof (existingCode as { code?: unknown }).code === 'string') {
-    return { code: (existingCode as { code: string }).code }
+  if (existingCode?.code) {
+    return { code: existingCode.code }
   }
 
   // Rate limit: max 5 generations per hour
   const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString()
-  const { count } = await sb
+  const { count } = await supabase
     .from('bot_link_codes')
     .select('*', { count: 'exact', head: true })
     .eq('profile_id', user.id)
@@ -60,7 +55,7 @@ export async function generateBotLinkCode(): Promise<{ code?: string; error?: st
 
   // Generate new
   const code = generateCode()
-  const { error } = await sb.from('bot_link_codes').insert({ code, profile_id: user.id })
+  const { error } = await supabase.from('bot_link_codes').insert({ code, profile_id: user.id })
   if (error) {
     console.error('[bot-link] insert error:', error)
     return { error: 'Code-Erzeugung fehlgeschlagen.' }
@@ -75,13 +70,14 @@ export async function unlinkBotAccount(): Promise<{ success?: true; error?: stri
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { error: 'Nicht eingeloggt.' }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const sb = supabase as any
-  const { error } = await sb
+  const { error } = await supabase
     .from('bot_users')
     .delete()
     .eq('profile_id', user.id)
-  if (error) return { error: 'Entknüpfen fehlgeschlagen.' }
+  if (error) {
+    console.error('[bot-link] unlink error:', error)
+    return { error: 'Entknüpfen fehlgeschlagen.' }
+  }
 
   revalidatePath('/konto')
   return { success: true }

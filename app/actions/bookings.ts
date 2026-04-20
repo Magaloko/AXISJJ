@@ -10,50 +10,18 @@ export async function bookClass(sessionId: string): Promise<{ success?: boolean;
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) return { error: 'Nicht eingeloggt' }
 
-  // Check for existing non-cancelled booking
-  const { data: existing } = await supabase
-    .from('bookings')
-    .select('id, status')
-    .eq('session_id', sessionId)
-    .eq('profile_id', user.id)
-    .single()
+  const { data: result, error: rpcError } = await supabase.rpc('book_class', {
+    p_session_id: sessionId,
+    p_user_id: user.id,
+  })
 
-  if (existing && existing.status !== 'cancelled') {
-    return { error: 'Du hast diese Klasse bereits gebucht.' }
+  if (rpcError) {
+    console.error('[bookings] book_class RPC error:', rpcError)
+    return { error: `Buchung fehlgeschlagen: ${rpcError.message}` }
   }
+  if (result?.error) return { error: result.error }
 
-  // NOTE: capacity check and insert are not atomic — concurrent requests can cause overbooking.
-  // A proper fix requires a DB-level function (RPC). Acceptable for current scale.
-  const [{ count: confirmedCount, error: countError }, { data: session }] = await Promise.all([
-    supabase
-      .from('bookings')
-      .select('*', { count: 'exact', head: true })
-      .eq('session_id', sessionId)
-      .eq('status', 'confirmed'),
-    supabase
-      .from('class_sessions')
-      .select('capacity')
-      .eq('id', sessionId)
-      .single(),
-  ])
-
-  if (countError) return { error: 'Buchung fehlgeschlagen. Bitte versuche es erneut.' }
-  if (!session) return { error: 'Klasse nicht gefunden.' }
-
-  const hasSpace = (confirmedCount ?? 0) < session.capacity
-  const status = hasSpace ? 'confirmed' as const : 'waitlisted' as const
-
-  const { error } = existing
-    ? await supabase
-        .from('bookings')
-        .update({ status, waitlist_position: hasSpace ? null : (confirmedCount ?? 0) + 1 })
-        .eq('id', existing.id)
-    : await supabase
-        .from('bookings')
-        .insert({ session_id: sessionId, profile_id: user.id, status,
-          waitlist_position: hasSpace ? null : (confirmedCount ?? 0) + 1 })
-
-  if (error) return { error: 'Buchung fehlgeschlagen. Bitte versuche es erneut.' }
+  const status = result?.status ?? 'confirmed'
 
   revalidatePath('/buchen')
   revalidatePath('/dashboard')
@@ -72,11 +40,10 @@ export async function bookClass(sessionId: string): Promise<{ success?: boolean;
         .eq('id', user.id)
         .single(),
     ])
-    const classTypes = (sessionInfo as { class_types?: { name?: string } | { name?: string }[] } | null)?.class_types
-    const ct = Array.isArray(classTypes) ? classTypes[0] : classTypes
+    const ct = Array.isArray(sessionInfo?.class_types) ? sessionInfo.class_types[0] : sessionInfo?.class_types
     const className = ct?.name ?? 'Unbekannt'
-    const startsAt = (sessionInfo as { starts_at?: string } | null)?.starts_at ?? ''
-    const memberName = (memberProfile as { full_name?: string } | null)?.full_name ?? 'Unbekannt'
+    const startsAt = sessionInfo?.starts_at ?? ''
+    const memberName = memberProfile?.full_name ?? 'Unbekannt'
     waitUntil(notify({
       type: 'booking.created',
       data: { memberName, className, startsAt, status },
@@ -103,45 +70,18 @@ export async function cancelBooking(bookingId: string): Promise<{ success?: bool
   if (error) return { error: 'Stornierung fehlgeschlagen. Bitte versuche es erneut.' }
   if (!cancelled || cancelled.length === 0) return { error: 'Buchung nicht gefunden.' }
 
-  // Promote first waitlisted booking for this session
+  // Atomic waitlist promotion via RPC — promotes first waitlisted and decrements
+  // all remaining positions in a single transaction.
   const sessionId = cancelled[0].session_id
+  let promotedProfileId: string | null = null
   if (sessionId) {
-    const { data: firstWaitlisted } = await supabase
-      .from('bookings')
-      .select('id, waitlist_position')
-      .eq('session_id', sessionId)
-      .eq('status', 'waitlisted')
-      .order('waitlist_position', { ascending: true })
-      .limit(1)
-      .single()
-
-    if (firstWaitlisted) {
-      const { error: promoteError } = await supabase
-        .from('bookings')
-        .update({ status: 'confirmed', waitlist_position: null })
-        .eq('id', firstWaitlisted.id)
-
-      if (promoteError) {
-        console.error('Waitlist promotion failed:', promoteError)
-      }
-
-      // Decrement remaining waitlist positions
-      // NOTE: N+1 loop acceptable at gym scale (< 20 waitlisted per session)
-      const { data: remaining } = await supabase
-        .from('bookings')
-        .select('id, waitlist_position')
-        .eq('session_id', sessionId)
-        .eq('status', 'waitlisted')
-        .gt('waitlist_position', 0)
-
-      if (remaining) {
-        for (const b of remaining) {
-          await supabase
-            .from('bookings')
-            .update({ waitlist_position: b.waitlist_position! - 1 })
-            .eq('id', b.id)
-        }
-      }
+    const { data: promoted, error: rpcError } = await supabase.rpc('promote_waitlist', {
+      p_session_id: sessionId,
+    })
+    if (rpcError) {
+      console.error('[bookings] waitlist promotion failed:', rpcError)
+    } else {
+      promotedProfileId = promoted
     }
   }
 
@@ -163,15 +103,34 @@ export async function cancelBooking(bookingId: string): Promise<{ success?: bool
           .eq('id', user.id)
           .single(),
       ])
-      const classTypes = (sessionInfo as { class_types?: { name?: string } | { name?: string }[] } | null)?.class_types
-      const ct = Array.isArray(classTypes) ? classTypes[0] : classTypes
+      const ct = Array.isArray(sessionInfo?.class_types) ? sessionInfo.class_types[0] : sessionInfo?.class_types
       const className = ct?.name ?? 'Unbekannt'
-      const startsAt = (sessionInfo as { starts_at?: string } | null)?.starts_at ?? ''
-      const memberName = (memberProfile as { full_name?: string } | null)?.full_name ?? 'Unbekannt'
+      const startsAt = sessionInfo?.starts_at ?? ''
+      const memberName = memberProfile?.full_name ?? 'Unbekannt'
       waitUntil(notify({
         type: 'booking.cancelled',
         data: { memberName, className, startsAt },
       }))
+
+      // Notify auto-promoted waitlist member (if any)
+      if (promotedProfileId) {
+        const { data: promotedProfile } = await supabase
+          .from('profiles')
+          .select('full_name, email')
+          .eq('id', promotedProfileId)
+          .single()
+        if (promotedProfile) {
+          waitUntil(notify({
+            type: 'waitlist.promoted',
+            data: {
+              memberName: promotedProfile.full_name ?? 'Unbekannt',
+              memberEmail: promotedProfile.email,
+              className,
+              startsAt,
+            },
+          }))
+        }
+      }
     }
   } catch {
     // best-effort

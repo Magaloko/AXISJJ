@@ -3,7 +3,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, CheckSquare, CalendarDays, Users, Award, ClipboardList, Settings, LogOut, Menu, X, Building2, BookOpen, MonitorPlay } from 'lucide-react'
+import { LayoutDashboard, CheckSquare, CalendarDays, Users, Award, ClipboardList, Settings, LogOut, Menu, X, Building2, ScrollText, BookOpen, MonitorPlay } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { createClient } from '@/lib/supabase/client'
@@ -19,7 +19,7 @@ interface NavItem {
 const opsItems: NavItem[] = [
   { href: '/admin/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
   { href: '/admin/checkin',   label: 'Check-In',  Icon: CheckSquare },
-  { href: '/admin/klassen',   label: 'Klassen',   Icon: CalendarDays },
+  { href: '/admin/klassen',   label: 'Training',  Icon: CalendarDays },
 ]
 
 const managementItems: NavItem[] = [
@@ -30,6 +30,7 @@ const managementItems: NavItem[] = [
   { href: '/admin/blog',          label: 'Blog',          Icon: BookOpen },
   { href: '/admin/hero',         label: 'Hero Slider',   Icon: MonitorPlay },
   { href: '/admin/einstellungen', label: 'Einstellungen', Icon: Settings },
+  { href: '/admin/audit',         label: 'Audit-Log',     Icon: ScrollText },
 ]
 
 interface NavContentProps {

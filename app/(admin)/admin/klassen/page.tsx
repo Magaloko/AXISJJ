@@ -1,65 +1,79 @@
 // app/(admin)/admin/klassen/page.tsx
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { startOfWeek, endOfWeek } from 'date-fns'
+import { subMonths, addMonths } from 'date-fns'
 import { SessionCalendar } from '@/components/admin/SessionCalendar'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Klassen | Admin' }
+export const metadata: Metadata = { title: 'Training | Admin' }
 
 export default async function KlassenPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const weekStart = startOfWeek(new Date(), { weekStartsOn: 1 })
-  const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 })
+  // Fetch a wide range (±2 months around today) so Day/Week/Month/Quarter views
+  // all work without re-fetching. Client filters this down per view.
+  const rangeStart = subMonths(new Date(), 2)
+  const rangeEnd = addMonths(new Date(), 2)
 
-  const [sessionsResult, classTypesResult] = await Promise.all([
+  const [sessionsResult, classTypesResult, coachesResult] = await Promise.all([
     supabase
       .from('class_sessions')
       .select(`
-        id, starts_at, ends_at, cancelled, location, capacity, class_type_id,
+        id, starts_at, ends_at, cancelled, location, capacity, class_type_id, coach_id,
         class_types(name),
-        bookings(id, status)
+        bookings(id, status),
+        profiles!class_sessions_coach_id_fkey(full_name)
       `)
-      .gte('starts_at', weekStart.toISOString())
-      .lte('starts_at', weekEnd.toISOString())
+      .gte('starts_at', rangeStart.toISOString())
+      .lte('starts_at', rangeEnd.toISOString())
       .order('starts_at', { ascending: true }),
     supabase
       .from('class_types')
       .select('id, name')
       .order('name', { ascending: true }),
+    supabase
+      .from('profiles')
+      .select('id, full_name')
+      .in('role', ['coach', 'owner'])
+      .order('full_name', { ascending: true }),
   ])
 
-  const rawSessions = sessionsResult.data ?? []
-  const sessions = rawSessions.map((s: Record<string, unknown>) => {
-    const bookingsArr = Array.isArray(s.bookings) ? s.bookings as { status: string }[] : []
+  const sessions = (sessionsResult.data ?? []).map((s) => {
+    const bookingsArr = Array.isArray(s.bookings) ? s.bookings : []
     const confirmedCount = bookingsArr.filter(b => b.status === 'confirmed').length
-    const rawCt = s.class_types
-    const classType = Array.isArray(rawCt) ? rawCt[0] : rawCt
+    const classType = Array.isArray(s.class_types) ? s.class_types[0] : s.class_types
+    const coachProfile = Array.isArray(s.profiles) ? s.profiles[0] : s.profiles
     return {
-      id: s.id as string,
-      starts_at: s.starts_at as string,
-      ends_at: s.ends_at as string,
-      cancelled: s.cancelled as boolean,
-      location: s.location as string | null,
-      capacity: s.capacity as number,
-      class_type_id: s.class_type_id as string,
-      class_types: classType ? { name: (classType as { name: string }).name } : null,
+      id: s.id,
+      starts_at: s.starts_at,
+      ends_at: s.ends_at,
+      cancelled: s.cancelled,
+      location: s.location,
+      capacity: s.capacity,
+      class_type_id: s.class_type_id,
+      coach_id: s.coach_id ?? null,
+      coach_name: coachProfile?.full_name ?? null,
+      class_types: classType ? { name: classType.name } : null,
       confirmedCount,
     }
   })
 
   const classTypes = (classTypesResult.data ?? []).map(ct => ({
-    id: ct.id as string,
-    name: ct.name as string,
+    id: ct.id,
+    name: ct.name,
+  }))
+
+  const coaches = (coachesResult.data ?? []).map(c => ({
+    id: c.id,
+    name: c.full_name,
   }))
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="mb-6 text-2xl font-black text-foreground">Klassen</h1>
-      <SessionCalendar initialSessions={sessions} classTypes={classTypes} />
+      <h1 className="mb-6 text-2xl font-black text-foreground">Training</h1>
+      <SessionCalendar initialSessions={sessions} classTypes={classTypes} coaches={coaches} />
     </div>
   )
 }

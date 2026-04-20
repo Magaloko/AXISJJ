@@ -6,6 +6,16 @@ import { revalidatePath } from 'next/cache'
 import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
 import { LeadSchema } from './leads.schema'
+import { assertStaff } from '@/lib/auth'
+import { z } from 'zod'
+
+const newLeadSchema = z.object({
+  full_name: z.string().min(2, 'Name ist Pflicht'),
+  email: z.string().email('Ungültige E-Mail'),
+  phone: z.string().max(20).optional(),
+  message: z.string().max(1000).optional(),
+  source: z.enum(['website', 'instagram']),
+})
 
 /**
  * Phase 1 public contact-form action (kept for the /trial page).
@@ -43,6 +53,15 @@ export async function submitTrialLead(
       source: 'website',
     },
   }))
+
+  // Auto-confirmation email to the prospect
+  waitUntil(notify({
+    type: 'trial.confirmation',
+    data: {
+      fullName: parsed.data.full_name,
+      email: parsed.data.email,
+    },
+  }))
   return { success: true }
 }
 
@@ -55,15 +74,10 @@ export async function updateLeadStatus(
 ): Promise<{ success?: true; error?: string }> {
   if (!VALID_LEAD_STATUS.includes(status)) return { error: 'Ungültiger Status.' }
 
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) return { error: 'Nicht eingeloggt.' }
+  const auth = await assertStaff()
+  if ('error' in auth) return { error: auth.error }
 
-  const { data: caller } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single()
-  if (!caller || !['coach', 'owner'].includes(caller.role)) {
-    return { error: 'Keine Berechtigung.' }
-  }
+  const supabase = await createClient()
 
   // Fetch current lead info for notification (old status + identity)
   const { data: existingLead } = await supabase
@@ -72,9 +86,7 @@ export async function updateLeadStatus(
     .eq('id', leadId)
     .single()
 
-  const { error } = await (supabase.from('leads') as any)
-    .update({ status })
-    .eq('id', leadId)
+  const { error } = await supabase.from('leads').update({ status }).eq('id', leadId)
   if (error) return { error: 'Status-Update fehlgeschlagen.' }
 
   revalidatePath('/admin/leads')
@@ -94,42 +106,24 @@ export async function updateLeadStatus(
   return { success: true }
 }
 
-export interface NewLeadData {
-  full_name: string
-  email: string
-  phone?: string
-  message?: string
-  source: 'website' | 'instagram'
-}
+export type NewLeadData = z.infer<typeof newLeadSchema>
 
 export async function createLead(
   data: NewLeadData,
 ): Promise<{ success?: true; error?: string }> {
+  const parsed = newLeadSchema.safeParse(data)
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Ungültige Eingabe.' }
+
+  const auth = await assertStaff()
+  if ('error' in auth) return { error: auth.error }
+
   const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) return { error: 'Nicht eingeloggt.' }
-
-  const { data: caller } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single()
-  if (!caller || !['coach', 'owner'].includes(caller.role)) {
-    return { error: 'Keine Berechtigung.' }
-  }
-
-  if (!data.full_name?.trim() || !data.email?.trim()) {
-    return { error: 'Name und E-Mail sind Pflicht.' }
-  }
-
-  const full_name = data.full_name.trim()
-  const email = data.email.trim()
-  const phone = data.phone?.trim() || null
-  const message = data.message?.trim() || null
-
-  const { error } = await (supabase.from('leads') as any).insert({
-    full_name,
-    email,
-    phone,
-    message,
-    source: data.source,
+  const { error } = await supabase.from('leads').insert({
+    full_name: parsed.data.full_name.trim(),
+    email: parsed.data.email.trim(),
+    phone: parsed.data.phone?.trim() || null,
+    message: parsed.data.message?.trim() || null,
+    source: parsed.data.source,
     status: 'new',
   })
   if (error) return { error: 'Lead-Erstellung fehlgeschlagen.' }
@@ -139,7 +133,13 @@ export async function createLead(
 
   waitUntil(notify({
     type: 'lead.created',
-    data: { full_name, email, phone, message, source: data.source },
+    data: {
+      full_name: parsed.data.full_name.trim(),
+      email: parsed.data.email.trim(),
+      phone: parsed.data.phone?.trim() || null,
+      message: parsed.data.message?.trim() || null,
+      source: parsed.data.source,
+    },
   }))
   return { success: true }
 }

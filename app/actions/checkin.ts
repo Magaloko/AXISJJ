@@ -3,25 +3,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
+import { assertStaff } from '@/lib/auth'
 
 export async function checkIn(
   profileId: string,
   sessionId: string
 ): Promise<{ success?: boolean; memberName?: string; error?: string }> {
+  const auth = await assertStaff()
+  if ('error' in auth) return { error: auth.error }
+
   const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) return { error: 'Nicht eingeloggt' }
-
-  // Verify caller is a coach or owner
-  const { data: callerProfile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!callerProfile || !['coach', 'owner'].includes(callerProfile.role)) {
-    return { error: 'Keine Berechtigung.' }
-  }
 
   // Verify profile exists and get member name
   const { data: profile } = await supabase
@@ -32,11 +23,10 @@ export async function checkIn(
 
   if (!profile) return { error: 'Mitglied nicht gefunden.' }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { error } = await supabase
     .from('attendances')
     .upsert(
-      { profile_id: profileId, session_id: sessionId, checked_in_at: new Date().toISOString() } as any,
+      { profile_id: profileId, session_id: sessionId, checked_in_at: new Date().toISOString() },
       { onConflict: 'profile_id,session_id' }
     )
 
@@ -51,10 +41,9 @@ export async function checkIn(
       .select('starts_at, class_types(name)')
       .eq('id', sessionId)
       .single()
-    const classTypes = (sessionInfo as { class_types?: { name?: string } | { name?: string }[] } | null)?.class_types
-    const ct = Array.isArray(classTypes) ? classTypes[0] : classTypes
+    const ct = Array.isArray(sessionInfo?.class_types) ? sessionInfo.class_types[0] : sessionInfo?.class_types
     const className = ct?.name ?? 'Unbekannt'
-    const startsAt = (sessionInfo as { starts_at?: string } | null)?.starts_at ?? ''
+    const startsAt = sessionInfo?.starts_at ?? ''
     waitUntil(notify({
       type: 'checkin.recorded',
       data: { memberName, className, startsAt },

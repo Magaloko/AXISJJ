@@ -24,7 +24,7 @@ export interface Database {
       }
       class_types: {
         Row: { id: string; name: string; description: string | null; level: 'beginner' | 'all' | 'advanced' | 'kids'; gi: boolean }
-        Insert: Omit<Database['public']['Tables']['class_types']['Row'], 'id'>
+        Insert: { id?: string; name: string; description?: string | null; level?: 'beginner' | 'all' | 'advanced' | 'kids'; gi?: boolean }
         Update: Partial<Database['public']['Tables']['class_types']['Insert']>
         Relationships: []
       }
@@ -34,7 +34,7 @@ export interface Database {
           starts_at: string; ends_at: string; capacity: number
           location: string; recurring_group_id: string | null; cancelled: boolean
         }
-        Insert: Omit<Database['public']['Tables']['class_sessions']['Row'], 'id'>
+        Insert: { id?: string; class_type_id: string; coach_id?: string | null; starts_at: string; ends_at: string; capacity?: number; location?: string; recurring_group_id?: string | null; cancelled?: boolean }
         Update: Partial<Database['public']['Tables']['class_sessions']['Insert']>
         Relationships: [
           {
@@ -80,7 +80,7 @@ export interface Database {
       }
       attendances: {
         Row: { id: string; session_id: string; profile_id: string; checked_in_at: string; checked_in_by: string | null }
-        Insert: Omit<Database['public']['Tables']['attendances']['Row'], 'id' | 'checked_in_at'>
+        Insert: { session_id: string; profile_id: string; checked_in_at?: string; checked_in_by?: string | null }
         Update: Partial<Database['public']['Tables']['attendances']['Insert']>
         Relationships: [
           {
@@ -169,7 +169,7 @@ export interface Database {
       }
       profile_ranks: {
         Row: { id: string; profile_id: string; belt_rank_id: string; promoted_at: string; promoted_by: string | null; notes: string | null }
-        Insert: Omit<Database['public']['Tables']['profile_ranks']['Row'], 'id'>
+        Insert: { id?: string; profile_id: string; belt_rank_id: string; promoted_at?: string; promoted_by?: string | null; notes?: string | null }
         Update: Partial<Database['public']['Tables']['profile_ranks']['Insert']>
         Relationships: [
           {
@@ -210,9 +210,251 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['gym_settings']['Row']>
         Relationships: []
       }
+      training_logs: {
+        Row: {
+          id: string
+          profile_id: string
+          session_id: string | null
+          mood_before: number
+          mood_after: number | null
+          energy: number | null
+          technique: number | null
+          conditioning: number | null
+          mental: number | null
+          focus_areas: string[]
+          notes: string | null
+          next_goal: string | null
+          logged_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          session_id?: string | null
+          mood_before: number
+          mood_after?: number | null
+          energy?: number | null
+          technique?: number | null
+          conditioning?: number | null
+          mental?: number | null
+          focus_areas?: string[]
+          notes?: string | null
+          next_goal?: string | null
+          logged_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['training_logs']['Insert']>
+        Relationships: []
+      }
+      bot_users: {
+        Row: {
+          chat_id: number
+          profile_id: string
+          bot_role: 'admin' | 'moderator' | 'coach' | 'member'
+          telegram_username: string | null
+          first_name: string | null
+          linked_at: string
+        }
+        Insert: {
+          chat_id: number
+          profile_id: string
+          bot_role?: 'admin' | 'moderator' | 'coach' | 'member'
+          telegram_username?: string | null
+          first_name?: string | null
+          linked_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['bot_users']['Insert']>
+        Relationships: []
+      }
+      pricing_plans: {
+        Row: {
+          id: string
+          category: 'students' | 'adults' | 'kids'
+          duration_months: number
+          price_per_month: number
+          total_price: number | null
+          highlighted: boolean
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          category: 'students' | 'adults' | 'kids'
+          duration_months: number
+          price_per_month: number
+          total_price?: number | null
+          highlighted?: boolean
+          updated_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['pricing_plans']['Insert']>
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          id: string
+          profile_id: string
+          category: 'students' | 'adults' | 'kids'
+          duration_months: number
+          price_per_month: number
+          start_date: string
+          end_date: string | null
+          status: 'active' | 'paused' | 'cancelled' | 'expired'
+          payment_method: 'sepa' | 'bar' | 'ueberweisung' | 'karte' | null
+          notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          category: 'students' | 'adults' | 'kids'
+          duration_months: number
+          price_per_month: number
+          start_date?: string
+          end_date?: string | null
+          status?: 'active' | 'paused' | 'cancelled' | 'expired'
+          payment_method?: 'sepa' | 'bar' | 'ueberweisung' | 'karte' | null
+          notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['subscriptions']['Insert']>
+        Relationships: []
+      }
+      session_notes: {
+        Row: {
+          id: string
+          session_id: string
+          author_id: string | null
+          plan: string | null
+          reflection: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          session_id: string
+          author_id?: string | null
+          plan?: string | null
+          reflection?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['session_notes']['Insert']>
+        Relationships: []
+      }
+      competitions: {
+        Row: {
+          id: string
+          profile_id: string
+          name: string
+          date: string
+          location: string | null
+          category: string | null
+          placement: string | null
+          notes: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          name: string
+          date: string
+          location?: string | null
+          category?: string | null
+          placement?: string | null
+          notes?: string | null
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['competitions']['Insert']>
+        Relationships: []
+      }
+      audit_log: {
+        Row: {
+          id: string
+          actor_id: string | null
+          actor_name: string | null
+          action: string
+          target_type: string | null
+          target_id: string | null
+          target_name: string | null
+          meta: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          actor_id?: string | null
+          actor_name?: string | null
+          action: string
+          target_type?: string | null
+          target_id?: string | null
+          target_name?: string | null
+          meta?: Json | null
+          created_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['audit_log']['Insert']>
+        Relationships: []
+      }
+      coach_notes: {
+        Row: {
+          id: string
+          profile_id: string
+          author_id: string | null
+          content: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          author_id?: string | null
+          content: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: Partial<Database['public']['Tables']['coach_notes']['Insert']>
+        Relationships: []
+      }
+      bot_link_codes: {
+        Row: {
+          code: string
+          profile_id: string
+          created_at: string
+          expires_at: string
+          used_at: string | null
+          used_by_chat_id: number | null
+        }
+        Insert: {
+          code: string
+          profile_id: string
+          created_at?: string
+          expires_at?: string
+          used_at?: string | null
+          used_by_chat_id?: number | null
+        }
+        Update: Partial<Database['public']['Tables']['bot_link_codes']['Insert']>
+        Relationships: []
+      }
     }
-    Views: { [_ in never]: never }
-    Functions: { get_my_role: { Args: Record<PropertyKey, never>; Returns: string } }
+    Views: {
+      public_coaches: {
+        Row: {
+          id: string
+          full_name: string
+          role: 'coach' | 'owner'
+          avatar_url: string | null
+        }
+        Relationships: []
+      }
+    }
+    Functions: {
+      get_my_role: { Args: Record<PropertyKey, never>; Returns: string }
+      book_class: {
+        Args: { p_session_id: string; p_user_id: string }
+        Returns: { status?: 'confirmed' | 'waitlisted'; error?: string }
+      }
+      promote_waitlist: {
+        Args: { p_session_id: string }
+        Returns: string | null
+      }
+    }
     Enums: { [_ in never]: never }
   }
 }

@@ -2,25 +2,80 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils/cn'
-import { SCHEDULE, type ScheduleClass } from '@/lib/utils/schedule-data'
 
-const LEVEL_LABELS: Record<ScheduleClass['level'], string> = {
+export interface PublicSession {
+  id: string
+  name: string
+  time: string
+  endTime: string
+  level: 'beginner' | 'all' | 'advanced' | 'kids'
+  gi: boolean
+  trainer: string
+}
+
+export interface PublicDaySchedule {
+  dayLabel: string
+  dayShort: string
+  sessions: PublicSession[]
+}
+
+interface Props {
+  schedule: PublicDaySchedule[]
+}
+
+const LEVEL_LABELS: Record<PublicSession['level'], string> = {
   beginner: 'Anfänger',
   all:      'Alle Levels',
   advanced: 'Blue Belt+',
   kids:     'Kids',
 }
 
-const LEVEL_COLORS: Record<ScheduleClass['level'], string> = {
-  beginner: 'border-l-border',
-  all:      'border-l-primary',
-  advanced: 'border-l-blue-500',
-  kids:     'border-l-yellow-500',
+const LEVEL_BAR: Record<PublicSession['level'], string> = {
+  beginner: 'bg-border',
+  all:      'bg-primary',
+  advanced: 'bg-blue-500',
+  kids:     'bg-yellow-400',
 }
 
-export function ScheduleWidget() {
+const LEVEL_TEXT: Record<PublicSession['level'], string> = {
+  beginner: 'text-muted-foreground',
+  all:      'text-primary',
+  advanced: 'text-blue-400',
+  kids:     'text-yellow-400',
+}
+
+function ClassCard({ cls }: { cls: PublicSession }) {
+  return (
+    <div className="relative overflow-hidden border border-border bg-card p-3 transition-colors hover:border-primary/50 hover:bg-muted">
+      <div className={cn('absolute left-0 top-0 h-full w-1', LEVEL_BAR[cls.level])} />
+      <div className="pl-3">
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-sm font-black leading-tight text-foreground">{cls.name}</p>
+          <span className={cn(
+            'shrink-0 rounded px-1.5 py-0.5 text-[10px] font-bold tracking-wider',
+            cls.gi
+              ? 'bg-primary/10 text-primary'
+              : 'border border-border bg-muted text-muted-foreground'
+          )}>
+            {cls.gi ? 'GI' : 'NO-GI'}
+          </span>
+        </div>
+        <p className="mt-1 font-mono text-xs font-bold text-foreground">
+          {cls.time} – {cls.endTime}
+        </p>
+        <p className={cn('mt-0.5 text-[10px] font-semibold uppercase tracking-wider', LEVEL_TEXT[cls.level])}>
+          {LEVEL_LABELS[cls.level]}
+        </p>
+        <p className="mt-1.5 truncate text-[10px] text-muted-foreground">
+          👤 {cls.trainer}
+        </p>
+      </div>
+    </div>
+  )
+}
+
+export function ScheduleWidget({ schedule }: Props) {
   const [activeDay, setActiveDay] = useState(0)
-  const day = SCHEDULE[activeDay]
 
   return (
     <section id="trainingsplan" className="bg-background py-16 sm:py-24">
@@ -34,59 +89,74 @@ export function ScheduleWidget() {
           </h2>
         </div>
 
-        <div className="mb-8 flex gap-1 overflow-x-auto pb-1">
-          {SCHEDULE.map((d, i) => (
-            <button
-              key={d.short}
-              onClick={() => setActiveDay(i)}
-              className={cn(
-                'min-w-[52px] flex-shrink-0 px-3 py-2 text-xs font-bold tracking-wider transition-all',
-                activeDay === i
-                  ? 'bg-primary text-primary-foreground'
-                  : 'bg-muted text-muted-foreground hover:bg-card hover:text-foreground'
-              )}
-            >
-              {d.short}
-            </button>
-          ))}
-        </div>
-
-        <p className="mb-4 text-sm font-semibold uppercase tracking-widest text-muted-foreground">
-          {day.label}
-        </p>
-
-        {day.classes.length === 0 ? (
-          <p className="text-muted-foreground">Kein Training an diesem Tag.</p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {day.classes.map(cls => (
-              <div
-                key={`${cls.name}-${cls.time}`}
-                className={cn(
-                  'flex items-center justify-between border-l-4 bg-muted px-4 py-4 transition-colors hover:bg-card',
-                  LEVEL_COLORS[cls.level]
-                )}
-              >
-                <div>
-                  <p className="font-semibold text-foreground">{cls.name}</p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{LEVEL_LABELS[cls.level]}</p>
+        {/* Desktop: full 7-column week grid */}
+        <div className="hidden md:block">
+          <div className="grid grid-cols-7 gap-3">
+            {schedule.map(day => (
+              <div key={day.dayShort}>
+                <div className="mb-3 border-b-2 border-primary pb-2 text-center">
+                  <p className="text-xs font-black uppercase tracking-widest text-primary">{day.dayShort}</p>
+                  <p className="mt-0.5 text-[10px] text-muted-foreground">{day.dayLabel}</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="rounded bg-background px-2 py-1 text-xs font-bold text-muted-foreground">
-                    {cls.gi ? 'GI' : 'NO-GI'}
-                  </span>
-                  <div className="text-right" style={{ fontFamily: 'var(--font-mono)' }}>
-                    <p className="text-sm font-bold text-foreground">{cls.time}</p>
-                    <p className="text-xs text-muted-foreground">{cls.endTime}</p>
+                {day.sessions.length === 0 ? (
+                  <div className="flex h-20 items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground/40">
+                    Kein Training
                   </div>
-                </div>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    {day.sessions.map(cls => (
+                      <ClassCard key={`${cls.id}`} cls={cls} />
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
-        )}
+        </div>
 
-        <p className="mt-8 text-xs text-muted-foreground">
-          * Stundenplan kann variieren. Änderungen auf @axisjj_at.
+        {/* Mobile: tab per day */}
+        <div className="md:hidden">
+          <div className="mb-5 flex gap-1.5 overflow-x-auto pb-1">
+            {schedule.map((d, i) => (
+              <button
+                key={d.dayShort}
+                onClick={() => setActiveDay(i)}
+                className={cn(
+                  'min-w-[44px] shrink-0 px-3 py-2 text-xs font-black uppercase tracking-wider transition-all',
+                  activeDay === i
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-card text-muted-foreground hover:text-foreground'
+                )}
+              >
+                {d.dayShort}
+              </button>
+            ))}
+          </div>
+          <p className="mb-3 text-sm font-bold uppercase tracking-widest text-foreground">
+            {schedule[activeDay]?.dayLabel}
+          </p>
+          {(schedule[activeDay]?.sessions.length ?? 0) === 0 ? (
+            <p className="text-sm text-muted-foreground">Kein Training an diesem Tag.</p>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {schedule[activeDay]?.sessions.map(cls => (
+                <ClassCard key={cls.id} cls={cls} />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Legend */}
+        <div className="mt-8 flex flex-wrap gap-4">
+          {(Object.keys(LEVEL_LABELS) as PublicSession['level'][]).map(level => (
+            <div key={level} className="flex items-center gap-2">
+              <div className={cn('h-3 w-1 rounded-full', LEVEL_BAR[level])} />
+              <span className="text-xs text-muted-foreground">{LEVEL_LABELS[level]}</span>
+            </div>
+          ))}
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          * Stundenplan kann variieren. Aktuelle Änderungen auf @axisjj_at.
         </p>
       </div>
     </section>

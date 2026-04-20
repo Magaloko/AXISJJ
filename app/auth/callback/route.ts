@@ -5,17 +5,47 @@ import { cookies } from 'next/headers'
 import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
 
-async function notifyAuthEvent(
+async function ensureProfileAndNotify(
   supabase: ReturnType<typeof createServerClient>,
 ): Promise<void> {
   try {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
-    const { data: profile } = await supabase
+
+    let { data: profile } = await supabase
       .from('profiles')
       .select('full_name, email, created_at')
       .eq('id', user.id)
       .single()
+
+    // Auto-create profile on first login if missing (e.g. signup via magic link).
+    if (!profile) {
+      const fullName =
+        (user.user_metadata?.full_name as string | undefined) ??
+        (user.user_metadata?.name as string | undefined) ??
+        (user.email ? user.email.split('@')[0] : 'Unbekannt')
+      const email = user.email ?? ''
+
+      const { error: insertError } = await supabase.from('profiles').insert({
+        id: user.id,
+        full_name: fullName,
+        email,
+        role: 'member',
+        language: 'de',
+      })
+      if (insertError) {
+        console.error('[auth/callback] profile auto-create failed:', insertError)
+        return
+      }
+
+      const { data: freshProfile } = await supabase
+        .from('profiles')
+        .select('full_name, email, created_at')
+        .eq('id', user.id)
+        .single()
+      profile = freshProfile
+    }
+
     if (!profile) return
     const createdAt = new Date((profile as { created_at: string }).created_at).getTime()
     const age = Date.now() - createdAt
@@ -27,8 +57,8 @@ async function notifyAuthEvent(
         email: (profile as { email?: string }).email ?? '',
       },
     }))
-  } catch {
-    // best-effort
+  } catch (err) {
+    console.error('[auth/callback] ensureProfile error:', err)
   }
 }
 
@@ -64,7 +94,7 @@ export async function GET(request: NextRequest) {
   if (token_hash && type) {
         const { error } = await supabase.auth.verifyOtp({ token_hash, type: type as never })
         if (!error) {
-                await notifyAuthEvent(supabase)
+                await ensureProfileAndNotify(supabase)
                 return NextResponse.redirect(new URL(safePath, origin))
         }
   }
@@ -73,7 +103,7 @@ export async function GET(request: NextRequest) {
   if (code) {
         const { error } = await supabase.auth.exchangeCodeForSession(code)
         if (!error) {
-                await notifyAuthEvent(supabase)
+                await ensureProfileAndNotify(supabase)
                 return NextResponse.redirect(new URL(safePath, origin))
         }
   }

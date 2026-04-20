@@ -25,13 +25,22 @@ interface Props {
 export function MemberTable({ members, belts, viewerRole }: Props) {
   const [search, setSearch] = useState('')
   const [beltFilter, setBeltFilter] = useState('')
+  const [roleFilter, setRoleFilter] = useState<'all' | 'member' | 'coach' | 'owner'>('all')
   const [selected, setSelected] = useState<MemberDetail | null>(null)
 
   const filtered = members.filter(m => {
     const matchesSearch = !search || (m.full_name ?? '').toLowerCase().includes(search.toLowerCase())
     const matchesBelt = !beltFilter || m.belt?.name === beltFilter
-    return matchesSearch && matchesBelt
+    const matchesRole = roleFilter === 'all' || m.role === roleFilter
+    return matchesSearch && matchesBelt && matchesRole
   })
+
+  const counts = {
+    all: members.length,
+    member: members.filter(m => m.role === 'member').length,
+    coach: members.filter(m => m.role === 'coach').length,
+    owner: members.filter(m => m.role === 'owner').length,
+  }
 
   function formatDate(iso: string | null) {
     if (!iso) return '—'
@@ -40,6 +49,28 @@ export function MemberTable({ members, belts, viewerRole }: Props) {
 
   return (
     <div>
+      {/* Role tabs */}
+      <div className="mb-3 flex gap-1 overflow-x-auto">
+        {([
+          { key: 'all',    label: 'Alle' },
+          { key: 'member', label: 'Mitglieder' },
+          { key: 'coach',  label: 'Coaches' },
+          { key: 'owner',  label: 'Owner' },
+        ] as const).map(t => (
+          <button
+            key={t.key}
+            onClick={() => setRoleFilter(t.key)}
+            className={`shrink-0 border px-3 py-1.5 text-xs font-bold uppercase tracking-wider transition-colors ${
+              roleFilter === t.key
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border bg-background text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {t.label} <span className="ml-1 font-mono text-[10px]">({counts[t.key]})</span>
+          </button>
+        ))}
+      </div>
+
       {/* Filters */}
       <div className="mb-4 flex flex-col gap-2 sm:flex-row">
         <input
@@ -86,7 +117,15 @@ export function MemberTable({ members, belts, viewerRole }: Props) {
                 className="cursor-pointer border-b border-border/50 hover:bg-muted/50 transition-colors"
               >
                 <td className="py-3 pr-4 font-semibold text-foreground">
-                  {member.full_name ?? '—'}
+                  <div className="flex items-center gap-2">
+                    <span>{member.full_name ?? '—'}</span>
+                    {member.role === 'coach' && (
+                      <span className="rounded bg-blue-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-blue-700 dark:bg-blue-950/30 dark:text-blue-300">Coach</span>
+                    )}
+                    {member.role === 'owner' && (
+                      <span className="rounded bg-primary/10 px-1.5 py-0.5 text-[10px] font-bold uppercase text-primary">Owner</span>
+                    )}
+                  </div>
                 </td>
                 <td className="py-3 pr-4">
                   {member.belt ? (

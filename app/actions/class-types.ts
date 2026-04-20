@@ -4,18 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
+import { assertOwner } from '@/lib/auth'
+import { classTypeSchema } from './class-types.schema'
 
-async function assertOwner(): Promise<true | { error: string }> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Nicht eingeloggt.' }
-  const { data: caller } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single()
-  if (caller?.role !== 'owner') return { error: 'Keine Berechtigung.' }
-  return true
-}
-
-export interface ClassTypeData {
+export type ClassTypeData = {
   id?: string
   name: string
   description?: string
@@ -24,24 +16,22 @@ export interface ClassTypeData {
 }
 
 export async function upsertClassType(data: ClassTypeData): Promise<{ success?: true; error?: string }> {
+  const parsed = classTypeSchema.safeParse(data)
+  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Ungültige Eingabe.' }
+
   const ok = await assertOwner()
-  if (ok !== true) return { error: ok.error }
+  if ('error' in ok) return { error: ok.error }
 
-  if (!data.name?.trim()) return { error: 'Name ist Pflicht.' }
-
-  const isNew = !data.id
-
+  const isNew = !parsed.data.id
   const supabase = await createClient()
-  const name = data.name.trim()
-  const payload: Record<string, unknown> = {
-    name,
-    description: data.description?.trim() || null,
-    level: data.level,
-    gi: data.gi,
-  }
-  if (data.id) payload.id = data.id
 
-  const { error } = await (supabase.from('class_types') as any).upsert(payload)
+  const { error } = await supabase.from('class_types').upsert({
+    ...(parsed.data.id ? { id: parsed.data.id } : {}),
+    name: parsed.data.name,
+    description: parsed.data.description?.trim() || null,
+    level: parsed.data.level,
+    gi: parsed.data.gi,
+  })
   if (error) return { error: 'Speichern fehlgeschlagen.' }
 
   revalidatePath('/admin/einstellungen')
@@ -49,14 +39,14 @@ export async function upsertClassType(data: ClassTypeData): Promise<{ success?: 
 
   waitUntil(notify({
     type: 'classtype.upserted',
-    data: { name, isNew },
+    data: { name: parsed.data.name, isNew },
   }))
   return { success: true }
 }
 
 export async function deleteClassType(id: string): Promise<{ success?: true; error?: string }> {
   const ok = await assertOwner()
-  if (ok !== true) return { error: ok.error }
+  if ('error' in ok) return { error: ok.error }
 
   const supabase = await createClient()
   const { count, error: countError } = await supabase
@@ -73,13 +63,13 @@ export async function deleteClassType(id: string): Promise<{ success?: true; err
     .eq('id', id)
     .single()
 
-  const { error } = await (supabase.from('class_types') as any).delete().eq('id', id)
+  const { error } = await supabase.from('class_types').delete().eq('id', id)
   if (error) return { error: 'Löschen fehlgeschlagen.' }
 
   revalidatePath('/admin/einstellungen')
   revalidatePath('/admin/klassen')
 
-  const name = (existing as { name?: string } | null)?.name ?? 'Unbekannt'
+  const name = existing?.name ?? 'Unbekannt'
   waitUntil(notify({
     type: 'classtype.deleted',
     data: { name },

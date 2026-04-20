@@ -17,78 +17,92 @@ export default async function MitgliederPage() {
     .eq('id', user.id)
     .single()
 
-  const callerRole = (callerProfile?.role as string | undefined) ?? 'member'
+  const callerRole = callerProfile?.role ?? 'member'
   const viewerRole: 'coach' | 'owner' = callerRole === 'owner' ? 'owner' : 'coach'
 
-  const [profilesResult, beltsResult] = await Promise.all([
-    supabase
-      .from('profiles')
-      .select(`
-        id, full_name, created_at, phone, date_of_birth, role,
-        profile_ranks(promoted_at, belt_ranks(name, stripes, color_hex))
-      `)
-      .eq('role', 'member')
-      .order('full_name', { ascending: true }),
+  // Step 1: plain profiles query — no joins, robust
+  const { data: profilesData, error: profilesError } = await supabase
+    .from('profiles')
+    .select('id, full_name, created_at, phone, date_of_birth, role')
+    .order('full_name', { ascending: true, nullsFirst: false })
+
+  if (profilesError) {
+    console.error('[mitglieder] profiles query error:', profilesError)
+  }
+
+  const memberIds = (profilesData ?? []).map(p => p.id)
+
+  // Step 2: parallel supplementary queries, each isolated so one failure doesn't nuke the list
+  const [ranksResult, beltsResult, attendancesResult] = await Promise.all([
+    memberIds.length > 0
+      ? supabase
+          .from('profile_ranks')
+          .select('profile_id, promoted_at, belt_ranks(name, stripes, color_hex)')
+          .in('profile_id', memberIds)
+          .order('promoted_at', { ascending: false })
+      : Promise.resolve({ data: [], error: null }),
     supabase
       .from('belt_ranks')
       .select('id, name, color_hex')
       .order('name', { ascending: true }),
+    memberIds.length > 0
+      ? supabase
+          .from('attendances')
+          .select('profile_id, checked_in_at')
+          .in('profile_id', memberIds)
+          .order('checked_in_at', { ascending: false })
+      : Promise.resolve({ data: [], error: null }),
   ])
 
-  const memberIds = (profilesResult.data ?? []).map(p => p.id as string)
+  if (ranksResult.error) console.error('[mitglieder] ranks error:', ranksResult.error)
+  if (beltsResult.error) console.error('[mitglieder] belts error:', beltsResult.error)
+  if (attendancesResult.error) console.error('[mitglieder] attendances error:', attendancesResult.error)
 
-  // Get last attendance per member
-  const { data: lastAttendances } = memberIds.length > 0
-    ? await supabase
-        .from('attendances')
-        .select('profile_id, checked_in_at')
-        .in('profile_id', memberIds)
-        .order('checked_in_at', { ascending: false })
-    : { data: [] }
+  // Build: latest rank per profile
+  const latestRankByProfile = new Map<string, { name: string; stripes: number; color_hex: string | null }>()
+  for (const r of ranksResult.data ?? []) {
+    if (latestRankByProfile.has(r.profile_id)) continue
+    const belt = Array.isArray(r.belt_ranks) ? r.belt_ranks[0] : r.belt_ranks
+    if (belt) {
+      latestRankByProfile.set(r.profile_id, {
+        name: belt.name,
+        stripes: belt.stripes,
+        color_hex: belt.color_hex,
+      })
+    }
+  }
 
+  // Last attendance per profile
   const lastAttendanceMap = new Map<string, string>()
-  for (const a of lastAttendances ?? []) {
+  for (const a of attendancesResult.data ?? []) {
     if (!lastAttendanceMap.has(a.profile_id)) {
       lastAttendanceMap.set(a.profile_id, a.checked_in_at)
     }
   }
 
-  const members = (profilesResult.data ?? []).map((p: Record<string, unknown>) => {
-    const ranks = Array.isArray(p.profile_ranks)
-      ? p.profile_ranks as { promoted_at: string; belt_ranks: unknown }[]
-      : p.profile_ranks
-      ? [p.profile_ranks as { promoted_at: string; belt_ranks: unknown }]
-      : []
-
-    const latestRank = ranks.sort((a, b) => b.promoted_at.localeCompare(a.promoted_at))[0]
-    const rawBelt = latestRank?.belt_ranks
-    const belt = Array.isArray(rawBelt) ? rawBelt[0] : rawBelt
-
-    return {
-      id: p.id as string,
-      full_name: p.full_name as string | null,
-      created_at: p.created_at as string,
-      phone: (p.phone as string | null) ?? null,
-      date_of_birth: (p.date_of_birth as string | null) ?? null,
-      role: ((p.role as string) ?? 'member') as 'member' | 'coach' | 'owner',
-      lastAttendance: lastAttendanceMap.get(p.id as string) ?? null,
-      belt: belt ? {
-        name: (belt as { name: string; stripes: number; color_hex: string | null }).name,
-        stripes: (belt as { name: string; stripes: number; color_hex: string | null }).stripes,
-        color_hex: (belt as { name: string; stripes: number; color_hex: string | null }).color_hex,
-      } : null,
-    }
-  })
+  const members = (profilesData ?? []).map(p => ({
+    id: p.id,
+    full_name: p.full_name,
+    created_at: p.created_at,
+    phone: p.phone ?? null,
+    date_of_birth: p.date_of_birth ?? null,
+    role: p.role,
+    lastAttendance: lastAttendanceMap.get(p.id) ?? null,
+    belt: latestRankByProfile.get(p.id) ?? null,
+  }))
 
   const belts = (beltsResult.data ?? []).map(b => ({
-    id: b.id as string,
-    name: b.name as string,
-    color_hex: b.color_hex as string | null,
+    id: b.id,
+    name: b.name,
+    color_hex: b.color_hex,
   }))
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="mb-6 text-2xl font-black text-foreground">Mitglieder</h1>
+      <div className="mb-6 flex items-baseline justify-between">
+        <h1 className="text-2xl font-black text-foreground">Mitglieder</h1>
+        <p className="text-xs text-muted-foreground">{members.length} Mitglied{members.length !== 1 ? 'er' : ''}</p>
+      </div>
       <MemberTable members={members} belts={belts} viewerRole={viewerRole} />
     </div>
   )

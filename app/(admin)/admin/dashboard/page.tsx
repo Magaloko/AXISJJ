@@ -2,9 +2,19 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getAdminDashboard } from '@/app/actions/admin'
+import { getOwnerInsights } from '@/app/actions/owner-insights'
+import { getCoachInsights } from '@/app/actions/coach-insights'
 import { AdminStatCard } from '@/components/admin/AdminStatCard'
 import { PromotionsWidget } from '@/components/admin/PromotionsWidget'
 import { LeadsMiniKanban } from '@/components/admin/LeadsMiniKanban'
+import { UtilizationChart } from '@/components/admin/UtilizationChart'
+import { TopClassesChart } from '@/components/admin/TopClassesChart'
+import { RevenueWidget } from '@/components/admin/RevenueWidget'
+import { CoachTodaySchedule } from '@/components/admin/CoachTodaySchedule'
+import { MyStudentsWidget } from '@/components/admin/MyStudentsWidget'
+import { InactiveMembersWidget } from '@/components/admin/InactiveMembersWidget'
+import { BirthdaysWidget } from '@/components/admin/BirthdaysWidget'
+import { getUpcomingBirthdays } from '@/app/actions/birthdays'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard | Admin' }
@@ -14,7 +24,12 @@ export default async function AdminDashboardPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const data = await getAdminDashboard()
+  const [data, ownerInsights, coachInsights, birthdays] = await Promise.all([
+    getAdminDashboard(),
+    getOwnerInsights().catch(() => null),
+    getCoachInsights().catch(() => null),
+    getUpcomingBirthdays(14).catch(() => []),
+  ])
 
   if (data.error) {
     return (
@@ -38,13 +53,30 @@ export default async function AdminDashboardPage() {
       <h1 className="mb-6 text-2xl font-black text-foreground">Dashboard</h1>
 
       {/* Stat cards */}
-      <div className={`mb-6 grid gap-4 ${role === 'owner' ? 'sm:grid-cols-2 lg:grid-cols-5' : 'sm:grid-cols-2'}`}>
-        {role === 'owner' && <AdminStatCard label="Mitglieder" value={data.activeMembers ?? 0} />}
-        {role === 'owner' && <AdminStatCard label="Neue Leads" value={data.newLeads ?? 0} highlight />}
-        <AdminStatCard label="Check-Ins heute" value={data.checkinsToday} />
-        <AdminStatCard label="Buchungen heute" value={data.bookingsToday} />
-        {role === 'owner' && <AdminStatCard label="Promotions bereit" value={data.promotionsReady?.length ?? 0} />}
-      </div>
+      {role === 'coach' && coachInsights && !coachInsights.error ? (
+        <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <AdminStatCard label="Meine Klassen heute" value={coachInsights.sessionsTodayCount} highlight />
+          <AdminStatCard label="Diese Woche" value={coachInsights.sessionsWeekCount} />
+          <AdminStatCard label="Meine Mitglieder (30T)" value={coachInsights.studentsLast30d} />
+          <AdminStatCard label="Check-Ins heute" value={coachInsights.checkinsTodayCount} />
+        </div>
+      ) : (
+        <div className={`mb-6 grid gap-4 ${role === 'owner' ? 'sm:grid-cols-2 lg:grid-cols-5' : 'sm:grid-cols-2'}`}>
+          {role === 'owner' && <AdminStatCard label="Mitglieder" value={data.activeMembers ?? 0} />}
+          {role === 'owner' && <AdminStatCard label="Neue Leads" value={data.newLeads ?? 0} highlight />}
+          <AdminStatCard label="Check-Ins heute" value={data.checkinsToday} />
+          <AdminStatCard label="Buchungen heute" value={data.bookingsToday} />
+          {role === 'owner' && <AdminStatCard label="Promotions bereit" value={data.promotionsReady?.length ?? 0} />}
+        </div>
+      )}
+
+      {/* Coach-specific widgets */}
+      {role === 'coach' && coachInsights && !coachInsights.error && (
+        <div className="mb-6 grid gap-6 lg:grid-cols-2">
+          <CoachTodaySchedule sessions={coachInsights.todaySessions} />
+          <MyStudentsWidget students={coachInsights.students} />
+        </div>
+      )}
 
       {/* Upcoming class card + PromotionsWidget (owner) / upcoming alone (coach) */}
       {role === 'owner' ? (
@@ -128,6 +160,33 @@ export default async function AdminDashboardPage() {
           </ul>
         )}
       </div>
+
+      {/* Owner only: Business insights */}
+      {role === 'owner' && ownerInsights && !ownerInsights.error && (
+        <>
+          <div className="mt-6 grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <UtilizationChart data={ownerInsights.utilizationTrend} />
+            </div>
+            <RevenueWidget
+              estimatedMonthlyRevenue={ownerInsights.estimatedMonthlyRevenue}
+              activeMembers={ownerInsights.activeMembers}
+              breakdown={ownerInsights.revenueBreakdown}
+            />
+          </div>
+
+          <div className="mt-6 grid gap-6 lg:grid-cols-2">
+            <TopClassesChart data={ownerInsights.topClasses} />
+            <InactiveMembersWidget members={ownerInsights.inactiveMembers} />
+          </div>
+
+          {birthdays.length > 0 && (
+            <div className="mt-6">
+              <BirthdaysWidget birthdays={birthdays} />
+            </div>
+          )}
+        </>
+      )}
 
       {/* Owner only: LeadsMiniKanban */}
       {role === 'owner' && data.leadsByStatus && (

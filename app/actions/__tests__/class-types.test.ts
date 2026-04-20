@@ -31,7 +31,7 @@ describe('upsertClassType', () => {
     mockSupabase.from.mockReturnValueOnce(callerChain('owner'))
     const upsert = { upsert: vi.fn().mockResolvedValue({ error: null }) }
     mockSupabase.from.mockReturnValueOnce(upsert)
-    const res = await upsertClassType({ id: 'c-1', name: 'BJJ', level: 'all', gi: true, description: 'desc' })
+    const res = await upsertClassType({ id: 'f47ac10b-58cc-4372-a567-0e02b2c3d479', name: 'BJJ', level: 'all', gi: true, description: 'desc' })
     expect(res.success).toBe(true)
     expect(upsert.upsert).toHaveBeenCalled()
   })
