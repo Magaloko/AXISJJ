@@ -38,9 +38,17 @@ export function ClassTypeTable({ types }: Props) {
       <ul className="divide-y divide-border">
         {types.map(t => (
           <li key={t.id} className="flex items-center justify-between py-3">
-            <div>
-              <p className="text-sm font-bold">{t.name}</p>
-              <p className="text-xs text-muted-foreground">{labelForLevel(t.level)} · {t.gi ? 'Gi' : 'No-Gi'}</p>
+            <div className="flex items-center gap-3">
+              {t.image_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={t.image_url} alt={t.name} className="h-10 w-10 rounded object-cover flex-shrink-0" />
+              ) : (
+                <div className="h-10 w-10 rounded bg-muted flex-shrink-0" />
+              )}
+              <div>
+                <p className="text-sm font-bold">{t.name}</p>
+                <p className="text-xs text-muted-foreground">{labelForLevel(t.level)} · {t.gi ? 'Gi' : 'No-Gi'}</p>
+              </div>
             </div>
             <div className="flex gap-2">
               <button onClick={() => setEditing(t)} className="border border-border px-2 py-1 text-[10px]">Edit</button>

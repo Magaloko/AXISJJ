@@ -1,7 +1,8 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useRef } from 'react'
 import { upsertClassType } from '@/app/actions/class-types'
+import { uploadClassTypeImage } from '@/app/actions/class-type-image'
 import { useRouter } from 'next/navigation'
 
 export interface ClassTypeRow {
@@ -10,6 +11,7 @@ export interface ClassTypeRow {
   description: string | null
   level: 'beginner' | 'all' | 'advanced' | 'kids'
   gi: boolean
+  image_url?: string | null
 }
 
 interface Props { initial?: ClassTypeRow; onClose: () => void }
@@ -20,6 +22,24 @@ export function ClassTypeForm({ initial, onClose }: Props) {
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
+  const [imageUrl, setImageUrl] = useState(initial?.image_url ?? '')
+  const [imageError, setImageError] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setImageError(null)
+    setIsUploading(true)
+    const fd = new FormData()
+    fd.append('file', file)
+    const result = await uploadClassTypeImage(fd)
+    setIsUploading(false)
+    if (result.error) { setImageError(result.error); return }
+    setImageUrl(result.url ?? '')
+  }
+
   function save() {
     setError(null)
     startTransition(async () => {
@@ -29,6 +49,7 @@ export function ClassTypeForm({ initial, onClose }: Props) {
         description: form.description ?? undefined,
         level: form.level,
         gi: form.gi,
+        image_url: imageUrl || null,
       })
       if (result.error) { setError(result.error); return }
       router.refresh()
@@ -59,6 +80,48 @@ export function ClassTypeForm({ initial, onClose }: Props) {
           <input type="checkbox" checked={form.gi} onChange={e => setForm({ ...form, gi: e.target.checked })} />
           Mit Gi
         </label>
+        {/* Image */}
+        <div>
+          <label className="mb-1 block text-xs text-muted-foreground">Bild</label>
+          {imageUrl && (
+            <div className="mb-2 relative w-full h-32 overflow-hidden rounded border border-border">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={imageUrl} alt="Vorschau" className="w-full h-full object-cover" />
+              <button
+                type="button"
+                onClick={() => setImageUrl('')}
+                className="absolute top-1 right-1 bg-background/80 px-1 text-xs text-destructive border border-border"
+              >
+                ✕
+              </button>
+            </div>
+          )}
+          {imageError && <p className="mb-1 text-xs text-destructive">{imageError}</p>}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              className="flex-1 border border-border bg-background p-2 text-sm"
+              placeholder="Bild-URL einfügen…"
+              value={imageUrl}
+              onChange={e => { setImageUrl(e.target.value); setImageError(null) }}
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isUploading}
+              className="border border-border px-3 py-2 text-xs font-medium disabled:opacity-50"
+            >
+              {isUploading ? '…' : 'Upload'}
+            </button>
+          </div>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileUpload}
+          />
+        </div>
         <div className="flex gap-2 pt-2">
           <button onClick={save} disabled={isPending}
                   className="flex-1 bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-50">

@@ -17,7 +17,7 @@ export default async function EinstellungenPage() {
   if (profile?.role !== 'owner') redirect('/admin/dashboard')
 
   const [classTypesResult, coachesResult, membersResult, pricingResult] = await Promise.all([
-    supabase.from('class_types').select('id, name, description, level, gi').order('name'),
+    supabase.from('class_types').select('id, name, description, level, gi, image_url').order('name'),
     supabase.from('profiles').select('id, full_name, role').eq('role', 'coach').order('full_name'),
     supabase.from('profiles').select('id, full_name, role').eq('role', 'member').order('full_name'),
     supabase.from('pricing_plans').select('id, category, duration_months, price_per_month, total_price, highlighted').order('category').order('duration_months', { ascending: false }),
@@ -25,7 +25,7 @@ export default async function EinstellungenPage() {
 
   const types = (classTypesResult.data ?? []) as {
     id: string; name: string; description: string | null;
-    level: 'beginner' | 'all' | 'advanced' | 'kids'; gi: boolean
+    level: 'beginner' | 'all' | 'advanced' | 'kids'; gi: boolean; image_url: string | null
   }[]
   const coaches = (coachesResult.data ?? []) as { id: string; full_name: string; role: 'coach' }[]
   const members = (membersResult.data ?? []) as { id: string; full_name: string; role: 'member' }[]
