@@ -25,7 +25,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <div className="min-h-screen bg-background">
       <AdminNav role={role as 'coach' | 'owner'} userName={displayName} />
       <div className="lg:ml-60">
-        <main className="min-h-screen pb-4 pt-14 lg:pt-0">{children}</main>
+        <main className="min-h-screen pb-20 pt-0 lg:pb-4">{children}</main>
       </div>
     </div>
   )
