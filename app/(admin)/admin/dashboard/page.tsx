@@ -15,9 +15,82 @@ import { MyStudentsWidget } from '@/components/admin/MyStudentsWidget'
 import { InactiveMembersWidget } from '@/components/admin/InactiveMembersWidget'
 import { BirthdaysWidget } from '@/components/admin/BirthdaysWidget'
 import { getUpcomingBirthdays } from '@/app/actions/birthdays'
+import type { TodaySession } from '@/app/actions/admin'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard | Admin' }
+
+function formatTime(iso: string) {
+  return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+}
+
+interface NextClassCardProps {
+  session: {
+    class_types: { name: string } | null
+    starts_at: string
+    ends_at: string
+    confirmedCount: number
+    capacity: number
+  }
+  formatTime: (iso: string) => string
+}
+
+function NextClassCard({ session, formatTime }: NextClassCardProps) {
+  return (
+    <div className="mb-6 border border-border bg-card p-6">
+      <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        Nächste Klasse
+      </p>
+      <p className="text-base font-black text-foreground">
+        {session.class_types?.name ?? 'Session'}
+      </p>
+      <p className="mt-1 font-mono text-sm text-muted-foreground">
+        {formatTime(session.starts_at)} – {formatTime(session.ends_at)}
+      </p>
+      <div className="mt-3">
+        <div className="mb-1 flex justify-between text-xs text-muted-foreground">
+          <span>{session.confirmedCount} Buchungen</span>
+          <span>{session.capacity} Plätze</span>
+        </div>
+        <div className="h-1.5 w-full bg-muted">
+          <div
+            className="h-full bg-primary transition-all"
+            style={{ width: `${Math.min(100, session.capacity > 0 ? (session.confirmedCount / session.capacity) * 100 : 0)}%` }}
+          />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+interface TodayScheduleCardProps {
+  sessions: TodaySession[]
+  formatTime: (iso: string) => string
+}
+
+function TodayScheduleCard({ sessions, formatTime }: TodayScheduleCardProps) {
+  return (
+    <div className="mb-6 border border-border bg-card p-6">
+      <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+        Heutiger Plan
+      </p>
+      {sessions.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Keine Sessions heute.</p>
+      ) : (
+        <ul className="space-y-2">
+          {sessions.map(s => (
+            <li key={s.id} className="flex items-center justify-between text-sm">
+              <span className="font-semibold text-foreground">{s.class_types?.name ?? 'Session'}</span>
+              <span className="font-mono text-muted-foreground">
+                {formatTime(s.starts_at)} · {s.confirmedCount}/{s.capacity}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
 
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
@@ -41,10 +114,6 @@ export default async function AdminDashboardPage() {
 
   const role = data.role
 
-  function formatTime(iso: string) {
-    return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
-  }
-
   const now = new Date()
   const upcomingSession = data.todaySessions?.find(s => new Date(s.starts_at) > now)
 
@@ -65,52 +134,10 @@ export default async function AdminDashboardPage() {
         )}
 
         {/* Next class */}
-        {upcomingSession && (
-          <div className="mb-6 border border-border bg-card p-6">
-            <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Nächste Klasse
-            </p>
-            <p className="text-base font-black text-foreground">
-              {upcomingSession.class_types?.name ?? 'Session'}
-            </p>
-            <p className="mt-1 font-mono text-sm text-muted-foreground">
-              {formatTime(upcomingSession.starts_at)} – {formatTime(upcomingSession.ends_at)}
-            </p>
-            <div className="mt-3">
-              <div className="mb-1 flex justify-between text-xs text-muted-foreground">
-                <span>{upcomingSession.confirmedCount} Buchungen</span>
-                <span>{upcomingSession.capacity} Plätze</span>
-              </div>
-              <div className="h-1.5 w-full bg-muted">
-                <div
-                  className="h-full bg-primary transition-all"
-                  style={{ width: `${Math.min(100, (upcomingSession.confirmedCount / upcomingSession.capacity) * 100)}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        )}
+        {upcomingSession && <NextClassCard session={upcomingSession} formatTime={formatTime} />}
 
         {/* Today's schedule */}
-        <div className="mb-6 border border-border bg-card p-6">
-          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Heutiger Plan
-          </p>
-          {(data.todaySessions?.length ?? 0) === 0 ? (
-            <p className="text-sm text-muted-foreground">Keine Sessions heute.</p>
-          ) : (
-            <ul className="space-y-2">
-              {data.todaySessions?.map(s => (
-                <li key={s.id} className="flex items-center justify-between text-sm">
-                  <span className="font-semibold text-foreground">{s.class_types?.name ?? 'Session'}</span>
-                  <span className="font-mono text-muted-foreground">
-                    {formatTime(s.starts_at)} · {s.confirmedCount}/{s.capacity}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
+        <TodayScheduleCard sessions={data.todaySessions ?? []} formatTime={formatTime} />
 
         {/* Coach schedule + students */}
         {coachInsights && !coachInsights.error && (
@@ -160,31 +187,7 @@ export default async function AdminDashboardPage() {
       )}
 
       {/* Next class */}
-      {upcomingSession && (
-        <div className="mb-6 border border-border bg-card p-6">
-          <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Nächste Klasse
-          </p>
-          <p className="text-base font-black text-foreground">
-            {upcomingSession.class_types?.name ?? 'Session'}
-          </p>
-          <p className="mt-1 font-mono text-sm text-muted-foreground">
-            {formatTime(upcomingSession.starts_at)} – {formatTime(upcomingSession.ends_at)}
-          </p>
-          <div className="mt-3">
-            <div className="mb-1 flex justify-between text-xs text-muted-foreground">
-              <span>{upcomingSession.confirmedCount} Buchungen</span>
-              <span>{upcomingSession.capacity} Plätze</span>
-            </div>
-            <div className="h-1.5 w-full bg-muted">
-              <div
-                className="h-full bg-primary transition-all"
-                style={{ width: `${Math.min(100, (upcomingSession.confirmedCount / upcomingSession.capacity) * 100)}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      {upcomingSession && <NextClassCard session={upcomingSession} formatTime={formatTime} />}
 
       {/* Promotions + Birthdays */}
       <div className="mb-6 grid gap-6 lg:grid-cols-2">
@@ -193,25 +196,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Today's schedule */}
-      <div className="mb-6 border border-border bg-card p-6">
-        <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-          Heutiger Plan
-        </p>
-        {(data.todaySessions?.length ?? 0) === 0 ? (
-          <p className="text-sm text-muted-foreground">Keine Sessions heute.</p>
-        ) : (
-          <ul className="space-y-2">
-            {data.todaySessions?.map(s => (
-              <li key={s.id} className="flex items-center justify-between text-sm">
-                <span className="font-semibold text-foreground">{s.class_types?.name ?? 'Session'}</span>
-                <span className="font-mono text-muted-foreground">
-                  {formatTime(s.starts_at)} · {s.confirmedCount}/{s.capacity}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      <TodayScheduleCard sessions={data.todaySessions ?? []} formatTime={formatTime} />
 
       {/* Charts row */}
       {insights && (
