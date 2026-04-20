@@ -30,6 +30,9 @@ export interface OwnerInsights {
   activeMembers: number
   revenueBreakdown: { category: string; members: number; revenue: number }[]
   inactiveMembers: InactiveMember[]
+  leadConversionRate: number        // % leads converted this month
+  revenueVsLastMonthPct: number     // % delta vs last month (positive = growth)
+  avgClassFillRate: number          // % avg fill across last 30d sessions
   error?: string
 }
 
@@ -38,6 +41,9 @@ export async function getOwnerInsights(): Promise<OwnerInsights> {
     utilizationTrend: [], topClasses: [],
     estimatedMonthlyRevenue: 0, activeMembers: 0, revenueBreakdown: [],
     inactiveMembers: [],
+    leadConversionRate: 0,
+    revenueVsLastMonthPct: 0,
+    avgClassFillRate: 0,
   }
 
   const auth = await assertOwner()
@@ -81,6 +87,7 @@ export async function getOwnerInsights(): Promise<OwnerInsights> {
     weekMap.set(d.toISOString().split('T')[0], { capacity: 0, confirmed: 0 })
   }
   for (const s of sessionsResult.data ?? []) {
+    if (!s.starts_at) continue
     const sessionDate = new Date(s.starts_at)
     const dow = (sessionDate.getDay() + 6) % 7
     sessionDate.setDate(sessionDate.getDate() - dow)
@@ -141,6 +148,53 @@ export async function getOwnerInsights(): Promise<OwnerInsights> {
     members: revenueByCat[plan.category]?.members ?? 0,
     revenue: Math.round(revenueByCat[plan.category]?.revenue ?? 0),
   }))
+
+  // ── Last month date range ──
+  const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  const endOfLastMonth = new Date(startOfThisMonth.getTime() - 1)
+
+  const [lastMonthSubsResult, thisMonthLeadsResult] = await Promise.all([
+    supabase
+      .from('subscriptions')
+      .select('price_per_month')
+      .lte('start_date', endOfLastMonth.toISOString().split('T')[0])
+      .or(`end_date.is.null,end_date.gte.${startOfLastMonth.toISOString().split('T')[0]}`),
+    supabase
+      .from('leads')
+      .select('status, created_at')
+      .gte('created_at', startOfThisMonth.toISOString())
+      .lte('created_at', now.toISOString()),
+  ])
+
+  // ── Lead conversion rate ──
+  const thisMonthLeads = thisMonthLeadsResult.data ?? []
+  const convertedCount = thisMonthLeads.filter(l => l.status === 'converted').length
+  const leadConversionRate = thisMonthLeads.length > 0
+    ? Math.round((convertedCount / thisMonthLeads.length) * 100)
+    : 0
+
+  // ── Revenue vs last month ──
+  const lastMonthRevenue = (lastMonthSubsResult.data ?? [])
+    .reduce((sum, s) => sum + Number(s.price_per_month), 0)
+  const revenueVsLastMonthPct = lastMonthRevenue > 0
+    ? Math.round(((estimatedMonthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100)
+    : 0
+
+  // ── Avg class fill rate (30d sessions, reuse sessionsResult) ──
+  const thirtyDaySessions = (sessionsResult.data ?? []).filter(s => {
+    if (!s.starts_at) return true
+    return new Date(s.starts_at) >= thirtyDaysAgo
+  })
+  const fillRates = thirtyDaySessions
+    .filter(s => s.capacity > 0)
+    .map(s => {
+      const confirmed = (s.bookings ?? []).filter(b => b.status === 'confirmed').length
+      return confirmed / s.capacity
+    })
+  const avgClassFillRate = fillRates.length > 0
+    ? Math.round((fillRates.reduce((a, b) => a + b, 0) / fillRates.length) * 100)
+    : 0
 
   // ── Inactive members — no training in last 30 days ──
   const thirtyDaysAgoIso = thirtyDaysAgo.toISOString()
@@ -209,5 +263,8 @@ export async function getOwnerInsights(): Promise<OwnerInsights> {
     activeMembers,
     revenueBreakdown,
     inactiveMembers,
+    leadConversionRate,
+    revenueVsLastMonthPct,
+    avgClassFillRate,
   }
 }

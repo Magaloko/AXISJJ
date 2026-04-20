@@ -54,6 +54,16 @@ describe('getOwnerInsights', () => {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockResolvedValue({ data: [], error: null }),
     }
+    const lastMonthSubsChain = {
+      select: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      or: vi.fn().mockResolvedValue({ data: [], error: null }),
+    }
+    const leadsChain = {
+      select: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockResolvedValue({ data: [], error: null }),
+    }
     const memberListChain = {
       select: vi.fn().mockReturnThis(),
       eq: vi.fn().mockReturnThis(),
@@ -73,8 +83,10 @@ describe('getOwnerInsights', () => {
       if (callCount === 3) return attendancesChain
       if (callCount === 4) return membersCountChain
       if (callCount === 5) return subsChain
-      if (callCount === 6) return memberListChain
-      if (callCount === 7) return recentAttChain
+      if (callCount === 6) return lastMonthSubsChain
+      if (callCount === 7) return leadsChain
+      if (callCount === 8) return memberListChain
+      if (callCount === 9) return recentAttChain
       return memberListChain
     })
 
@@ -83,5 +95,154 @@ describe('getOwnerInsights', () => {
     expect(result.topClasses).toEqual([])
     expect(result.inactiveMembers).toEqual([])
     expect(result.activeMembers).toBe(0)
+  })
+})
+
+describe('getOwnerInsights — new metrics', () => {
+  function makeOwnerChain() {
+    return {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({ data: { role: 'owner' }, error: null }),
+    }
+  }
+
+  function makeEmptyChain() {
+    return {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      order: vi.fn().mockResolvedValue({ data: [], error: null }),
+    }
+  }
+
+  function makeCountChain(count: number) {
+    return {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ count, error: null }),
+    }
+  }
+
+  function makeSubsChain(subs: { category: string; price_per_month: number }[]) {
+    return {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockResolvedValue({ data: subs, error: null }),
+    }
+  }
+
+  function makeLastMonthSubsChain(subs: { price_per_month: number }[]) {
+    return {
+      select: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockReturnThis(),
+      or: vi.fn().mockResolvedValue({ data: subs, error: null }),
+    }
+  }
+
+  function makeLeadsChain(leads: { status: string; created_at: string }[]) {
+    return {
+      select: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockResolvedValue({ data: leads, error: null }),
+    }
+  }
+
+  function makeSessionsChain(sessions: { capacity: number; bookings: { status: string }[] }[]) {
+    return {
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      gte: vi.fn().mockReturnThis(),
+      lte: vi.fn().mockResolvedValue({ data: sessions, error: null }),
+    }
+  }
+
+  it('computes leadConversionRate as 0 when no leads this month', async () => {
+    let call = 0
+    mockSupabase.from.mockImplementation(() => {
+      call++
+      if (call === 1) return makeOwnerChain()
+      if (call === 2) return makeSessionsChain([])
+      if (call === 3) return makeEmptyChain()
+      if (call === 4) return makeCountChain(0)
+      if (call === 5) return makeSubsChain([])
+      if (call === 6) return makeLastMonthSubsChain([])
+      if (call === 7) return makeLeadsChain([])
+      if (call === 8) return makeEmptyChain()
+      if (call === 9) return makeEmptyChain()
+      return makeEmptyChain()
+    })
+    const result = await getOwnerInsights()
+    expect(result.leadConversionRate).toBe(0)
+  })
+
+  it('computes leadConversionRate correctly', async () => {
+    const now = new Date()
+    const thisMonth = now.toISOString()
+    const leads = [
+      { status: 'converted', created_at: thisMonth },
+      { status: 'converted', created_at: thisMonth },
+      { status: 'new', created_at: thisMonth },
+      { status: 'lost', created_at: thisMonth },
+    ]
+    let call = 0
+    mockSupabase.from.mockImplementation(() => {
+      call++
+      if (call === 1) return makeOwnerChain()
+      if (call === 2) return makeSessionsChain([])
+      if (call === 3) return makeEmptyChain()
+      if (call === 4) return makeCountChain(0)
+      if (call === 5) return makeSubsChain([])
+      if (call === 6) return makeLastMonthSubsChain([])
+      if (call === 7) return makeLeadsChain(leads)
+      if (call === 8) return makeEmptyChain()
+      if (call === 9) return makeEmptyChain()
+      return makeEmptyChain()
+    })
+    const result = await getOwnerInsights()
+    expect(result.leadConversionRate).toBe(50) // 2/4 × 100
+  })
+
+  it('computes revenueVsLastMonthPct as 0 when last month had no revenue', async () => {
+    let call = 0
+    mockSupabase.from.mockImplementation(() => {
+      call++
+      if (call === 1) return makeOwnerChain()
+      if (call === 2) return makeSessionsChain([])
+      if (call === 3) return makeEmptyChain()
+      if (call === 4) return makeCountChain(0)
+      if (call === 5) return makeSubsChain([{ category: 'adults', price_per_month: 100 }])
+      if (call === 6) return makeLastMonthSubsChain([])
+      if (call === 7) return makeLeadsChain([])
+      if (call === 8) return makeEmptyChain()
+      if (call === 9) return makeEmptyChain()
+      return makeEmptyChain()
+    })
+    const result = await getOwnerInsights()
+    expect(result.revenueVsLastMonthPct).toBe(0)
+  })
+
+  it('computes avgClassFillRate from session data', async () => {
+    const sessions = [
+      { capacity: 10, bookings: [{ status: 'confirmed' }, { status: 'confirmed' }, { status: 'cancelled' }] },
+      { capacity: 10, bookings: [{ status: 'confirmed' }, { status: 'confirmed' }, { status: 'confirmed' }, { status: 'confirmed' }] },
+    ]
+    // session 1: 2/10 = 20%, session 2: 4/10 = 40%, avg = 30%
+    let call = 0
+    mockSupabase.from.mockImplementation(() => {
+      call++
+      if (call === 1) return makeOwnerChain()
+      if (call === 2) return makeSessionsChain(sessions)
+      if (call === 3) return makeEmptyChain()
+      if (call === 4) return makeCountChain(0)
+      if (call === 5) return makeSubsChain([])
+      if (call === 6) return makeLastMonthSubsChain([])
+      if (call === 7) return makeLeadsChain([])
+      if (call === 8) return makeEmptyChain()
+      if (call === 9) return makeEmptyChain()
+      return makeEmptyChain()
+    })
+    const result = await getOwnerInsights()
+    expect(result.avgClassFillRate).toBe(30)
   })
 })
