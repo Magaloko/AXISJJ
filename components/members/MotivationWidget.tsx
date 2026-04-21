@@ -1,5 +1,15 @@
+'use client'
+
 import { differenceInDays, parseISO, formatDistanceToNow } from 'date-fns'
 import { de } from 'date-fns/locale'
+import {
+  FlameIcon,
+  LightningIcon,
+  StrengthIcon,
+  TargetIcon,
+  AnimatedCheckIcon,
+  AnimatedGiIcon,
+} from '@/components/ui/icons/animated-icons'
 
 interface Props {
   streak: number
@@ -8,26 +18,54 @@ interface Props {
   lastGoal: string | null
 }
 
+type MotivationIcon = 'gi' | 'flame' | 'lightning' | 'strength' | 'check' | 'target'
+type MotivationState = { icon: MotivationIcon; text: string }
+
+const ICON_SIZE = 40
+
+function getMotivationState(
+  streak: number,
+  totalSessions: number,
+  daysSinceLast: number | null,
+): MotivationState {
+  if (totalSessions === 0) return { icon: 'gi', text: 'Starte deinen ersten Training-Log!' }
+  if (streak >= 7) return { icon: 'flame', text: `${streak} Sessions in Folge — du bist auf einem guten Weg!` }
+  if (streak >= 3) return { icon: 'lightning', text: `${streak} Sessions in Folge — bleib dran!` }
+  if (daysSinceLast !== null && daysSinceLast > 7) return { icon: 'strength', text: `Komm zurück — letztes Training vor ${daysSinceLast} Tagen.` }
+  if (daysSinceLast === 0) return { icon: 'check', text: 'Gut gemacht — du warst heute dabei!' }
+  return { icon: 'target', text: `${totalSessions} Trainings gesamt. Weiter so!` }
+}
+
+function MotivationIconRender({ variant }: { variant: MotivationIcon }) {
+  switch (variant) {
+    case 'gi':
+      return <AnimatedGiIcon size={ICON_SIZE} animate="always" />
+    case 'flame':
+      return <FlameIcon size={ICON_SIZE} animate="always" />
+    case 'lightning':
+      return <LightningIcon size={ICON_SIZE} animate="always" />
+    case 'strength':
+      return <StrengthIcon size={ICON_SIZE} animate="always" />
+    case 'check':
+      return <AnimatedCheckIcon size={ICON_SIZE} animate="once" />
+    case 'target':
+      return <TargetIcon size={ICON_SIZE} animate="always" />
+  }
+}
+
 export function MotivationWidget({ streak, totalSessions, lastSessionDate, lastGoal }: Props) {
   const daysSinceLast = lastSessionDate
     ? differenceInDays(new Date(), parseISO(lastSessionDate))
     : null
 
-  function getMotivationMessage() {
-    if (totalSessions === 0) return { emoji: '🥋', text: 'Starte deinen ersten Training-Log!' }
-    if (streak >= 7) return { emoji: '🔥', text: `${streak} Sessions in Folge — du bist auf einem guten Weg!` }
-    if (streak >= 3) return { emoji: '⚡', text: `${streak} Sessions in Folge — bleib dran!` }
-    if (daysSinceLast !== null && daysSinceLast > 7) return { emoji: '💪', text: `Komm zurück — letztes Training vor ${daysSinceLast} Tagen.` }
-    if (daysSinceLast === 0) return { emoji: '✅', text: 'Gut gemacht — du warst heute dabei!' }
-    return { emoji: '🎯', text: `${totalSessions} Trainings gesamt. Weiter so!` }
-  }
-
-  const { emoji, text } = getMotivationMessage()
+  const { icon, text } = getMotivationState(streak, totalSessions, daysSinceLast)
 
   return (
     <div className="border border-border bg-card p-6">
       <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">Motivation</p>
-      <p className="mb-4 text-2xl">{emoji}</p>
+      <div className="mb-4">
+        <MotivationIconRender variant={icon} />
+      </div>
       <p className="text-sm font-semibold text-foreground">{text}</p>
 
       {lastGoal && (
