@@ -5,13 +5,20 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { submitMembership } from '@/app/actions/membership'
 import { membershipFormSchema, type MembershipFormData } from '@/app/actions/membership.schema'
+import { translations, type Lang } from '@/lib/i18n'
+
 const inputClass =
   'w-full border border-border bg-card px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary'
 const labelClass =
   'mb-1 block text-xs font-bold uppercase tracking-wider text-muted-foreground'
 const errorClass = 'mt-1 text-xs text-destructive'
 
-export default function AnmeldenPage() {
+interface MembershipFormProps {
+  lang: Lang
+}
+
+export default function MembershipForm({ lang }: MembershipFormProps) {
+  const t = translations[lang].public.membershipForm
   const [submitted, setSubmitted] = useState(false)
   const [serverError, setServerError] = useState('')
 
@@ -36,19 +43,18 @@ export default function AnmeldenPage() {
       <div className="flex min-h-screen items-center justify-center bg-background px-4">
         <div className="text-center">
           <div className="mb-4 inline-block border border-primary px-4 py-1 text-xs font-bold uppercase tracking-widest text-primary">
-            Antrag eingegangen
+            {t.successBadge}
           </div>
-          <h1 className="mb-4 text-3xl font-black text-foreground">Danke für deine Anmeldung!</h1>
+          <h1 className="mb-4 text-3xl font-black text-foreground">{t.successHeading}</h1>
           <p className="mb-6 max-w-md text-sm text-muted-foreground">
-            Wir haben deinen Antrag erhalten und melden uns in Kürze.
-            Bitte drucke den Mitgliedsvertrag aus, unterschreibe ihn und bring ihn beim ersten Training mit.
+            {t.successText}
           </p>
           <a
             href="/vertrag.pdf"
             download="AXIS_Mitgliedsvertrag.pdf"
             className="inline-block border border-primary px-8 py-3 text-sm font-bold uppercase tracking-wider text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
           >
-            Vertrag herunterladen (PDF)
+            {t.successDownload}
           </a>
         </div>
       </div>
@@ -59,86 +65,89 @@ export default function AnmeldenPage() {
     <div className="mx-auto max-w-2xl px-6 py-16">
       {/* Header */}
       <p className="mb-2 text-xs font-bold uppercase tracking-[0.3em] text-primary">
-        Mitgliedschaft
+        {t.eyebrow}
       </p>
-      <h1 className="mb-2 text-4xl font-black text-foreground">JETZT ANMELDEN</h1>
+      <h1 className="mb-2 text-4xl font-black text-foreground">{t.heading}</h1>
       <p className="mb-2 text-sm text-muted-foreground">
-        Fülle das Formular aus — wir schicken dir eine Bestätigung und bereiten alles vor.
-        Den Vertrag unterschreibst du beim ersten Training.
+        {t.intro}
       </p>
 
       {/* PDF Download */}
       <div className="mb-10 flex items-center gap-4 border border-border bg-card p-4">
         <div className="flex-1">
-          <p className="text-sm font-bold text-foreground">Lieber ausdrucken?</p>
-          <p className="text-xs text-muted-foreground">Leeren Vertrag herunterladen, ausfüllen und mitbringen.</p>
+          <p className="text-sm font-bold text-foreground">{t.printHeading}</p>
+          <p className="text-xs text-muted-foreground">{t.printText}</p>
         </div>
         <a
           href="/vertrag.pdf"
           download="AXIS_Mitgliedsvertrag.pdf"
           className="shrink-0 border border-primary px-5 py-2 text-xs font-bold uppercase tracking-wider text-primary transition-colors hover:bg-primary hover:text-primary-foreground"
         >
-          PDF Download
+          {t.printButton}
         </a>
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Persönliche Daten */}
+        {/* Personal Data */}
         <div>
           <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-foreground border-b border-border pb-2">
-            Persönliche Daten
+            {t.personalSection}
           </h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="vorname" className={labelClass}>Vorname *</label>
-              <input id="vorname" {...register('vorname')} placeholder="Max" className={inputClass} />
+              <label htmlFor="vorname" className={labelClass}>{t.firstName}</label>
+              <input id="vorname" {...register('vorname')} placeholder={t.firstNamePlaceholder} className={inputClass} />
               {errors.vorname && <p className={errorClass}>{errors.vorname.message}</p>}
             </div>
             <div>
-              <label htmlFor="nachname" className={labelClass}>Nachname *</label>
-              <input id="nachname" {...register('nachname')} placeholder="Mustermann" className={inputClass} />
+              <label htmlFor="nachname" className={labelClass}>{t.lastName}</label>
+              <input id="nachname" {...register('nachname')} placeholder={t.lastNamePlaceholder} className={inputClass} />
               {errors.nachname && <p className={errorClass}>{errors.nachname.message}</p>}
             </div>
           </div>
 
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="geburtsdatum" className={labelClass}>Geburtsdatum *</label>
+              <label htmlFor="geburtsdatum" className={labelClass}>{t.birthDate}</label>
               <input id="geburtsdatum" type="date" {...register('geburtsdatum')} className={inputClass} />
               {errors.geburtsdatum && <p className={errorClass}>{errors.geburtsdatum.message}</p>}
             </div>
             <div>
-              <label htmlFor="telefon" className={labelClass}>Telefon</label>
-              <input id="telefon" type="tel" {...register('telefon')} placeholder="+43 ..." className={inputClass} />
+              <label htmlFor="telefon" className={labelClass}>{t.phone}</label>
+              <input id="telefon" type="tel" {...register('telefon')} placeholder={t.phonePlaceholder} className={inputClass} />
             </div>
           </div>
 
           <div className="mt-4">
-            <label htmlFor="adresse" className={labelClass}>Adresse *</label>
-            <input id="adresse" {...register('adresse')} placeholder="Musterstraße 1, 1010 Wien" className={inputClass} />
+            <label htmlFor="adresse" className={labelClass}>{t.address}</label>
+            <input id="adresse" {...register('adresse')} placeholder={t.addressPlaceholder} className={inputClass} />
             {errors.adresse && <p className={errorClass}>{errors.adresse.message}</p>}
           </div>
 
           <div className="mt-4">
-            <label htmlFor="email" className={labelClass}>E-Mail *</label>
-            <input id="email" type="email" {...register('email')} placeholder="deine@email.at" className={inputClass} />
+            <label htmlFor="email" className={labelClass}>{t.email}</label>
+            <input id="email" type="email" {...register('email')} placeholder={t.emailPlaceholder} className={inputClass} />
             {errors.email && <p className={errorClass}>{errors.email.message}</p>}
           </div>
         </div>
 
-        {/* Tarifwahl */}
+        {/* Tariff */}
         <div>
           <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-foreground border-b border-border pb-2">
-            Tarifwahl
+            {t.tariffSection}
           </h2>
 
           <div className="mb-4">
-            <p className={labelClass}>Kategorie *</p>
+            <p className={labelClass}>{t.category}</p>
             <div className="mt-2 flex flex-wrap gap-3">
-              {(['Erwachsene', 'Student', 'Kind'] as const).map(k => (
-                <label key={k} className="flex cursor-pointer items-center gap-2">
-                  <input type="radio" value={k} {...register('kategorie')} className="accent-primary" />
-                  <span className="text-sm text-foreground">{k}</span>
+              {([
+                { value: 'Erwachsene', label: t.catAdults },
+                { value: 'Student',    label: t.catStudent },
+                { value: 'Kind',       label: t.catKids },
+              ] as const).map(({ value, label }) => (
+                <label key={value} className="flex cursor-pointer items-center gap-2">
+                  <input type="radio" value={value} {...register('kategorie')} className="accent-primary" />
+                  <span className="text-sm text-foreground">{label}</span>
                 </label>
               ))}
             </div>
@@ -146,13 +155,13 @@ export default function AnmeldenPage() {
           </div>
 
           <div>
-            <p className={labelClass}>Laufzeit *</p>
+            <p className={labelClass}>{t.duration}</p>
             <div className="mt-2 flex flex-wrap gap-3">
               {([
-                { value: '12', label: '12 Monate' },
-                { value: '6',  label: '6 Monate' },
-                { value: '3',  label: '3 Monate' },
-                { value: '1',  label: '1 Monat' },
+                { value: '12', label: t.dur12 },
+                { value: '6',  label: t.dur6 },
+                { value: '3',  label: t.dur3 },
+                { value: '1',  label: t.dur1 },
               ] as const).map(({ value, label }) => (
                 <label key={value} className="flex cursor-pointer items-center gap-2">
                   <input type="radio" value={value} {...register('laufzeit')} className="accent-primary" />
@@ -167,51 +176,46 @@ export default function AnmeldenPage() {
         {/* SEPA */}
         <div>
           <h2 className="mb-4 text-xs font-bold uppercase tracking-[0.2em] text-foreground border-b border-border pb-2">
-            SEPA-Lastschrift
+            {t.sepaSection}
           </h2>
           <p className="mb-4 text-xs text-muted-foreground">
-            Ich ermächtige Axis Jiu-Jitsu Vienna, die vereinbarten Beiträge per SEPA-Lastschrift einzuziehen.
+            {t.sepaLegal}
           </p>
 
           <div className="mb-4">
-            <label htmlFor="kontoinhaber" className={labelClass}>Kontoinhaber *</label>
-            <input id="kontoinhaber" {...register('kontoinhaber')} placeholder="Vor- und Nachname" className={inputClass} />
+            <label htmlFor="kontoinhaber" className={labelClass}>{t.accountHolder}</label>
+            <input id="kontoinhaber" {...register('kontoinhaber')} placeholder={t.accountHolderPlaceholder} className={inputClass} />
             {errors.kontoinhaber && <p className={errorClass}>{errors.kontoinhaber.message}</p>}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label htmlFor="iban" className={labelClass}>IBAN *</label>
-              <input id="iban" {...register('iban')} placeholder="AT61 1904 3002 3457 3201" className={inputClass} />
+              <label htmlFor="iban" className={labelClass}>{t.iban}</label>
+              <input id="iban" {...register('iban')} placeholder={t.ibanPlaceholder} className={inputClass} />
               {errors.iban && <p className={errorClass}>{errors.iban.message}</p>}
             </div>
             <div>
-              <label htmlFor="bic" className={labelClass}>BIC</label>
-              <input id="bic" {...register('bic')} placeholder="OPSKATWW" className={inputClass} />
+              <label htmlFor="bic" className={labelClass}>{t.bic}</label>
+              <input id="bic" {...register('bic')} placeholder={t.bicPlaceholder} className={inputClass} />
             </div>
           </div>
         </div>
 
-        {/* Nachricht */}
+        {/* Notes */}
         <div>
-          <label htmlFor="nachricht" className={labelClass}>Nachricht / Anmerkungen</label>
+          <label htmlFor="nachricht" className={labelClass}>{t.notesLabel}</label>
           <textarea
             id="nachricht"
             {...register('nachricht')}
             rows={3}
-            placeholder="Vorerfahrung, Fragen, besondere Hinweise ..."
+            placeholder={t.notesPlaceholder}
             className={`${inputClass} resize-none`}
           />
         </div>
 
-        {/* AGB Hinweis */}
+        {/* Terms */}
         <p className="text-xs text-muted-foreground">
-          Mit dem Absenden akzeptierst du die{' '}
-          <a href="/vertrag.pdf" target="_blank" className="underline hover:text-foreground">
-            Allgemeinen Geschäftsbedingungen
-          </a>{' '}
-          von Axis Jiu-Jitsu Vienna. Mindestlaufzeit bei 12-Monats-Vertrag: 12 Monate,
-          Kündigung 4 Wochen vor Ende an office@axisjj.at.
+          {t.termsLegal}
         </p>
 
         {serverError && <p className="text-sm text-destructive">{serverError}</p>}
@@ -221,7 +225,7 @@ export default function AnmeldenPage() {
           disabled={isSubmitting}
           className="w-full bg-primary py-4 text-sm font-black uppercase tracking-widest text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
         >
-          {isSubmitting ? 'Wird gesendet ...' : 'Antrag absenden →'}
+          {isSubmitting ? t.submitting : t.submit}
         </button>
       </form>
     </div>

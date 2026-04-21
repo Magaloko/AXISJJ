@@ -1,7 +1,7 @@
 // app/(public)/trial/__tests__/TrialForm.test.tsx
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import TrialPage from '../page'
+import TrialForm from '../TrialForm'
 
 // Mock the server action
 vi.mock('@/app/actions/leads', () => ({
@@ -16,7 +16,7 @@ describe('Trial signup page', () => {
   })
 
   it('renders the signup form', () => {
-    render(<TrialPage />)
+    render(<TrialForm lang="de" />)
     expect(screen.getByLabelText(/name/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/e-mail/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /anmelden/i })).toBeInTheDocument()
@@ -24,7 +24,7 @@ describe('Trial signup page', () => {
 
   it('shows success state after submission', async () => {
     vi.mocked(submitTrialLead).mockResolvedValueOnce({ success: true })
-    render(<TrialPage />)
+    render(<TrialForm lang="de" />)
 
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Max Mustermann' } })
     fireEvent.change(screen.getByLabelText(/e-mail/i), { target: { value: 'max@example.com' } })
@@ -37,7 +37,7 @@ describe('Trial signup page', () => {
 
   it('shows error when server action fails', async () => {
     vi.mocked(submitTrialLead).mockResolvedValueOnce({ error: 'Fehler beim Speichern' })
-    render(<TrialPage />)
+    render(<TrialForm lang="de" />)
 
     fireEvent.change(screen.getByLabelText(/name/i), { target: { value: 'Max Mustermann' } })
     fireEvent.change(screen.getByLabelText(/e-mail/i), { target: { value: 'max@example.com' } })
