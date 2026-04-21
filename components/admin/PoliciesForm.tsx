@@ -4,10 +4,12 @@ import { useState, useTransition } from 'react'
 import { updatePolicies } from '@/app/actions/gym-settings'
 import { useRouter } from 'next/navigation'
 import type { GymSettings } from '@/lib/gym-settings'
+import { translations, type Lang } from '@/lib/i18n'
 
-interface Props { initial: GymSettings }
+interface Props { initial: GymSettings; lang: Lang }
 
-export function PoliciesForm({ initial }: Props) {
+export function PoliciesForm({ initial, lang }: Props) {
+  const tg = translations[lang].admin.gym
   const [form, setForm] = useState({
     house_rules: initial.house_rules ?? '',
     cancellation_policy: initial.cancellation_policy ?? '',
@@ -37,29 +39,29 @@ export function PoliciesForm({ initial }: Props) {
 
   return (
     <div className="border border-border bg-card p-6">
-      <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">Richtlinien</p>
+      <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">{tg.policies}</p>
       {error && <p className="mb-2 text-xs text-destructive">{error}</p>}
-      {success && <p className="mb-2 text-xs text-[#2e7d32]">Gespeichert.</p>}
+      {success && <p className="mb-2 text-xs text-[#2e7d32]">{tg.saved}</p>}
       <div className="space-y-4">
         <div>
-          <label className={label}>Haus-Regeln</label>
+          <label className={label}>{tg.houseRules}</label>
           <textarea rows={8} className={ta} value={form.house_rules}
                     onChange={e => setForm({ ...form, house_rules: e.target.value })} />
         </div>
         <div>
-          <label className={label}>Kündigungsfristen</label>
+          <label className={label}>{tg.cancellationPolicy}</label>
           <textarea rows={4} className={ta} value={form.cancellation_policy}
                     onChange={e => setForm({ ...form, cancellation_policy: e.target.value })} />
         </div>
         <div>
-          <label className={label}>Preise</label>
+          <label className={label}>{tg.pricingInfo}</label>
           <textarea rows={6} className={ta} value={form.pricing_info}
                     onChange={e => setForm({ ...form, pricing_info: e.target.value })} />
         </div>
       </div>
       <button onClick={save} disabled={isPending}
               className="mt-4 bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-50">
-        Speichern
+        {tg.save}
       </button>
     </div>
   )

@@ -3,6 +3,7 @@
 
 import { useState } from 'react'
 import { MemberEditPanel, type MemberDetail } from './MemberEditPanel'
+import type { Lang } from '@/lib/i18n'
 
 interface Belt { id: string; name: string; color_hex: string | null }
 interface Member {
@@ -20,9 +21,10 @@ interface Props {
   members: Member[]
   belts: Belt[]
   viewerRole: 'coach' | 'owner'
+  lang: Lang
 }
 
-export function MemberTable({ members, belts, viewerRole }: Props) {
+export function MemberTable({ members, belts, viewerRole, lang }: Props) {
   const [search, setSearch] = useState('')
   const [beltFilter, setBeltFilter] = useState('')
   const [roleFilter, setRoleFilter] = useState<'all' | 'member' | 'coach' | 'owner'>('all')
@@ -171,6 +173,7 @@ export function MemberTable({ members, belts, viewerRole }: Props) {
           member={selected}
           viewerRole={viewerRole}
           onClose={() => setSelected(null)}
+          lang={lang}
         />
       )}
     </div>

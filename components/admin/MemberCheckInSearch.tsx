@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { checkIn } from '@/app/actions/checkin'
+import { translations, type Lang } from '@/lib/i18n'
 
 interface Member {
   id: string
@@ -11,9 +12,13 @@ interface Member {
   role: string
 }
 
-interface Props { sessionId: string }
+interface Props {
+  sessionId: string
+  lang: Lang
+}
 
-export function MemberCheckInSearch({ sessionId }: Props) {
+export function MemberCheckInSearch({ sessionId, lang }: Props) {
+  const t = translations[lang].admin.checkinExtra
   const [query, setQuery] = useState('')
   const [members, setMembers] = useState<Member[]>([])
   const [checkedInIds, setCheckedInIds] = useState<Set<string>>(new Set())
@@ -52,7 +57,7 @@ export function MemberCheckInSearch({ sessionId }: Props) {
         setError(result.error)
       } else {
         setCheckedInIds(prev => new Set(prev).add(member.id))
-        setSuccess(`✓ ${result.memberName ?? member.full_name ?? 'Mitglied'} eingecheckt`)
+        setSuccess(`✓ ${result.memberName ?? member.full_name ?? t.memberLabel} ${translations[lang].admin.checkin.checkedIn}`)
         setQuery('')
       }
     })
@@ -61,13 +66,13 @@ export function MemberCheckInSearch({ sessionId }: Props) {
   return (
     <div>
       <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-        Quick Check-In (Namen-Suche)
+        {t.quickCheckIn}
       </p>
       <input
         type="search"
         value={query}
         onChange={e => setQuery(e.target.value)}
-        placeholder="Namen tippen (min. 2 Zeichen)..."
+        placeholder={t.searchPlaceholder}
         className="w-full border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
       />
 
@@ -92,11 +97,11 @@ export function MemberCheckInSearch({ sessionId }: Props) {
                 <div>
                   <p className="font-semibold text-foreground">{m.full_name ?? m.email}</p>
                   <p className="text-xs text-muted-foreground">
-                    {m.email} · {m.role === 'coach' ? 'Coach' : 'Mitglied'}
+                    {m.email} · {m.role === 'coach' ? 'Coach' : t.memberLabel}
                   </p>
                 </div>
                 <span className="text-xs">
-                  {isCheckedIn ? '✓ Eingecheckt' : 'Check-In →'}
+                  {isCheckedIn ? t.checkedInLabel : t.checkInArrow}
                 </span>
               </button>
             )
@@ -105,7 +110,7 @@ export function MemberCheckInSearch({ sessionId }: Props) {
       )}
 
       {query.trim().length >= 2 && filtered.length === 0 && (
-        <p className="mt-2 text-xs text-muted-foreground">Kein Mitglied gefunden.</p>
+        <p className="mt-2 text-xs text-muted-foreground">{t.noMemberFound}</p>
       )}
     </div>
   )

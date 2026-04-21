@@ -6,13 +6,16 @@ import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { checkIn } from '@/app/actions/checkin'
 import type { BookingWithAttendance } from '@/app/actions/admin'
+import { translations, type Lang } from '@/lib/i18n'
 
 interface Props {
   sessionId: string
   initialBookings: BookingWithAttendance[]
+  lang: Lang
 }
 
-export function CheckInList({ sessionId, initialBookings }: Props) {
+export function CheckInList({ sessionId, initialBookings, lang }: Props) {
+  const t = translations[lang].admin
   const [bookings, setBookings] = useState(initialBookings)
   const [isPending, startTransition] = useTransition()
   const [loadingId, setLoadingId] = useState<string | null>(null)
@@ -50,11 +53,15 @@ export function CheckInList({ sessionId, initialBookings }: Props) {
     })
   }
 
+  const checkedInCountStr = t.checkinExtra.checkedInCount
+    .replace('{count}', String(checkedInCount))
+    .replace('{total}', String(bookings.length))
+
   return (
     <div>
       <div className="mb-3">
         <span className="text-sm font-bold text-foreground">
-          {checkedInCount} / {bookings.length} eingecheckt
+          {checkedInCountStr}
         </span>
       </div>
 
@@ -80,7 +87,7 @@ export function CheckInList({ sessionId, initialBookings }: Props) {
                 disabled={isPending && loadingId === booking.id}
                 className="border border-border bg-background px-3 py-1 text-xs font-bold uppercase tracking-wide text-foreground transition-colors hover:border-primary hover:text-primary disabled:opacity-50"
               >
-                {isPending && loadingId === booking.id ? '...' : 'Einchecken'}
+                {isPending && loadingId === booking.id ? '...' : t.checkin.checkInBtn}
               </button>
             )}
           </div>
@@ -88,7 +95,7 @@ export function CheckInList({ sessionId, initialBookings }: Props) {
 
         {bookings.length === 0 && (
           <p className="py-4 text-center text-sm text-muted-foreground">
-            Keine Buchungen für diese Session.
+            {t.checkinExtra.noBookings}
           </p>
         )}
       </div>

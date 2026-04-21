@@ -4,10 +4,12 @@ import { useState, useTransition } from 'react'
 import { updateGymInfo } from '@/app/actions/gym-settings'
 import { useRouter } from 'next/navigation'
 import type { GymSettings } from '@/lib/gym-settings'
+import { translations, type Lang } from '@/lib/i18n'
 
-interface Props { initial: GymSettings }
+interface Props { initial: GymSettings; lang: Lang }
 
-export function GymInfoForm({ initial }: Props) {
+export function GymInfoForm({ initial, lang }: Props) {
+  const tg = translations[lang].admin.gym
   const [form, setForm] = useState({
     name: initial.name,
     address_line1: initial.address_line1 ?? '',
@@ -39,51 +41,51 @@ export function GymInfoForm({ initial }: Props) {
 
   return (
     <div className="border border-border bg-card p-6">
-      <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">Gym-Info</p>
+      <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">{tg.info}</p>
       {error && <p className="mb-2 text-xs text-destructive">{error}</p>}
-      {success && <p className="mb-2 text-xs text-[#2e7d32]">Gespeichert.</p>}
+      {success && <p className="mb-2 text-xs text-[#2e7d32]">{tg.saved}</p>}
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">
-          <label className={label}>Name *</label>
+          <label className={label}>{tg.name} *</label>
           <input className={input} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
         </div>
         <div className="sm:col-span-2">
-          <label className={label}>Adresse</label>
+          <label className={label}>{tg.address}</label>
           <input className={input} value={form.address_line1}
-                 onChange={e => setForm({ ...form, address_line1: e.target.value })} placeholder="Straße und Nummer" />
+                 onChange={e => setForm({ ...form, address_line1: e.target.value })} placeholder={tg.addressPlaceholder} />
         </div>
         <div className="sm:col-span-2">
           <input className={input} value={form.address_line2}
-                 onChange={e => setForm({ ...form, address_line2: e.target.value })} placeholder="Top / Stiege (optional)" />
+                 onChange={e => setForm({ ...form, address_line2: e.target.value })} placeholder={tg.addressLine2Placeholder} />
         </div>
         <div>
-          <label className={label}>PLZ</label>
+          <label className={label}>{tg.postalCode}</label>
           <input className={input} value={form.postal_code} onChange={e => setForm({ ...form, postal_code: e.target.value })} />
         </div>
         <div>
-          <label className={label}>Ort</label>
+          <label className={label}>{tg.city}</label>
           <input className={input} value={form.city} onChange={e => setForm({ ...form, city: e.target.value })} />
         </div>
         <div className="sm:col-span-2">
-          <label className={label}>Land</label>
+          <label className={label}>{tg.country}</label>
           <input className={input} value={form.country} onChange={e => setForm({ ...form, country: e.target.value })} />
         </div>
         <div>
-          <label className={label}>Telefon</label>
+          <label className={label}>{tg.phone}</label>
           <input className={input} value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} />
         </div>
         <div>
-          <label className={label}>E-Mail</label>
+          <label className={label}>{tg.email}</label>
           <input className={input} type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
         </div>
         <div className="sm:col-span-2">
-          <label className={label}>Website</label>
+          <label className={label}>{tg.website}</label>
           <input className={input} value={form.website} onChange={e => setForm({ ...form, website: e.target.value })} />
         </div>
       </div>
       <button onClick={save} disabled={isPending}
               className="mt-4 bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-50">
-        Speichern
+        {tg.save}
       </button>
     </div>
   )

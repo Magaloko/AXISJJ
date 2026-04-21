@@ -1,7 +1,9 @@
 // app/(admin)/admin/mitglieder/page.tsx
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { MemberTable } from '@/components/admin/MemberTable'
+import { resolveLang } from '@/lib/i18n/resolve-lang'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Mitglieder | Admin' }
@@ -13,12 +15,14 @@ export default async function MitgliederPage() {
 
   const { data: callerProfile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, language')
     .eq('id', user.id)
     .single()
 
   const callerRole = callerProfile?.role ?? 'member'
   const viewerRole: 'coach' | 'owner' = callerRole === 'owner' ? 'owner' : 'coach'
+  const rawLang = (await cookies()).get('lang')?.value
+  const lang = resolveLang(rawLang, callerProfile?.language)
 
   // Step 1: plain profiles query — no joins, robust
   const { data: profilesData, error: profilesError } = await supabase
@@ -103,7 +107,7 @@ export default async function MitgliederPage() {
         <h1 className="text-2xl font-black text-foreground">Mitglieder</h1>
         <p className="text-xs text-muted-foreground">{members.length} Mitglied{members.length !== 1 ? 'er' : ''}</p>
       </div>
-      <MemberTable members={members} belts={belts} viewerRole={viewerRole} />
+      <MemberTable members={members} belts={belts} viewerRole={viewerRole} lang={lang} />
     </div>
   )
 }

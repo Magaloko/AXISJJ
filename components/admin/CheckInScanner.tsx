@@ -4,10 +4,12 @@
 import { useEffect, useRef, useState } from 'react'
 import jsQR from 'jsqr'
 import { checkIn } from '@/app/actions/checkin'
+import { translations, type Lang } from '@/lib/i18n'
 
 interface Props {
   sessionId: string
   onCheckedIn: (profileId: string) => void
+  lang: Lang
 }
 
 type ScanResult =
@@ -15,7 +17,8 @@ type ScanResult =
   | { type: 'error'; message: string }
   | null
 
-export function CheckInScanner({ sessionId, onCheckedIn }: Props) {
+export function CheckInScanner({ sessionId, onCheckedIn, lang }: Props) {
+  const t = translations[lang].admin.checkinExtra
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
@@ -32,7 +35,7 @@ export function CheckInScanner({ sessionId, onCheckedIn }: Props) {
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment' },
         })
-        if (!active) { stream.getTracks().forEach(t => t.stop()); return }
+        if (!active) { stream.getTracks().forEach(tr => tr.stop()); return }
         streamRef.current = stream
         if (videoRef.current) {
           videoRef.current.srcObject = stream
@@ -40,7 +43,7 @@ export function CheckInScanner({ sessionId, onCheckedIn }: Props) {
           tick()
         }
       } catch {
-        setCameraError('Kamera konnte nicht gestartet werden.')
+        setCameraError(t.cameraError)
       }
     }
 
@@ -72,7 +75,7 @@ export function CheckInScanner({ sessionId, onCheckedIn }: Props) {
     return () => {
       active = false
       cancelAnimationFrame(rafRef.current)
-      streamRef.current?.getTracks().forEach(t => t.stop())
+      streamRef.current?.getTracks().forEach(tr => tr.stop())
     }
   }, [sessionId])
 
@@ -82,7 +85,7 @@ export function CheckInScanner({ sessionId, onCheckedIn }: Props) {
       setScanResult({ type: 'success', memberName: result.memberName })
       onCheckedIn(profileId)
     } else {
-      setScanResult({ type: 'error', message: result.error ?? 'Fehler beim Check-In.' })
+      setScanResult({ type: 'error', message: result.error ?? t.scanError })
     }
     // Reset after 2s to allow next scan
     setTimeout(() => {
@@ -104,7 +107,7 @@ export function CheckInScanner({ sessionId, onCheckedIn }: Props) {
       {/* Hint */}
       {!scanResult && !cameraError && (
         <div className="absolute bottom-3 left-0 right-0 text-center text-xs font-semibold text-white/80">
-          QR-Code scannen
+          {t.qrScanHint}
         </div>
       )}
 
@@ -125,7 +128,7 @@ export function CheckInScanner({ sessionId, onCheckedIn }: Props) {
           <p className="text-lg font-black text-white">
             {scanResult.type === 'success'
               ? `✓ ${scanResult.memberName}`
-              : '✗ Fehler'}
+              : t.scanErrorLabel}
           </p>
           {scanResult.type === 'error' && (
             <p className="mt-1 text-sm text-white/80">{scanResult.message}</p>

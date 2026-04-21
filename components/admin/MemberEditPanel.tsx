@@ -9,6 +9,7 @@ import { MemberCompetitionsView } from './MemberCompetitionsView'
 import { MemberProgressChart } from './MemberProgressChart'
 import { MemberSkillsManager } from './MemberSkillsManager'
 import { MemberSubscriptionPanel } from './MemberSubscriptionPanel'
+import { translations, type Lang } from '@/lib/i18n'
 
 export interface MemberDetail {
   id: string
@@ -22,9 +23,11 @@ interface Props {
   member: MemberDetail
   viewerRole: 'coach' | 'owner'
   onClose: () => void
+  lang: Lang
 }
 
-export function MemberEditPanel({ member, viewerRole, onClose }: Props) {
+export function MemberEditPanel({ member, viewerRole, onClose, lang }: Props) {
+  const t = translations[lang].admin.memberEdit
   const [form, setForm] = useState({
     full_name: member.full_name,
     phone: member.phone ?? '',
@@ -99,35 +102,35 @@ export function MemberEditPanel({ member, viewerRole, onClose }: Props) {
       {error && <p className="mb-3 text-xs text-destructive">{error}</p>}
       <div className="space-y-3">
         <div>
-          <label className="mb-1 block text-xs text-muted-foreground">Name</label>
+          <label className="mb-1 block text-xs text-muted-foreground">{t.name}</label>
           <input className="w-full border border-border bg-background p-2 text-sm disabled:opacity-60"
                  value={form.full_name} disabled={readOnly}
                  onChange={e => setForm({ ...form, full_name: e.target.value })} />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-muted-foreground">Telefon</label>
+          <label className="mb-1 block text-xs text-muted-foreground">{t.phone}</label>
           <input className="w-full border border-border bg-background p-2 text-sm disabled:opacity-60"
                  value={form.phone} disabled={readOnly}
                  onChange={e => setForm({ ...form, phone: e.target.value })} />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-muted-foreground">Geburtsdatum</label>
+          <label className="mb-1 block text-xs text-muted-foreground">{t.dateOfBirth}</label>
           <input type="date" className="w-full border border-border bg-background p-2 text-sm disabled:opacity-60"
                  value={form.date_of_birth} disabled={readOnly}
                  onChange={e => setForm({ ...form, date_of_birth: e.target.value })} />
         </div>
         <div>
-          <label className="mb-1 block text-xs text-muted-foreground">Rolle</label>
+          <label className="mb-1 block text-xs text-muted-foreground">{t.role}</label>
           <p className="text-sm font-bold capitalize">{member.role}</p>
-          <p className="text-[10px] text-muted-foreground">Rolle ändern: /admin/einstellungen</p>
+          <p className="text-[10px] text-muted-foreground">{t.roleChangeHint}</p>
         </div>
         {!readOnly && (
           <div className="flex gap-2 pt-2">
             <button onClick={save} disabled={isPending}
                     className="flex-1 bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-50">
-              Speichern
+              {t.save}
             </button>
-            <button onClick={onClose} className="border border-border px-4 py-2 text-sm">Abbrechen</button>
+            <button onClick={onClose} className="border border-border px-4 py-2 text-sm">{t.cancel}</button>
           </div>
         )}
       </div>
@@ -155,10 +158,10 @@ export function MemberEditPanel({ member, viewerRole, onClose }: Props) {
       {isCoach && !readOnly && (
         <div className="mt-6 border-t border-border pt-6">
           <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-            Website-Profil
+            {t.websiteProfile}
           </p>
           {coachSaveError && <p className="mb-3 text-xs text-destructive">{coachSaveError}</p>}
-          {coachSaved && <p className="mb-3 text-xs text-primary">Gespeichert.</p>}
+          {coachSaved && <p className="mb-3 text-xs text-primary">{t.saved}</p>}
 
           <div className="space-y-3">
             <label className="flex items-center gap-2 cursor-pointer">
@@ -168,21 +171,21 @@ export function MemberEditPanel({ member, viewerRole, onClose }: Props) {
                 onChange={e => setCoachForm({ ...coachForm, showOnWebsite: e.target.checked })}
                 className="h-4 w-4"
               />
-              <span className="text-sm">Auf Landing Page anzeigen</span>
+              <span className="text-sm">{t.showOnLandingPage}</span>
             </label>
 
             <div>
-              <label className="mb-1 block text-xs text-muted-foreground">Spezialisierung</label>
+              <label className="mb-1 block text-xs text-muted-foreground">{t.specialization}</label>
               <input
                 className="w-full border border-border bg-background p-2 text-sm"
-                placeholder="z.B. Gi & No-Gi · Head Coach"
+                placeholder={t.specializationPlaceholder}
                 value={coachForm.specialization}
                 onChange={e => setCoachForm({ ...coachForm, specialization: e.target.value })}
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-xs text-muted-foreground">Bio</label>
+              <label className="mb-1 block text-xs text-muted-foreground">{t.bio}</label>
               <textarea
                 className="w-full border border-border bg-background p-2 text-sm resize-none"
                 rows={3}
@@ -192,18 +195,18 @@ export function MemberEditPanel({ member, viewerRole, onClose }: Props) {
             </div>
 
             <div>
-              <label className="mb-1 block text-xs text-muted-foreground">Erfolge</label>
+              <label className="mb-1 block text-xs text-muted-foreground">{t.achievements}</label>
               <textarea
                 className="w-full border border-border bg-background p-2 text-sm resize-none"
                 rows={2}
-                placeholder="z.B. IBJJF European Silver · Österreichischer Champion"
+                placeholder={t.achievementsPlaceholder}
                 value={coachForm.achievements}
                 onChange={e => setCoachForm({ ...coachForm, achievements: e.target.value })}
               />
             </div>
 
             <div>
-              <label className="mb-1 block text-xs text-muted-foreground">Reihenfolge (1 = zuerst)</label>
+              <label className="mb-1 block text-xs text-muted-foreground">{t.displayOrder}</label>
               <input
                 type="number"
                 min={1}
@@ -219,7 +222,7 @@ export function MemberEditPanel({ member, viewerRole, onClose }: Props) {
               disabled={isCoachPending}
               className="bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-50"
             >
-              {isCoachPending ? 'Speichern…' : 'Website-Profil speichern'}
+              {isCoachPending ? t.saving : t.saveWebsiteProfile}
             </button>
           </div>
         </div>

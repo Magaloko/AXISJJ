@@ -5,10 +5,12 @@ import { updateOpeningHours } from '@/app/actions/gym-settings'
 import { useRouter } from 'next/navigation'
 import { DAY_KEYS, DAY_LABELS_FULL_DE } from '@/lib/opening-hours'
 import type { OpeningHours } from '@/lib/gym-settings'
+import { translations, type Lang } from '@/lib/i18n'
 
-interface Props { initial: OpeningHours }
+interface Props { initial: OpeningHours; lang: Lang }
 
-export function OpeningHoursForm({ initial }: Props) {
+export function OpeningHoursForm({ initial, lang }: Props) {
+  const tg = translations[lang].admin.gym
   const [hours, setHours] = useState<OpeningHours>(initial)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -41,9 +43,9 @@ export function OpeningHoursForm({ initial }: Props) {
 
   return (
     <div className="border border-border bg-card p-6">
-      <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">Öffnungszeiten</p>
+      <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">{tg.hours}</p>
       {error && <p className="mb-2 text-xs text-destructive">{error}</p>}
-      {success && <p className="mb-2 text-xs text-[#2e7d32]">Gespeichert.</p>}
+      {success && <p className="mb-2 text-xs text-[#2e7d32]">{tg.saved}</p>}
       <ul className="space-y-2">
         {DAY_KEYS.map(key => {
           const day = hours[key]
@@ -59,7 +61,7 @@ export function OpeningHoursForm({ initial }: Props) {
                      className="border border-border bg-background p-1 text-sm disabled:opacity-40" />
               <label className="ml-auto flex items-center gap-2 text-xs">
                 <input type="checkbox" checked={day.closed} onChange={() => toggleClosed(key)} />
-                geschlossen
+                {tg.closed}
               </label>
             </li>
           )
@@ -67,7 +69,7 @@ export function OpeningHoursForm({ initial }: Props) {
       </ul>
       <button onClick={save} disabled={isPending}
               className="mt-4 bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-50">
-        Speichern
+        {tg.save}
       </button>
     </div>
   )

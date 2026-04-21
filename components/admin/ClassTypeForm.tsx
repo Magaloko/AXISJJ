@@ -4,6 +4,7 @@ import { useState, useTransition, useRef } from 'react'
 import { upsertClassType } from '@/app/actions/class-types'
 import { uploadClassTypeImage } from '@/app/actions/class-type-image'
 import { useRouter } from 'next/navigation'
+import { translations, type Lang } from '@/lib/i18n'
 
 export interface ClassTypeRow {
   id?: string
@@ -14,9 +15,11 @@ export interface ClassTypeRow {
   image_url?: string | null
 }
 
-interface Props { initial?: ClassTypeRow; onClose: () => void }
+interface Props { initial?: ClassTypeRow; onClose: () => void; lang: Lang }
 
-export function ClassTypeForm({ initial, onClose }: Props) {
+export function ClassTypeForm({ initial, onClose, lang }: Props) {
+  const te = translations[lang].admin.einstellungen
+  const tex = translations[lang].admin.einstellungenExtra
   const [form, setForm] = useState<ClassTypeRow>(initial ?? { name: '', description: '', level: 'all', gi: true })
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
@@ -60,33 +63,33 @@ export function ClassTypeForm({ initial, onClose }: Props) {
   return (
     <div className="fixed inset-y-0 right-0 z-40 w-full max-w-sm border-l border-border bg-card p-6 shadow-lg">
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-black">{initial ? 'Klassentyp bearbeiten' : 'Neuer Klassentyp'}</h2>
+        <h2 className="text-lg font-black">{initial ? te.editType : te.newType}</h2>
         <button onClick={onClose} className="text-muted-foreground">✕</button>
       </div>
       {error && <p className="mb-3 text-xs text-destructive">{error}</p>}
       <div className="space-y-3">
-        <input className="w-full border border-border bg-background p-2 text-sm" placeholder="Name"
+        <input className="w-full border border-border bg-background p-2 text-sm" placeholder={tex.name}
                value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} />
-        <textarea className="w-full border border-border bg-background p-2 text-sm" placeholder="Beschreibung" rows={3}
+        <textarea className="w-full border border-border bg-background p-2 text-sm" placeholder={tex.description} rows={3}
                   value={form.description ?? ''} onChange={e => setForm({ ...form, description: e.target.value })} />
         <select className="w-full border border-border bg-background p-2 text-sm"
                 value={form.level} onChange={e => setForm({ ...form, level: e.target.value as ClassTypeRow['level'] })}>
-          <option value="beginner">Anfänger</option>
-          <option value="all">Alle</option>
-          <option value="advanced">Fortgeschritten</option>
-          <option value="kids">Kids</option>
+          <option value="beginner">{te.levelBeginner}</option>
+          <option value="all">{te.levelAll}</option>
+          <option value="advanced">{te.levelAdvanced}</option>
+          <option value="kids">{te.levelKids}</option>
         </select>
         <label className="flex items-center gap-2 text-sm">
           <input type="checkbox" checked={form.gi} onChange={e => setForm({ ...form, gi: e.target.checked })} />
-          Mit Gi
+          {tex.withGi}
         </label>
         {/* Image */}
         <div>
-          <label className="mb-1 block text-xs text-muted-foreground">Bild</label>
+          <label className="mb-1 block text-xs text-muted-foreground">{tex.image}</label>
           {imageUrl && (
             <div className="mb-2 relative w-full h-32 overflow-hidden rounded border border-border">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={imageUrl} alt="Vorschau" className="w-full h-full object-cover" />
+              <img src={imageUrl} alt="Preview" className="w-full h-full object-cover" />
               <button
                 type="button"
                 onClick={() => setImageUrl('')}
@@ -101,7 +104,7 @@ export function ClassTypeForm({ initial, onClose }: Props) {
             <input
               type="text"
               className="flex-1 border border-border bg-background p-2 text-sm"
-              placeholder="Bild-URL einfügen…"
+              placeholder={tex.imageUrlPlaceholder}
               value={imageUrl}
               onChange={e => { setImageUrl(e.target.value); setImageError(null) }}
             />
@@ -111,7 +114,7 @@ export function ClassTypeForm({ initial, onClose }: Props) {
               disabled={isUploading}
               className="border border-border px-3 py-2 text-xs font-medium disabled:opacity-50"
             >
-              {isUploading ? '…' : 'Upload'}
+              {isUploading ? '…' : tex.upload}
             </button>
           </div>
           <input
@@ -125,9 +128,9 @@ export function ClassTypeForm({ initial, onClose }: Props) {
         <div className="flex gap-2 pt-2">
           <button onClick={save} disabled={isPending}
                   className="flex-1 bg-primary px-4 py-2 text-sm font-bold text-primary-foreground disabled:opacity-50">
-            Speichern
+            {tex.save}
           </button>
-          <button onClick={onClose} className="border border-border px-4 py-2 text-sm">Abbrechen</button>
+          <button onClick={onClose} className="border border-border px-4 py-2 text-sm">{tex.cancel}</button>
         </div>
       </div>
     </div>

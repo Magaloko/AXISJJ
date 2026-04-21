@@ -1,11 +1,14 @@
 // app/(admin)/admin/checkin/page.tsx
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
+import { cookies } from 'next/headers'
 import { getTodaySessions, getSessionBookings } from '@/app/actions/admin'
 import Link from 'next/link'
 import { CheckInScanner } from '@/components/admin/CheckInScanner'
 import { CheckInList } from '@/components/admin/CheckInList'
 import { MemberCheckInSearch } from '@/components/admin/MemberCheckInSearch'
+import { resolveLang } from '@/lib/i18n/resolve-lang'
+import { translations } from '@/lib/i18n'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Check-In | Admin' }
@@ -18,6 +21,16 @@ export default async function CheckInPage({ searchParams }: Props) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('language')
+    .eq('id', user.id)
+    .single()
+
+  const rawLang = (await cookies()).get('lang')?.value
+  const lang = resolveLang(rawLang, profile?.language)
+  const t = translations[lang].admin
 
   const params = await searchParams
 
@@ -41,15 +54,15 @@ export default async function CheckInPage({ searchParams }: Props) {
 
   return (
     <div className="p-6 sm:p-8">
-      <h1 className="mb-6 text-2xl font-black text-foreground">Check-In</h1>
+      <h1 className="mb-6 text-2xl font-black text-foreground">{t.checkin.title}</h1>
 
       {/* Session selector */}
       <div className="mb-6">
         <label className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
-          Session wählen
+          {t.checkin.selectSession}
         </label>
         {sessions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Keine Sessions heute.</p>
+          <p className="text-sm text-muted-foreground">{t.checkin.noSessions}</p>
         ) : (
           <div className="flex flex-wrap gap-2">
             {sessions.map(s => (
@@ -76,29 +89,31 @@ export default async function CheckInPage({ searchParams }: Props) {
           </div>
 
           <div className="mb-6">
-            <MemberCheckInSearch sessionId={selectedSession.id} />
+            <MemberCheckInSearch sessionId={selectedSession.id} lang={lang} />
           </div>
 
           <div className="grid gap-6 lg:grid-cols-2">
             {/* QR Scanner */}
             <div>
               <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                QR-Code scannen
+                {t.checkinExtra.qrScanLabel}
               </p>
               <CheckInScanner
                 sessionId={selectedSession.id}
                 onCheckedIn={() => {}}
+                lang={lang}
               />
             </div>
 
             {/* Manual list */}
             <div>
               <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-                Buchungsliste
+                {t.checkinExtra.bookingList}
               </p>
               <CheckInList
                 sessionId={selectedSession.id}
                 initialBookings={bookings}
+                lang={lang}
               />
             </div>
           </div>

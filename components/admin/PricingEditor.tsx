@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { updatePricingPlan } from '@/app/actions/pricing'
+import { translations, type Lang } from '@/lib/i18n'
 
 interface Plan {
   id: string
@@ -12,15 +13,20 @@ interface Plan {
   highlighted: boolean
 }
 
-interface Props { plans: Plan[] }
+interface Props { plans: Plan[]; lang: Lang }
 
-const CATEGORY_LABELS = { students: 'Studenten', adults: 'Erwachsene', kids: 'Kinder' }
-
-export function PricingEditor({ plans: initialPlans }: Props) {
+export function PricingEditor({ plans: initialPlans, lang }: Props) {
+  const tex = translations[lang].admin.einstellungenExtra
   const [plans, setPlans] = useState(initialPlans)
   const [pendingId, setPendingId] = useState<string | null>(null)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [isPending, startTransition] = useTransition()
+
+  const CATEGORY_LABELS: Record<string, string> = {
+    students: tex.catStudents,
+    adults: tex.catAdults,
+    kids: tex.catKids,
+  }
 
   function updateLocal(id: string, patch: Partial<Plan>) {
     setPlans(prev => prev.map(p => p.id === id ? { ...p, ...patch } : p))
@@ -39,7 +45,7 @@ export function PricingEditor({ plans: initialPlans }: Props) {
       if (result.error) {
         setMessage({ type: 'error', text: result.error })
       } else {
-        setMessage({ type: 'success', text: '✓ Gespeichert' })
+        setMessage({ type: 'success', text: tex.saved })
       }
       setPendingId(null)
     })
@@ -56,9 +62,9 @@ export function PricingEditor({ plans: initialPlans }: Props) {
 
   return (
     <div className="border border-border bg-card p-6">
-      <p className="mb-1 text-xs font-bold uppercase tracking-widest text-muted-foreground">Preise</p>
+      <p className="mb-1 text-xs font-bold uppercase tracking-widest text-muted-foreground">{tex.pricingTitle}</p>
       <p className="mb-5 text-sm text-muted-foreground">
-        Änderungen erscheinen sofort auf Landing-Page und /preise.
+        {tex.pricingSubtext}
       </p>
 
       {message && (
@@ -77,17 +83,17 @@ export function PricingEditor({ plans: initialPlans }: Props) {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-border text-left">
-                    <th className="py-2 pr-3 text-xs text-muted-foreground">Laufzeit</th>
-                    <th className="py-2 pr-3 text-xs text-muted-foreground">€/Monat</th>
-                    <th className="py-2 pr-3 text-xs text-muted-foreground">Gesamtpreis (optional)</th>
-                    <th className="py-2 pr-3 text-xs text-muted-foreground">Hervorgehoben</th>
+                    <th className="py-2 pr-3 text-xs text-muted-foreground">{tex.duration}</th>
+                    <th className="py-2 pr-3 text-xs text-muted-foreground">{tex.pricePerMonth}</th>
+                    <th className="py-2 pr-3 text-xs text-muted-foreground">{tex.totalPrice}</th>
+                    <th className="py-2 pr-3 text-xs text-muted-foreground">{tex.highlighted}</th>
                     <th className="py-2 text-right text-xs text-muted-foreground"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {(grouped[cat] ?? []).sort((a, b) => b.duration_months - a.duration_months).map(plan => (
                     <tr key={plan.id} className="border-b border-border/50">
-                      <td className="py-2 pr-3 font-semibold text-foreground">{plan.duration_months} Monate</td>
+                      <td className="py-2 pr-3 font-semibold text-foreground">{plan.duration_months} {tex.months}</td>
                       <td className="py-2 pr-3">
                         <input
                           type="number" step="0.01" min={0}
@@ -121,7 +127,7 @@ export function PricingEditor({ plans: initialPlans }: Props) {
                           disabled={isPending && pendingId === plan.id}
                           className="bg-primary px-3 py-1 text-[10px] font-bold uppercase text-primary-foreground hover:opacity-90 disabled:opacity-50"
                         >
-                          {pendingId === plan.id && isPending ? '...' : 'Speichern'}
+                          {pendingId === plan.id && isPending ? '...' : tex.save}
                         </button>
                       </td>
                     </tr>
