@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { tournamentInputSchema, type TournamentInput } from './tournaments.schema'
+import { getActionErrors } from '@/lib/i18n/action-lang'
 
 export interface Tournament {
   id: string
@@ -32,12 +33,14 @@ export async function createTournament(
   const parsed = tournamentInputSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Ungültige Eingabe.' }
 
+  const e = await getActionErrors()
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Nicht eingeloggt.' }
+  if (!user) return { error: e.notAuthenticated }
 
   const role = await getCallerRole()
-  if (role !== 'coach' && role !== 'owner') return { error: 'Keine Berechtigung.' }
+  if (role !== 'coach' && role !== 'owner') return { error: e.notAuthorized }
 
   const status = role === 'owner' ? 'approved' : 'pending_approval'
 
@@ -57,7 +60,7 @@ export async function createTournament(
     .select('id')
     .single()
 
-  if (error) return { error: 'Speichern fehlgeschlagen.' }
+  if (error) return { error: e.saveFailed }
 
   revalidatePath('/admin/turniere')
   revalidatePath('/')
@@ -71,8 +74,10 @@ export async function updateTournament(
   const parsed = tournamentInputSchema.safeParse(input)
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? 'Ungültige Eingabe.' }
 
+  const e = await getActionErrors()
+
   const role = await getCallerRole()
-  if (role !== 'coach' && role !== 'owner') return { error: 'Keine Berechtigung.' }
+  if (role !== 'coach' && role !== 'owner') return { error: e.notAuthorized }
 
   const supabase = await createClient()
   const { error } = await supabase
@@ -88,7 +93,7 @@ export async function updateTournament(
     })
     .eq('id', id)
 
-  if (error) return { error: 'Update fehlgeschlagen.' }
+  if (error) return { error: e.updateFailed }
 
   revalidatePath('/admin/turniere')
   revalidatePath('/')
@@ -96,8 +101,10 @@ export async function updateTournament(
 }
 
 export async function approveTournament(id: string): Promise<{ success?: true; error?: string }> {
+  const e = await getActionErrors()
+
   const role = await getCallerRole()
-  if (role !== 'owner') return { error: 'Nur Owner kann genehmigen.' }
+  if (role !== 'owner') return { error: e.ownerOnly }
 
   const supabase = await createClient()
   const { error } = await supabase
@@ -105,7 +112,7 @@ export async function approveTournament(id: string): Promise<{ success?: true; e
     .update({ status: 'approved' })
     .eq('id', id)
 
-  if (error) return { error: 'Genehmigung fehlgeschlagen.' }
+  if (error) return { error: e.tournamentApproveFailed }
 
   revalidatePath('/admin/turniere')
   revalidatePath('/')
@@ -113,8 +120,10 @@ export async function approveTournament(id: string): Promise<{ success?: true; e
 }
 
 export async function cancelTournament(id: string): Promise<{ success?: true; error?: string }> {
+  const e = await getActionErrors()
+
   const role = await getCallerRole()
-  if (role !== 'coach' && role !== 'owner') return { error: 'Keine Berechtigung.' }
+  if (role !== 'coach' && role !== 'owner') return { error: e.notAuthorized }
 
   const supabase = await createClient()
   const { error } = await supabase
@@ -122,7 +131,7 @@ export async function cancelTournament(id: string): Promise<{ success?: true; er
     .update({ status: 'cancelled' })
     .eq('id', id)
 
-  if (error) return { error: 'Absage fehlgeschlagen.' }
+  if (error) return { error: e.tournamentCancelFailed }
 
   revalidatePath('/admin/turniere')
   revalidatePath('/')

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { getActionErrors } from '@/lib/i18n/action-lang'
 
 export interface RegistrationInput {
   weight_category: string | null
@@ -23,9 +24,11 @@ export async function registerForTournament(
   tournamentId: string,
   input: RegistrationInput,
 ): Promise<{ success?: true; error?: string }> {
+  const e = await getActionErrors()
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Nicht eingeloggt.' }
+  if (!user) return { error: e.notAuthenticated }
 
   const { error } = await supabase
     .from('tournament_registrations')
@@ -41,7 +44,7 @@ export async function registerForTournament(
       { onConflict: 'tournament_id,profile_id' },
     )
 
-  if (error) return { error: 'Anmeldung fehlgeschlagen.' }
+  if (error) return { error: e.registrationFailed }
 
   revalidatePath('/dashboard/turniere')
   revalidatePath('/admin/turniere')
@@ -52,21 +55,23 @@ export async function updateRegistrationStatus(
   registrationId: string,
   status: 'approved' | 'denied',
 ): Promise<{ success?: true; error?: string }> {
+  const e = await getActionErrors()
+
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  if (!user) return { error: 'Nicht eingeloggt.' }
+  if (!user) return { error: e.notAuthenticated }
 
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
   const role = profile?.role
-  if (role !== 'coach' && role !== 'owner') return { error: 'Keine Berechtigung.' }
+  if (role !== 'coach' && role !== 'owner') return { error: e.notAuthorized }
 
   const { error } = await supabase
     .from('tournament_registrations')
     .update({ status })
     .eq('id', registrationId)
 
-  if (error) return { error: 'Update fehlgeschlagen.' }
+  if (error) return { error: e.updateFailed }
 
   revalidatePath('/admin/turniere')
   revalidatePath('/')
