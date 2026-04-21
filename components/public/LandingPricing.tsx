@@ -99,7 +99,7 @@ export function LandingPricing({ plans: PRICING_PLANS, lang }: LandingPricingPro
 
   return (
     <section id="preise" ref={pricingRef} className="relative mx-auto max-w-7xl px-4 py-20">
-      <article className="mb-10 max-w-2xl space-y-4 text-left">
+      <article className="mb-6 max-w-2xl space-y-4 text-left">
         <h2 className="mb-4 text-4xl font-black text-foreground md:text-6xl">
           <VerticalCutReveal
             splitBy="words"
@@ -122,16 +122,17 @@ export function LandingPricing({ plans: PRICING_PLANS, lang }: LandingPricingPro
         >
           {tp.subtitle}
         </TimelineContent>
-
-        <TimelineContent
-          as="div"
-          animationNum={1}
-          timelineRef={pricingRef}
-          customVariants={revealVariants}
-        >
-          <DurationSwitch selected={duration} onChange={setDuration} durationLabels={DURATION_LABELS} save30Label={tp.save30} />
-        </TimelineContent>
       </article>
+
+      <TimelineContent
+        as="div"
+        animationNum={1}
+        timelineRef={pricingRef}
+        customVariants={revealVariants}
+        className="mb-8 flex justify-center"
+      >
+        <DurationSwitch selected={duration} onChange={setDuration} durationLabels={DURATION_LABELS} save30Label={tp.save30} />
+      </TimelineContent>
 
       <div className="grid gap-4 py-6 md:grid-cols-3">
         {PRICING_PLANS.map((plan, index) => {

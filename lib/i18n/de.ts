@@ -450,7 +450,7 @@ export const de = {
     },
     trialCta: {
       eyebrow: 'Kein Risiko · Keine Verpflichtung',
-      heading: 'STARTE HEUTE — ERSTE WOCHE GRATIS',
+      heading: 'STARTE HEUTE. ERSTE WOCHE GRATIS.',
       subtext: 'Tritt ein. Trainiere. Entscheide.',
       descriptive: 'Keine Anmeldegebühr · Keine Verpflichtung · Plätze begrenzt',
       levelsWelcome: 'Alle Levels willkommen',
