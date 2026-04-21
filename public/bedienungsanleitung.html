@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex" />
+<title>AXIS JJ — Bedienungsanleitung</title>
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --card: #141414;
+    --border: #222;
+    --fg: #f5f5f5;
+    --muted: #888;
+    --primary: #ef4444;
+    --primary-soft: rgba(239, 68, 68, 0.15);
+    --member: #3b82f6;
+    --coach: #10b981;
+    --owner: #f59e0b;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  /* Animated gradient background */
+  .bg-orb {
+    position: fixed;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    filter: blur(100px);
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .bg-orb.o1 { top: -100px; left: -100px; background: var(--primary); animation: float1 20s ease-in-out infinite; }
+  .bg-orb.o2 { bottom: 200px; right: -100px; background: var(--member); animation: float2 25s ease-in-out infinite; }
+  .bg-orb.o3 { top: 50%; left: 50%; background: var(--coach); animation: float3 30s ease-in-out infinite; }
+  @keyframes float1 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(200px, 100px); } }
+  @keyframes float2 { 0%,100% { transform: translate(0,0); } 50% { transform: translate(-150px, -80px); } }
+  @keyframes float3 { 0%,100% { transform: translate(-50%,-50%); } 50% { transform: translate(-30%,-70%); } }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    z-index: 1;
+  }
+  .hero-eyebrow {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    color: var(--primary);
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.1s forwards;
+  }
+  .hero h1 {
+    font-size: clamp(2.5rem, 8vw, 5.5rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.3s forwards;
+  }
+  .hero h1 .accent {
+    background: linear-gradient(135deg, var(--primary), var(--owner));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hero p {
+    max-width: 600px;
+    color: var(--muted);
+    font-size: 1.1rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s forwards;
+  }
+  .scroll-down {
+    position: absolute;
+    bottom: 2rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+    opacity: 0;
+    animation: fadeUp 0.8s 1s forwards, bounce 2s 1.5s infinite;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes bounce {
+    0%,100% { transform: translateY(0); }
+    50%     { transform: translateY(8px); }
+  }
+
+  /* Sections */
+  section.role {
+    position: relative;
+    padding: 5rem 1.5rem;
+    z-index: 1;
+  }
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .role-badge {
+    display: inline-block;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .badge-member { background: rgba(59, 130, 246, 0.15); color: var(--member); border: 1px solid rgba(59, 130, 246, 0.3); }
+  .badge-coach  { background: rgba(16, 185, 129, 0.15); color: var(--coach);  border: 1px solid rgba(16, 185, 129, 0.3); }
+  .badge-owner  { background: rgba(245, 158, 11, 0.15); color: var(--owner);  border: 1px solid rgba(245, 158, 11, 0.3); }
+
+  h2 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 2rem;
+    line-height: 1.1;
+  }
+  h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  /* Grid of cards */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  .card.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .card:hover {
+    transform: translateY(-4px);
+    border-color: var(--primary);
+    box-shadow: 0 10px 40px rgba(239, 68, 68, 0.1);
+  }
+  .card-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px; height: 44px;
+    border-radius: 0.75rem;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    background: var(--primary-soft);
+  }
+  .card h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+  .card p {
+    font-size: 0.9rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* Workflow steps */
+  .workflow {
+    margin-top: 2rem;
+    position: relative;
+  }
+  .workflow::before {
+    content: '';
+    position: absolute;
+    left: 19px;
+    top: 40px;
+    bottom: 40px;
+    width: 2px;
+    background: linear-gradient(to bottom, var(--primary), transparent);
+  }
+  .step {
+    position: relative;
+    padding-left: 3.5rem;
+    margin-bottom: 2rem;
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: all 0.6s ease;
+  }
+  .step.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .step-num {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1rem;
+    box-shadow: 0 0 20px var(--primary-soft);
+  }
+  .step h4 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+  }
+  .step p {
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  /* Role split divider */
+  .divider {
+    position: relative;
+    text-align: center;
+    margin: 5rem 0 3rem;
+  }
+  .divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border), transparent);
+  }
+  .divider span {
+    position: relative;
+    background: var(--bg);
+    padding: 0 1.5rem;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 0.3em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* Nav */
+  .jump-nav {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    gap: 0.5rem;
+    z-index: 10;
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(12px);
+    padding: 0.5rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+  .jump-nav a {
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+  .jump-nav a:hover {
+    color: var(--fg);
+    background: var(--card);
+  }
+
+  /* Footer */
+  footer {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--muted);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+    margin-top: 3rem;
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 600px) {
+    section.role { padding: 3rem 1rem; }
+    .jump-nav { bottom: 1rem; top: auto; right: 0.5rem; left: 0.5rem; justify-content: center; }
+    .jump-nav a { font-size: 0.65rem; padding: 0.3rem 0.6rem; }
+    .step { padding-left: 3rem; }
+    .workflow::before { left: 15px; }
+    .step-num { width: 32px; height: 32px; font-size: 0.85rem; }
+  }
+
+  /* Motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    .bg-orb { animation: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-orb o1"></div>
+<div class="bg-orb o2"></div>
+<div class="bg-orb o3"></div>
+
+<nav class="jump-nav">
+  <a href="#hero">Start</a>
+  <a href="#mitglied">Mitglied</a>
+  <a href="#coach">Coach</a>
+  <a href="#owner">Owner</a>
+  <a href="#workflows">Abläufe</a>
+</nav>
+
+<section class="hero" id="hero">
+  <p class="hero-eyebrow">AXIS Jiu-Jitsu · Vienna</p>
+  <h1>
+    Deine <span class="accent">Plattform</span><br/>
+    auf einen Blick
+  </h1>
+  <p>Alles was du wissen musst — egal ob du Mitglied, Coach oder Inhaber bist. Einfach. Klar. Mobil.</p>
+  <p class="scroll-down">↓ Scroll zum Start</p>
+</section>
+
+<!-- MITGLIED -->
+<section class="role" id="mitglied">
+  <div class="container">
+    <span class="role-badge badge-member">· Rolle: Mitglied ·</span>
+    <h2>Dein Training, dein Fortschritt</h2>
+
+    <div class="grid">
+      <div class="card anim">
+        <div class="card-icon">📅</div>
+        <h4>Klassen buchen</h4>
+        <p>Wochenplan ansehen, mit einem Klick buchen. Bei voller Klasse kommst du automatisch auf die Warteliste.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">📱</div>
+        <h4>Check-In mit QR</h4>
+        <p>Zeig deinen QR-Code am Handy, der Coach scannt — fertig. Du bekommst automatisch XP.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">🏆</div>
+        <h4>Turniere</h4>
+        <p>Anstehende Turniere durchsehen, mit Gewichtsklasse und Gi/No-Gi anmelden. Dein Status wird dir gezeigt.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">🥋</div>
+        <h4>Gurt-Fortschritt</h4>
+        <p>Sieh wo du stehst und was dir bis zum nächsten Gurt fehlt — Zeit und Trainings.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">⚡</div>
+        <h4>XP & Badges</h4>
+        <p>Sammle XP durch Training, Quiz und Regel-Spiel. Vergleich dich auf dem Leaderboard.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">📊</div>
+        <h4>Training-Tagebuch</h4>
+        <p>Logge jede Session mit Stimmung und Notizen. Deine Charts zeigen dir den Fortschritt.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COACH -->
+<section class="role" id="coach">
+  <div class="container">
+    <span class="role-badge badge-coach">· Rolle: Coach ·</span>
+    <h2>Unterrichten, organisieren, Turniere schaffen</h2>
+
+    <div class="grid">
+      <div class="card anim">
+        <div class="card-icon">🎯</div>
+        <h4>Check-In</h4>
+        <p>QR scannen oder manuell suchen. Jeder Check-In ist an die aktuelle Session verknüpft.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">📋</div>
+        <h4>Klassen verwalten</h4>
+        <p>Sessions erstellen (einmalig oder wiederkehrend), Teilnehmer sehen, Notizen hinterlegen.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">🏅</div>
+        <h4>Turniere erstellen</h4>
+        <p>Intern oder extern — mit Datum, Ort, Anmeldeschluss. Owner genehmigt, dann ist es live.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">✓</div>
+        <h4>Anmeldungen prüfen</h4>
+        <p>Mitglieder melden sich für dein Turnier an — du bestätigst oder lehnst ab.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">📝</div>
+        <h4>Coach-Notizen</h4>
+        <p>Plan vor der Session, Reflexion danach. Privat und nur für Coaches sichtbar.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">👥</div>
+        <h4>Meine Schüler</h4>
+        <p>Wer hat bei dir in den letzten 30 Tagen trainiert? Übersicht im Dashboard.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OWNER -->
+<section class="role" id="owner">
+  <div class="container">
+    <span class="role-badge badge-owner">· Rolle: Owner / Head Coach ·</span>
+    <h2>Volle Kontrolle, klare Übersicht</h2>
+    <p style="color: var(--muted); margin-bottom: 2rem;">Als Owner bist du gleichzeitig Head Coach — dein Dashboard zeigt die Trainer-Ansicht. Business-Metriken findest du unter <strong style="color: var(--fg);">Berichte</strong>.</p>
+
+    <div class="grid">
+      <div class="card anim">
+        <div class="card-icon">👤</div>
+        <h4>Mitgliederverwaltung</h4>
+        <p>Profile bearbeiten, Abos verwalten, Rollen zuweisen (Mitglied ↔ Coach).</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">💼</div>
+        <h4>Coach-Profil pflegen</h4>
+        <p>Für jeden Coach: Bio, Spezialisierung, Erfolge, Reihenfolge auf der Landing Page.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">✓</div>
+        <h4>Turniere genehmigen</h4>
+        <p>Coaches erstellen Turniere — du gibst das Go. Deine Turniere sind direkt live.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">📈</div>
+        <h4>Business-Berichte</h4>
+        <p>Umsatz, Konversionsrate, Auslastung, Top-Klassen, inaktive Mitglieder — alles in Berichte.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">🎨</div>
+        <h4>Content</h4>
+        <p>Blog, Hero-Slider, Klassentyp-Bilder, Curriculum — die Landing Page in deiner Hand.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">⚙️</div>
+        <h4>Einstellungen</h4>
+        <p>Preise, Klassentypen (mit Bildern), Gym-Info, Öffnungszeiten, Richtlinien.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">📊</div>
+        <h4>Leads / CRM</h4>
+        <p>Interessenten-Pipeline: Neu → Kontaktiert → Konvertiert → Verloren.</p>
+      </div>
+      <div class="card anim">
+        <div class="card-icon">🔒</div>
+        <h4>Audit-Log</h4>
+        <p>Jede administrative Aktion wird protokolliert — wer, wann, was.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WORKFLOWS -->
+<section class="role" id="workflows">
+  <div class="container">
+    <span class="role-badge badge-owner">· Abläufe ·</span>
+    <h2>Typische Workflows</h2>
+
+    <h3 style="margin-top: 3rem;">🏅 Ein Turnier von A bis Z</h3>
+    <div class="workflow">
+      <div class="step anim">
+        <div class="step-num">1</div>
+        <h4>Coach erstellt Turnier</h4>
+        <p>Turniere → Neues Turnier → Name, Datum, Ort, Typ. Status: Ausstehend.</p>
+      </div>
+      <div class="step anim">
+        <div class="step-num">2</div>
+        <h4>Owner genehmigt</h4>
+        <p>Owner öffnet Turniere-Liste → ✓ Genehmigen. Status: Genehmigt.</p>
+      </div>
+      <div class="step anim">
+        <div class="step-num">3</div>
+        <h4>Landing Page + Mitglieder-Bereich</h4>
+        <p>Turnier erscheint automatisch auf der öffentlichen Seite und im Mitglieder-Dashboard.</p>
+      </div>
+      <div class="step anim">
+        <div class="step-num">4</div>
+        <h4>Mitglieder melden sich an</h4>
+        <p>Gewichtsklasse, Gi/No-Gi, Notizen → Senden. Status: Ausstehend.</p>
+      </div>
+      <div class="step anim">
+        <div class="step-num">5</div>
+        <h4>Coach prüft Anmeldungen</h4>
+        <p>Bestätigen oder Ablehnen pro Teilnehmer. Bestätigte erscheinen im öffentlichen Teilnehmer-Slider.</p>
+      </div>
+    </div>
+
+    <div class="divider"><span>Und mehr</span></div>
+
+    <h3>🎓 Mitglied → Coach befördern</h3>
+    <div class="workflow">
+      <div class="step anim">
+        <div class="step-num">1</div>
+        <h4>Rolle ändern</h4>
+        <p>Einstellungen → Rollen → Mitglied auswählen → Coach zuweisen.</p>
+      </div>
+      <div class="step anim">
+        <div class="step-num">2</div>
+        <h4>Coach-Profil füllen</h4>
+        <p>Mitglieder → Profil öffnen → Website-Profil: Bio, Spezialisierung, Erfolge.</p>
+      </div>
+      <div class="step anim">
+        <div class="step-num">3</div>
+        <h4>Sichtbar schalten</h4>
+        <p>"Auf Landing Page anzeigen" aktivieren → Coach erscheint im öffentlichen Slider.</p>
+      </div>
+    </div>
+
+    <h3 style="margin-top: 3rem;">📅 Neue Klasse anlegen</h3>
+    <div class="workflow">
+      <div class="step anim">
+        <div class="step-num">1</div>
+        <h4>Klassentyp erstellen (einmal)</h4>
+        <p>Einstellungen → Klassentypen → Neu. Name, Level, Bild hochladen oder URL einfügen.</p>
+      </div>
+      <div class="step anim">
+        <div class="step-num">2</div>
+        <h4>Session planen</h4>
+        <p>Training → Neue Session → Klassentyp wählen, Datum, Zeit, Kapazität, Coach.</p>
+      </div>
+      <div class="step anim">
+        <div class="step-num">3</div>
+        <h4>Wiederkehrend (optional)</h4>
+        <p>Weekly Recurring markieren — Sessions werden für kommende Wochen automatisch angelegt.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p><strong>AXIS JJ · Wien</strong></p>
+  <p style="margin-top: 0.5rem;">Detaillierte Anleitung: <a href="/docs/manual/README.md" style="color: var(--primary);">docs/manual/</a></p>
+</footer>
+
+<script>
+  // Intersection observer for card animations
+  const animItems = document.querySelectorAll('.anim');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry, i) => {
+      if (entry.isIntersecting) {
+        setTimeout(() => entry.target.classList.add('visible'), i * 60);
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+  animItems.forEach(el => io.observe(el));
+
+  // Jump-nav active highlight
+  const navLinks = document.querySelectorAll('.jump-nav a');
+  const sections = document.querySelectorAll('section');
+  window.addEventListener('scroll', () => {
+    let active = 'hero';
+    sections.forEach(s => {
+      const rect = s.getBoundingClientRect();
+      if (rect.top <= 100) active = s.id;
+    });
+    navLinks.forEach(a => {
+      const href = a.getAttribute('href').replace('#', '');
+      a.style.color = href === active ? 'var(--fg)' : '';
+      a.style.background = href === active ? 'var(--card)' : '';
+    });
+  });
+</script>
+
+</body>
+</html>
