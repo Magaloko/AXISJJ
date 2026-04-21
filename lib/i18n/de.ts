@@ -575,5 +575,10 @@ export const de = {
     classTypeCheckFailed: 'Prüfung fehlgeschlagen.',
     memberRoleUpdateFailed: 'Rollen-Update fehlgeschlagen.',
     ownerOnly: 'Nur Owner kann genehmigen.',
+    sessionCancelFailed: 'Absagen fehlgeschlagen. Bitte erneut versuchen.',
+    bookingCancelFailed: 'Stornierung fehlgeschlagen. Bitte versuche es erneut.',
+    bookingNotFound: 'Buchung nicht gefunden.',
+    memberNotFound: 'Mitglied nicht gefunden.',
+    invalidStatus: 'Ungültiger Status.',
   },
 }

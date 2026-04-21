@@ -575,5 +575,10 @@ export const en = {
     classTypeCheckFailed: 'Check failed.',
     memberRoleUpdateFailed: 'Role update failed.',
     ownerOnly: 'Only owner can approve.',
+    sessionCancelFailed: 'Cancellation failed. Please try again.',
+    bookingCancelFailed: 'Cancellation failed. Please try again.',
+    bookingNotFound: 'Booking not found.',
+    memberNotFound: 'Member not found.',
+    invalidStatus: 'Invalid status.',
   },
 }

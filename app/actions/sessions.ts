@@ -95,6 +95,7 @@ export async function upsertSession(
 export async function cancelSession(
   sessionId: string
 ): Promise<{ success?: boolean; error?: string }> {
+  const e = await getActionErrors()
   const auth = await assertStaff()
   if ('error' in auth) return { error: auth.error }
 
@@ -112,7 +113,7 @@ export async function cancelSession(
     .update({ cancelled: true })
     .eq('id', sessionId)
 
-  if (error) return { error: 'Absagen fehlgeschlagen. Bitte erneut versuchen.' } // TODO: i18n
+  if (error) return { error: e.sessionCancelFailed }
 
   revalidatePath('/admin/klassen')
   revalidatePath('/admin/checkin')

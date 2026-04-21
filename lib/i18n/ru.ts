@@ -575,5 +575,10 @@ export const ru = {
     classTypeCheckFailed: 'Проверка не удалась.',
     memberRoleUpdateFailed: 'Не удалось обновить роль.',
     ownerOnly: 'Только владелец может одобрить.',
+    sessionCancelFailed: 'Не удалось отменить. Попробуйте ещё раз.',
+    bookingCancelFailed: 'Не удалось отменить. Попробуйте ещё раз.',
+    bookingNotFound: 'Бронирование не найдено.',
+    memberNotFound: 'Участник не найден.',
+    invalidStatus: 'Неверный статус.',
   },
 }

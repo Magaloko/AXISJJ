@@ -24,7 +24,7 @@ export async function checkIn(
     .eq('id', profileId)
     .single()
 
-  if (!profile) return { error: 'Mitglied nicht gefunden.' } // TODO: i18n
+  if (!profile) return { error: e.memberNotFound }
 
   const { error } = await supabase
     .from('attendances')
