@@ -2,13 +2,13 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { X } from 'lucide-react'
+import { X, Angry, Frown, Meh, Smile, Laugh } from 'lucide-react'
 import { logTraining } from '@/app/actions/training-log'
 import { cn } from '@/lib/utils/cn'
 
 const FOCUS_TAGS = ['Guard', 'Passing', 'Takedowns', 'No-Gi', 'Kondition', 'Sparring', 'Technik', 'Submissions']
 
-const MOOD_EMOJIS = ['😞', '😕', '😐', '🙂', '😊']
+const MOOD_ICONS = [Angry, Frown, Meh, Smile, Laugh] as const
 
 interface Props {
   sessionId?: string | null
@@ -46,7 +46,7 @@ function MoodRow({ label, value, onChange }: { label: string; value: number | nu
     <div>
       <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">{label}</p>
       <div className="flex gap-3">
-        {MOOD_EMOJIS.map((emoji, i) => {
+        {MOOD_ICONS.map((Icon, i) => {
           const v = i + 1
           return (
             <button
@@ -54,13 +54,13 @@ function MoodRow({ label, value, onChange }: { label: string; value: number | nu
               type="button"
               onClick={() => onChange(v)}
               className={cn(
-                'flex h-10 w-10 items-center justify-center rounded-full border text-xl transition-all',
+                'flex h-10 w-10 items-center justify-center rounded-full border transition-all',
                 value === v
-                  ? 'border-primary bg-primary/10 scale-110'
-                  : 'border-border hover:border-primary/50'
+                  ? 'border-primary bg-primary/10 scale-110 text-primary'
+                  : 'border-border text-muted-foreground hover:border-primary/50'
               )}
             >
-              {emoji}
+              <Icon size={20} strokeWidth={2} />
             </button>
           )
         })}
@@ -147,7 +147,7 @@ export function TrainingLogDrawer({ sessionId, onClose, onSuccess }: Props) {
             <>
               <MoodRow label="Stimmung VORHER" value={form.mood_before} onChange={v => setForm(f => ({ ...f, mood_before: v }))} />
               <MoodRow label="Stimmung NACHHER" value={form.mood_after} onChange={v => setForm(f => ({ ...f, mood_after: v }))} />
-              <ScaleRow label="⚡ Energie (1–5)" value={form.energy} onChange={v => setForm(f => ({ ...f, energy: v }))} />
+              <ScaleRow label="Energie (1–5)" value={form.energy} onChange={v => setForm(f => ({ ...f, energy: v }))} />
             </>
           )}
 

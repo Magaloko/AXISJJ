@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { generateBotLinkCode, unlinkBotAccount } from '@/app/actions/bot-link'
 import { Send, Unlink, Copy, CheckCheck } from 'lucide-react'
+import { AnimatedCheckIcon } from '@/components/ui/icons/animated-icons'
 
 interface Props {
   isLinked: boolean
@@ -56,8 +57,9 @@ export function BotLinkCard({ isLinked, telegramUsername }: Props) {
 
       {isLinked ? (
         <div className="flex items-center justify-between gap-4">
-          <p className="text-sm">
-            ✅ Verknüpft {telegramUsername && <>als <span className="font-mono">@{telegramUsername}</span></>}
+          <p className="flex items-center gap-2 text-sm">
+            <AnimatedCheckIcon size={16} animate="once" className="text-primary" />
+            Verknüpft {telegramUsername && <>als <span className="font-mono">@{telegramUsername}</span></>}
           </p>
           <button
             onClick={handleUnlink}

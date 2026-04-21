@@ -1,7 +1,14 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getTotalXp, xpToLevel } from '@/lib/gamification'
+import { Trophy, Medal, Award } from 'lucide-react'
 import type { Metadata } from 'next'
+
+const RANK_ICONS = [
+  { Icon: Trophy, className: 'text-yellow-500' },
+  { Icon: Medal, className: 'text-slate-400' },
+  { Icon: Award, className: 'text-amber-700' },
+] as const
 
 export const metadata: Metadata = { title: 'Leaderboard | AXIS' }
 
@@ -63,7 +70,10 @@ export default async function LeaderboardPage() {
                       : 'border-b border-border/50'
                   }>
                     <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
-                      {i + 1 <= 3 ? <span className="text-base">{['🥇','🥈','🥉'][i]}</span> : `#${i + 1}`}
+                      {i < 3 ? (() => {
+                        const { Icon, className } = RANK_ICONS[i]
+                        return <Icon size={18} className={className} strokeWidth={2} />
+                      })() : `#${i + 1}`}
                     </td>
                     <td className="px-4 py-3 font-semibold text-foreground">
                       {r.full_name}{isMe && <span className="ml-2 text-[10px] font-bold uppercase text-primary">DU</span>}

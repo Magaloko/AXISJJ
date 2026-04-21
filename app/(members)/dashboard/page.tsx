@@ -22,6 +22,7 @@ import { resolveLang } from '@/lib/i18n/resolve-lang'
 import { getGymSettings } from '@/lib/gym-settings'
 import { getTrainingStats } from '@/app/actions/training-log'
 import { Card, CardContent } from '@/components/ui/card'
+import { Flame } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard' }
@@ -135,8 +136,13 @@ export default async function DashboardPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Streak</p>
-            <p className="mt-1 font-mono text-3xl font-black text-foreground">
-              {trainingStats.currentStreak > 0 ? `🔥 ${trainingStats.currentStreak}` : '—'}
+            <p className="mt-1 flex items-center gap-2 font-mono text-3xl font-black text-foreground">
+              {trainingStats.currentStreak > 0 ? (
+                <>
+                  <Flame size={24} className="text-primary" strokeWidth={2.5} />
+                  {trainingStats.currentStreak}
+                </>
+              ) : '—'}
             </p>
           </CardContent>
         </Card>

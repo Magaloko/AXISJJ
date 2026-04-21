@@ -11,7 +11,7 @@ export default async function PublicLayout({ children }: { children: React.React
   return (
     <>
       <NavBar currentLang={lang} />
-      <main>{children}</main>
+      <main className="pt-20">{children}</main>
       <Footer lang={lang} />
       <CookieBanner lang={lang} />
     </>

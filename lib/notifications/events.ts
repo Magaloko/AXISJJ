@@ -96,8 +96,8 @@ function buildEmailText(title: string, rows: Array<[string, string] | string>, t
   return `${title}\n${body}\n\n${timeLine}`
 }
 
-function buildTelegram(emoji: string, title: string, rows: Array<[string, string]>): string {
-  const header = `${emoji} *${escapeMdV2(title)}*`
+function buildTelegram(title: string, rows: Array<[string, string]>): string {
+  const header = `*${escapeMdV2(title)}*`
   const body = rows.map(([k, v]) => `*${escapeMdV2(k)}:* ${escapeMdV2(v)}`).join('\n')
   return body ? `${header}\n${body}` : header
 }
@@ -123,7 +123,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: subject,
         emailText: buildEmailText(title, rows, timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram('🆕', 'Neuer Lead', rows),
+        telegramMarkdown: buildTelegram('Neuer Lead', rows),
       }
     }
     case 'lead.status_changed': {
@@ -139,7 +139,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Lead-Status: ${full_name} (${oldStatus} → ${newStatus})`,
         emailText: buildEmailText(title, [...rows, `Wechsel: ${oldStatus} → ${newStatus}`], timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram('🔄', 'Lead-Status geändert', rows),
+        telegramMarkdown: buildTelegram('Lead-Status geändert', rows),
       }
     }
     case 'user.registered': {
@@ -150,7 +150,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Neue Registrierung: ${full_name}`,
         emailText: buildEmailText(title, rows, timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram('🆕', 'Neue Registrierung', rows),
+        telegramMarkdown: buildTelegram('Neue Registrierung', rows),
       }
     }
     case 'user.login': {
@@ -161,7 +161,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Login: ${full_name}`,
         emailText: buildEmailText(title, rows, timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram('👤', 'Login', rows),
+        telegramMarkdown: buildTelegram('Login', rows),
       }
     }
     case 'booking.created': {
@@ -177,7 +177,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Neue Buchung: ${memberName} – ${className}`,
         emailText: buildEmailText(title, rows, timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram('🆕', 'Neue Buchung', rows),
+        telegramMarkdown: buildTelegram('Neue Buchung', rows),
       }
     }
     case 'booking.cancelled': {
@@ -192,7 +192,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Buchung storniert: ${memberName} – ${className}`,
         emailText: buildEmailText(title, rows, timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram('❌', 'Buchung storniert', rows),
+        telegramMarkdown: buildTelegram('Buchung storniert', rows),
       }
     }
     case 'checkin.recorded': {
@@ -207,7 +207,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Check-in: ${memberName} – ${className}`,
         emailText: buildEmailText(title, rows, timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram('✅', 'Check-in', rows),
+        telegramMarkdown: buildTelegram('Check-in', rows),
       }
     }
     case 'session.created': {
@@ -222,7 +222,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Neue Session: ${className}`,
         emailText: buildEmailText(title, rows, timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram('🆕', 'Neue Session', rows),
+        telegramMarkdown: buildTelegram('Neue Session', rows),
       }
     }
     case 'session.updated': {
@@ -236,7 +236,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Session aktualisiert: ${className}`,
         emailText: buildEmailText(title, rows, timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram('🔄', 'Session aktualisiert', rows),
+        telegramMarkdown: buildTelegram('Session aktualisiert', rows),
       }
     }
     case 'session.cancelled': {
@@ -250,7 +250,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Session abgesagt: ${className}`,
         emailText: buildEmailText(title, rows, timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram('❌', 'Session abgesagt', rows),
+        telegramMarkdown: buildTelegram('Session abgesagt', rows),
       }
     }
     case 'belt.promoted': {
@@ -265,7 +265,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Beförderung: ${memberName} (${fromBelt} → ${toBelt})`,
         emailText: buildEmailText(title, [...rows, `Wechsel: ${fromBelt} → ${toBelt}`], timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram('🥋', 'Gurt-Beförderung', rows),
+        telegramMarkdown: buildTelegram('Gurt-Beförderung', rows),
       }
     }
     case 'member.updated': {
@@ -279,7 +279,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Mitglied aktualisiert: ${memberName}`,
         emailText: buildEmailText(title, rows, timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram('🔧', 'Mitglied aktualisiert', rows),
+        telegramMarkdown: buildTelegram('Mitglied aktualisiert', rows),
       }
     }
     case 'member.role_changed': {
@@ -294,7 +294,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Rolle geändert: ${memberName} (${oldRole} → ${newRole})`,
         emailText: buildEmailText(title, rows, timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram('🔧', 'Rolle geändert', rows),
+        telegramMarkdown: buildTelegram('Rolle geändert', rows),
       }
     }
     case 'classtype.upserted': {
@@ -305,7 +305,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] ${title}: ${name}`,
         emailText: buildEmailText(title, rows, timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram(isNew ? '🆕' : '🔄', title, rows),
+        telegramMarkdown: buildTelegram(title, rows),
       }
     }
     case 'classtype.deleted': {
@@ -316,7 +316,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Kursart gelöscht: ${name}`,
         emailText: buildEmailText(title, rows, timeLine),
         emailHtml: buildEmailHtml(title, rows.map(([k, v]) => ({ label: k, value: v })), timeLine),
-        telegramMarkdown: buildTelegram('❌', 'Kursart gelöscht', rows),
+        telegramMarkdown: buildTelegram('Kursart gelöscht', rows),
       }
     }
     case 'gym.info_updated': {
@@ -325,7 +325,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Gym-Info aktualisiert`,
         emailText: buildEmailText(title, [], timeLine),
         emailHtml: buildEmailHtml(title, [], timeLine),
-        telegramMarkdown: buildTelegram('⚙️', 'Gym-Info aktualisiert', []),
+        telegramMarkdown: buildTelegram('Gym-Info aktualisiert', []),
       }
     }
     case 'gym.hours_updated': {
@@ -334,7 +334,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Öffnungszeiten aktualisiert`,
         emailText: buildEmailText(title, [], timeLine),
         emailHtml: buildEmailHtml(title, [], timeLine),
-        telegramMarkdown: buildTelegram('⚙️', 'Öffnungszeiten aktualisiert', []),
+        telegramMarkdown: buildTelegram('Öffnungszeiten aktualisiert', []),
       }
     }
     case 'gym.policies_updated': {
@@ -343,12 +343,12 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
         emailSubject: `[AXIS] Richtlinien aktualisiert`,
         emailText: buildEmailText(title, [], timeLine),
         emailHtml: buildEmailHtml(title, [], timeLine),
-        telegramMarkdown: buildTelegram('⚙️', 'Richtlinien aktualisiert', []),
+        telegramMarkdown: buildTelegram('Richtlinien aktualisiert', []),
       }
     }
     case 'waitlist.promoted': {
       const { memberName, memberEmail, className, startsAt } = event.data
-      const title = 'Du bist eingeteilt! 🎉'
+      const title = 'Du bist eingeteilt!'
       const rows: Array<[string, string]> = [
         ['Kurs', className],
         ['Beginn', formatDateDE(startsAt)],
@@ -364,19 +364,19 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
           timeLine
         ),
         emailHtml: `<div style="font-family:system-ui">
-          <h2 style="color:#e63946">Du bist eingeteilt! 🎉</h2>
+          <h2 style="color:#e63946">Du bist eingeteilt!</h2>
           <p>Hallo ${escapeHtml(memberName)},</p>
           <p>ein Platz ist frei geworden — du bist jetzt für <strong>${escapeHtml(className)}</strong> am <strong>${escapeHtml(formatDateDE(startsAt))}</strong> bestätigt.</p>
           <p>Bis bald auf der Matte!</p>
           <p style="color:#999;font-size:12px">${escapeHtml(timeLine)}</p>
         </div>`,
-        telegramMarkdown: buildTelegram('🎉', title, rows),
+        telegramMarkdown: buildTelegram(title, rows),
         emailToOverride: memberEmail,
       }
     }
     case 'birthday.wish': {
       const { memberName, memberEmail, age } = event.data
-      const title = `Alles Gute zum ${age}. Geburtstag! 🎂`
+      const title = `Alles Gute zum ${age}. Geburtstag!`
       return {
         emailSubject: title,
         emailText: buildEmailText(
@@ -396,13 +396,13 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
             <p style="color:#888;margin:4px 0 0;font-size:13px">Herzlichen Glückwunsch</p>
           </div>
           <div style="padding:0 32px">
-            <h2 style="color:#e63946">🎂 Hey ${escapeHtml(memberName)}!</h2>
+            <h2 style="color:#e63946">Hey ${escapeHtml(memberName)}!</h2>
             <p style="font-size:16px">Alles Gute zum <strong>${age}. Geburtstag</strong>!</p>
             <p>Feier schön und bleib auf der Matte.</p>
-            <p style="color:#999;font-size:13px;margin-top:32px">Dein AXIS-Team 🥋</p>
+            <p style="color:#999;font-size:13px;margin-top:32px">Dein AXIS-Team</p>
           </div>
         </div>`,
-        telegramMarkdown: `🎂 *${escapeMdV2(title)}*\n${escapeMdV2('An: ' + memberName)}`,
+        telegramMarkdown: `*${escapeMdV2(title)}*\n${escapeMdV2('An: ' + memberName)}`,
         emailToOverride: memberEmail,
       }
     }
@@ -410,8 +410,8 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
       const { memberName, memberEmail, month, trainings, streak, avgMoodLift } = event.data
       const title = `Dein ${month} bei AXIS`
       const motivation =
-        trainings === 0 ? 'Wir haben dich vermisst — komm gerne bald wieder auf die Matte! 💪'
-      : trainings >= 12 ? 'Mega Monat! Du zeigst was es heißt, wirklich committed zu sein. 🔥'
+        trainings === 0 ? 'Wir haben dich vermisst — komm gerne bald wieder auf die Matte!'
+      : trainings >= 12 ? 'Mega Monat! Du zeigst was es heißt, wirklich committed zu sein.'
       : trainings >= 6  ? 'Solider Monat — du bist auf dem richtigen Weg!'
       : `${trainings} Training${trainings !== 1 ? 's' : ''} — jedes zählt. Nächster Monat wird stärker.`
       return {
@@ -421,9 +421,9 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
           [
             `Hier dein ${month}-Rückblick:`,
             '',
-            `🥋 Trainings: ${trainings}`,
-            streak > 0 ? `🔥 Aktuelle Streak: ${streak} Tage` : '',
-            avgMoodLift !== null ? `😊 Ø Stimmungsveränderung: ${avgMoodLift > 0 ? '+' : ''}${avgMoodLift}` : '',
+            `Trainings: ${trainings}`,
+            streak > 0 ? `Aktuelle Streak: ${streak} Tage` : '',
+            avgMoodLift !== null ? `Ø Stimmungsveränderung: ${avgMoodLift > 0 ? '+' : ''}${avgMoodLift}` : '',
             '',
             motivation,
             '',
@@ -437,13 +437,13 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
             <p style="color:#888;margin:4px 0 0;font-size:13px">Monatsrückblick · ${escapeHtml(month)}</p>
           </div>
           <div style="padding:0 32px">
-            <h2 style="color:#e63946">Hallo ${escapeHtml(memberName)}! 🥋</h2>
+            <h2 style="color:#e63946">Hallo ${escapeHtml(memberName)}!</h2>
             <p>hier ist dein ${escapeHtml(month)}-Rückblick:</p>
 
             <div style="background:#f5f5f5;padding:20px;margin:20px 0;display:table;width:100%">
               <div style="display:table-row">
                 <div style="display:table-cell;padding:8px;font-size:32px;font-weight:900;color:#e63946;text-align:center">${trainings}</div>
-                <div style="display:table-cell;padding:8px;font-size:32px;font-weight:900;color:${streak > 0 ? '#e63946' : '#999'};text-align:center">${streak > 0 ? `🔥 ${streak}` : '—'}</div>
+                <div style="display:table-cell;padding:8px;font-size:32px;font-weight:900;color:${streak > 0 ? '#e63946' : '#999'};text-align:center">${streak > 0 ? streak : '—'}</div>
                 <div style="display:table-cell;padding:8px;font-size:32px;font-weight:900;color:${avgMoodLift !== null && avgMoodLift > 0 ? '#e63946' : '#999'};text-align:center">${avgMoodLift !== null ? (avgMoodLift > 0 ? '+' : '') + avgMoodLift : '—'}</div>
               </div>
               <div style="display:table-row;font-size:10px;color:#666;text-transform:uppercase;letter-spacing:1px">
@@ -457,7 +457,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
             <p>Bis bald auf der Matte!</p>
           </div>
         </div>`,
-        telegramMarkdown: `📊 *${escapeMdV2(title)}*\n${escapeMdV2('An: ' + memberName + ' | ' + trainings + ' Trainings')}`,
+        telegramMarkdown: `*${escapeMdV2(title)}*\n${escapeMdV2('An: ' + memberName + ' | ' + trainings + ' Trainings')}`,
         emailToOverride: memberEmail,
       }
     }
@@ -492,7 +492,7 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
             <p style="color:#888;margin:4px 0 0;font-size:13px">Probetraining-Bestätigung</p>
           </div>
           <div style="padding:0 32px">
-            <h2 style="color:#e63946">Danke ${escapeHtml(fullName)}! 🥋</h2>
+            <h2 style="color:#e63946">Danke ${escapeHtml(fullName)}!</h2>
             <p>deine kostenlose Probetrainings-Woche ist bei uns angekommen.</p>
 
             <h3 style="margin-top:24px;font-size:14px;letter-spacing:1px;text-transform:uppercase;color:#555">Nächste Schritte</h3>
@@ -503,9 +503,9 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
             </ol>
 
             <div style="background:#f5f5f5;border-left:3px solid #e63946;padding:16px 20px;margin:20px 0;font-size:14px">
-              <p style="margin:0 0 8px"><strong>📍 Ort:</strong> Strindberggasse 1/R01, 1110 Wien</p>
-              <p style="margin:0 0 8px"><strong>📞 Kontakt:</strong> office@axisjj.at</p>
-              <p style="margin:0"><strong>🕐 Trainingszeiten:</strong> <a href="https://axisjj.vercel.app/#trainingsplan" style="color:#e63946">axisjj.vercel.app</a></p>
+              <p style="margin:0 0 8px"><strong>Ort:</strong> Strindberggasse 1/R01, 1110 Wien</p>
+              <p style="margin:0 0 8px"><strong>Kontakt:</strong> office@axisjj.at</p>
+              <p style="margin:0"><strong>Trainingszeiten:</strong> <a href="https://axisjj.vercel.app/#trainingsplan" style="color:#e63946">axisjj.vercel.app</a></p>
             </div>
 
             <p>Bis bald auf der Matte!</p>
@@ -515,13 +515,13 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
             Du hast diese E-Mail erhalten weil du dich auf axisjj.vercel.app/trial angemeldet hast.
           </div>
         </div>`,
-        telegramMarkdown: `🥋 *${escapeMdV2(title)}*\n${escapeMdV2('An: ' + fullName)}`,
+        telegramMarkdown: `*${escapeMdV2(title)}*\n${escapeMdV2('An: ' + fullName)}`,
         emailToOverride: email,
       }
     }
     case 'member.belt_promoted': {
       const { memberName, memberEmail, fromBelt, toBelt } = event.data
-      const title = 'Herzlichen Glückwunsch zur Beförderung! 🥋'
+      const title = 'Herzlichen Glückwunsch zur Beförderung!'
       const rows: Array<[string, string]> = [
         ['Von', fromBelt],
         ['Nach', toBelt],
@@ -538,13 +538,13 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
           timeLine
         ),
         emailHtml: `<div style="font-family:system-ui">
-          <h2 style="color:#e63946">Herzlichen Glückwunsch! 🥋</h2>
+          <h2 style="color:#e63946">Herzlichen Glückwunsch!</h2>
           <p>Hallo ${escapeHtml(memberName)},</p>
           <p>du wurdest zum <strong>${escapeHtml(toBelt)}</strong> befördert.</p>
           <p><strong>${escapeHtml(fromBelt)}</strong> → <strong>${escapeHtml(toBelt)}</strong></p>
           <p>Weiter so — du hast es dir verdient!</p>
         </div>`,
-        telegramMarkdown: buildTelegram('🥋', title, rows),
+        telegramMarkdown: buildTelegram(title, rows),
         emailToOverride: memberEmail,
       }
     }
@@ -568,13 +568,13 @@ export function formatEvent(event: NotificationEvent, now?: Date): FormattedNoti
           timeLine
         ),
         emailHtml: `<div style="font-family:system-ui">
-          <h2 style="color:#e63946">Erinnerung: Training morgen 🥋</h2>
+          <h2 style="color:#e63946">Erinnerung: Training morgen</h2>
           <p>Hallo ${escapeHtml(memberName)},</p>
           <p>du hast morgen <strong>${escapeHtml(className)}</strong> gebucht.</p>
           <p><strong>Beginn:</strong> ${escapeHtml(formatDateDE(startsAt))}${location ? `<br/><strong>Ort:</strong> ${escapeHtml(location)}` : ''}</p>
           <p>Bis bald auf der Matte!</p>
         </div>`,
-        telegramMarkdown: buildTelegram('🥋', title, rows),
+        telegramMarkdown: buildTelegram(title, rows),
         emailToOverride: memberEmail,
       }
     }
