@@ -3,10 +3,17 @@ import Link from 'next/link'
 import { getGymSettings } from '@/lib/gym-settings'
 import { OpeningHoursDisplay } from './OpeningHoursDisplay'
 import { ContactCard } from './ContactCard'
+import { translations, type Lang } from '@/lib/i18n'
 
-export async function Footer() {
+interface FooterProps {
+  lang: Lang
+}
+
+export async function Footer({ lang }: FooterProps) {
   const settings = await getGymSettings()
   const year = new Date().getFullYear()
+  const t = translations[lang].public.footer
+  const tn = translations[lang].public.navbar
 
   return (
     <footer className="border-t border-border bg-card py-12">
@@ -29,39 +36,39 @@ export async function Footer() {
               Discipline · Technique · Progress
             </p>
             <div className="mt-4">
-              <ContactCard settings={settings} />
+              <ContactCard settings={settings} lang={lang} />
             </div>
           </div>
 
           <div>
             <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Öffnungszeiten
+              {t.openingHours}
             </p>
-            <OpeningHoursDisplay hours={settings.opening_hours} variant="compact" />
+            <OpeningHoursDisplay hours={settings.opening_hours} variant="compact" lang={lang} />
           </div>
 
           <div>
             <p className="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              Navigation
+              {t.navigation}
             </p>
             <nav className="flex flex-col gap-2">
               <Link href="/preise" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Preise
+                {tn.preise}
               </Link>
               <Link href="/kontakt" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Kontakt
+                {tn.kontakt}
               </Link>
               <Link href="#trainingsplan" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Trainingsplan
+                {tn.trainingsplan}
               </Link>
               <Link href="#team" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Team
+                {tn.team}
               </Link>
               <Link href="#programme" className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                Programme
+                {tn.programme}
               </Link>
               <Link href="/trial" className="text-sm text-primary transition-colors hover:text-primary/80 font-semibold">
-                1 Woche gratis testen
+                {t.trialCta}
               </Link>
             </nav>
           </div>
@@ -70,14 +77,14 @@ export async function Footer() {
 
         <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-border pt-6 sm:flex-row">
           <p className="text-xs text-muted-foreground">
-            © {year} {settings.name}. Alle Rechte vorbehalten.
+            © {year} {settings.name}. {t.allRightsReserved}
           </p>
           <div className="flex gap-6">
             <Link href="/impressum" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
-              Impressum
+              {t.impressum}
             </Link>
             <Link href="/datenschutz" className="text-xs text-muted-foreground transition-colors hover:text-foreground">
-              Datenschutz
+              {t.privacy}
             </Link>
           </div>
         </div>

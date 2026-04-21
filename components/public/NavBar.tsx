@@ -7,16 +7,19 @@ import { useEffect, useState } from 'react'
 import { Menu, X, LogIn } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import type { Lang } from '@/lib/i18n'
+import { translations, type Lang } from '@/lib/i18n'
 
-const NAV_LINKS = [
-  { href: '/trainingsplan', label: 'Trainingsplan' },
-  { href: '/team',          label: 'Team' },
-  { href: '/programme',     label: 'Programme' },
-  { href: '/preise',        label: 'Preise' },
-  { href: '/blog',          label: 'Blog' },
-  { href: '/kontakt',       label: 'Kontakt' },
-]
+function getNavLinks(lang: Lang) {
+  const t = translations[lang].public.navbar
+  return [
+    { href: '/trainingsplan', label: t.trainingsplan },
+    { href: '/team',          label: t.team },
+    { href: '/programme',     label: t.programme },
+    { href: '/preise',        label: t.preise },
+    { href: '/blog',          label: t.blog },
+    { href: '/kontakt',       label: t.kontakt },
+  ]
+}
 
 function isActive(pathname: string, href: string) {
   if (href === '/') return pathname === '/'
@@ -30,6 +33,8 @@ interface NavBarProps {
 export function NavBar({ currentLang }: NavBarProps) {
   const pathname = usePathname() ?? '/'
   const [open, setOpen] = useState(false)
+  const t = translations[currentLang].public.navbar
+  const navLinks = getNavLinks(currentLang)
 
   useEffect(() => {
     if (open) {
@@ -45,7 +50,7 @@ export function NavBar({ currentLang }: NavBarProps) {
     <>
       <nav className="fixed top-0 z-50 w-full border-b border-border bg-white/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Link href="/" aria-label="AXIS JIU JITSU — Zur Startseite" className="shrink-0">
+          <Link href="/" aria-label={t.ariaHome} className="shrink-0">
             <Image
               src="/images/logo-full.png"
               alt="AXIS JIU JITSU"
@@ -57,7 +62,7 @@ export function NavBar({ currentLang }: NavBarProps) {
           </Link>
 
           <div className="hidden items-center gap-6 lg:gap-8 md:flex">
-            {NAV_LINKS.map(link => {
+            {navLinks.map(link => {
               const active = isActive(pathname, link.href)
               return (
                 <Link
@@ -86,7 +91,7 @@ export function NavBar({ currentLang }: NavBarProps) {
             <LanguageSwitcher currentLang={currentLang} />
             <Link
               href="/login"
-              aria-label="Login"
+              aria-label={t.login}
               className="text-muted-foreground transition-colors hover:text-foreground"
             >
               <LogIn size={20} />
@@ -95,14 +100,14 @@ export function NavBar({ currentLang }: NavBarProps) {
               href="/trial"
               className="bg-primary px-5 py-2 text-sm font-black tracking-widest text-primary-foreground transition-colors hover:bg-primary/90"
             >
-              1 WOCHE GRATIS
+              {t.trialCta}
             </Link>
           </div>
 
           <button
             className="text-foreground md:hidden"
             onClick={() => setOpen(v => !v)}
-            aria-label={open ? 'Menü schließen' : 'Menü öffnen'}
+            aria-label={open ? t.ariaCloseMenu : t.ariaOpenMenu}
             aria-expanded={open}
           >
             {open ? <X size={26} /> : <Menu size={26} />}
@@ -125,7 +130,7 @@ export function NavBar({ currentLang }: NavBarProps) {
           open ? 'translate-x-0' : 'translate-x-full'
         )}
         aria-hidden={!open}
-        aria-label="Hauptmenü"
+        aria-label={t.ariaMainMenu}
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <Image
@@ -137,7 +142,7 @@ export function NavBar({ currentLang }: NavBarProps) {
           />
           <button
             onClick={() => setOpen(false)}
-            aria-label="Menü schließen"
+            aria-label={t.ariaCloseMenu}
             className="text-foreground"
           >
             <X size={26} />
@@ -145,7 +150,7 @@ export function NavBar({ currentLang }: NavBarProps) {
         </div>
 
         <div className="flex flex-col px-5 py-6">
-          {NAV_LINKS.map(link => {
+          {navLinks.map(link => {
             const active = isActive(pathname, link.href)
             return (
               <Link
@@ -170,7 +175,7 @@ export function NavBar({ currentLang }: NavBarProps) {
             className="flex items-center gap-2 py-4 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <LogIn size={18} />
-            Login
+            {t.login}
           </Link>
 
           <Link
@@ -178,7 +183,7 @@ export function NavBar({ currentLang }: NavBarProps) {
             onClick={() => setOpen(false)}
             className="mt-4 bg-primary px-5 py-3 text-center text-sm font-black tracking-widest text-primary-foreground transition-colors hover:bg-primary/90"
           >
-            1 WOCHE GRATIS
+            {t.trialCta}
           </Link>
 
           <div className="mt-6 border-t border-border pt-4">

@@ -1,9 +1,12 @@
 import { DAY_LABELS_DE, groupIntoRanges } from '@/lib/opening-hours'
 import type { OpeningHours } from '@/lib/gym-settings'
+import { translations, type Lang } from '@/lib/i18n'
 
-interface Props { hours: OpeningHours; variant?: 'compact' | 'full' }
+interface Props { hours: OpeningHours; variant?: 'compact' | 'full'; lang: Lang }
 
-export function OpeningHoursDisplay({ hours, variant = 'full' }: Props) {
+export function OpeningHoursDisplay({ hours, variant = 'full', lang }: Props) {
+  const closedLabel = translations[lang].public.openingHoursLabel.closed
+
   if (variant === 'compact') {
     const { ranges, closedDays } = groupIntoRanges(hours)
     return (
@@ -22,7 +25,7 @@ export function OpeningHoursDisplay({ hours, variant = 'full' }: Props) {
         {closedDays.length > 0 && (
           <li className="flex justify-between gap-6">
             <span>{closedDays.map(d => DAY_LABELS_DE[d]).join(', ')}</span>
-            <span className="text-xs italic">geschlossen</span>
+            <span className="text-xs italic">{closedLabel}</span>
           </li>
         )}
       </ul>
@@ -37,7 +40,7 @@ export function OpeningHoursDisplay({ hours, variant = 'full' }: Props) {
           <li key={key} className="flex justify-between gap-6">
             <span className="font-bold">{DAY_LABELS_DE[key]}</span>
             {day.closed ? (
-              <span className="text-xs italic text-muted-foreground">geschlossen</span>
+              <span className="text-xs italic text-muted-foreground">{closedLabel}</span>
             ) : (
               <span className="font-mono text-muted-foreground">{day.open} – {day.close}</span>
             )}

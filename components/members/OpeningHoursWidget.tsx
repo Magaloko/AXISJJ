@@ -31,7 +31,7 @@ export function OpeningHoursWidget({ hours }: Props) {
     <div className="border border-border bg-card p-6">
       <p className="mb-2 text-xs font-bold uppercase tracking-widest text-muted-foreground">Öffnungszeiten</p>
       <p className={`mb-3 text-sm font-bold ${statusTone}`}>{statusLine}</p>
-      <OpeningHoursDisplay hours={hours} variant="compact" />
+      <OpeningHoursDisplay hours={hours} variant="compact" lang="de" />
     </div>
   )
 }
