@@ -45,7 +45,8 @@ export default function LoginPage() {
       setErrorMsg('Ungültige E-Mail oder Passwort.')
       setStatus('error')
     } else {
-      await logPasswordLogin()
+      // Fire notify in background — must not block navigation
+      logPasswordLogin().catch(err => console.error('[login] notify failed:', err))
       // Hard navigation so server picks up fresh session cookies
       window.location.assign('/dashboard')
     }
