@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils/cn'
 import type { CoachPublicProfile } from '@/app/actions/public-coaches'
+import { translations, type Lang } from '@/lib/i18n'
 
 const BELT_ORDER = [
   { label: 'White',  color: '#e5e7eb' },
@@ -23,9 +24,10 @@ function getBeltIndex(beltName: string | null): number {
 interface Props {
   coach: CoachPublicProfile
   className?: string
+  lang: Lang
 }
 
-export function CoachProfileCard({ coach, className }: Props) {
+export function CoachProfileCard({ coach, className, lang }: Props) {
   const activeBeltIdx = getBeltIndex(coach.beltName)
 
   function BeltBar() {
@@ -47,7 +49,7 @@ export function CoachProfileCard({ coach, className }: Props) {
   }
 
   const photo = coach.avatarUrl ?? '/images/coach-portrait.jpg'
-  const role = coach.specialization ?? 'Coach'
+  const role = coach.specialization ?? translations[lang].public.coaches.fallbackRole
 
   return (
     <div className={cn('w-full', className)}>

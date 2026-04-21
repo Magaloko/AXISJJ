@@ -1,5 +1,6 @@
 import { Baby, GraduationCap, Sparkles, Swords, type LucideIcon } from 'lucide-react'
 import type { PricingCategory, PricingPlan } from '@/lib/pricing'
+import { translations, type Lang } from '@/lib/i18n'
 
 const CATEGORY_ICONS: Record<PricingCategory, LucideIcon> = {
   students: GraduationCap,
@@ -9,10 +10,12 @@ const CATEGORY_ICONS: Record<PricingCategory, LucideIcon> = {
 
 interface Props {
   plan: PricingPlan
+  lang: Lang
 }
 
-export function PricingCard({ plan }: Props) {
+export function PricingCard({ plan, lang }: Props) {
   const Icon = CATEGORY_ICONS[plan.category]
+  const tp = translations[lang].public.pricing
   return (
     <div className="flex flex-col border border-border bg-card">
       <div className="border-b border-border p-6">
@@ -31,19 +34,19 @@ export function PricingCard({ plan }: Props) {
           >
             {tier.highlighted && (
               <span className="absolute right-3 top-3 bg-primary px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-primary-foreground">
-                Beste Wahl
+                {tp.bestChoice}
               </span>
             )}
             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              {tier.durationMonths} {tier.durationMonths === 1 ? 'Monat' : 'Monate'}
+              {tier.durationMonths} {tier.durationMonths === 1 ? tp.monthUnit : tp.monthsUnit}
             </p>
             <p className="mt-1 font-mono text-xl font-black text-foreground">
               {tier.pricePerMonth}€
-              <span className="ml-1 text-xs font-normal text-muted-foreground">/Monat</span>
+              <span className="ml-1 text-xs font-normal text-muted-foreground">{tp.perMonth}</span>
             </p>
             {tier.totalPrice !== null && (
               <p className="mt-1 text-xs text-muted-foreground">
-                gesamt <span className="font-mono">{tier.totalPrice}€</span>
+                {tp.total} <span className="font-mono">{tier.totalPrice}€</span>
               </p>
             )}
           </li>

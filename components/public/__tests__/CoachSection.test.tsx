@@ -30,19 +30,19 @@ import { CoachSection } from '../CoachSection'
 
 describe('CoachSection', () => {
   it('renders coach name', async () => {
-    const jsx = await CoachSection()
+    const jsx = await CoachSection({ lang: 'de' })
     render(jsx as React.ReactElement)
     expect(screen.getAllByText(/shamsudin baisarov/i).length).toBeGreaterThan(0)
   })
 
   it('renders specialization', async () => {
-    const jsx = await CoachSection()
+    const jsx = await CoachSection({ lang: 'de' })
     render(jsx as React.ReactElement)
     expect(screen.getAllByText(/head coach/i).length).toBeGreaterThan(0)
   })
 
   it('renders achievements', async () => {
-    const jsx = await CoachSection()
+    const jsx = await CoachSection({ lang: 'de' })
     render(jsx as React.ReactElement)
     expect(screen.getAllByText(/ibjjf european silver/i).length).toBeGreaterThan(0)
   })
@@ -50,7 +50,7 @@ describe('CoachSection', () => {
   it('renders nothing when no coaches', async () => {
     const { getPublicCoaches } = await import('@/app/actions/public-coaches')
     vi.mocked(getPublicCoaches).mockResolvedValueOnce([])
-    const jsx = await CoachSection()
+    const jsx = await CoachSection({ lang: 'de' })
     expect(jsx).toBeNull()
   })
 })

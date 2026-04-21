@@ -2,11 +2,17 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { translations, type Lang } from '@/lib/i18n'
 
 const STORAGE_KEY = 'axis-cookie-consent'
 
-export function CookieBanner() {
+interface CookieBannerProps {
+  lang: Lang
+}
+
+export function CookieBanner({ lang }: CookieBannerProps) {
   const [visible, setVisible] = useState(false)
+  const t = translations[lang].public.cookies
 
   useEffect(() => {
     const saved = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
@@ -29,23 +35,22 @@ export function CookieBanner() {
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t-2 border-primary bg-card p-4 shadow-2xl sm:p-5">
       <div className="mx-auto flex max-w-5xl flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-xs text-foreground sm:text-sm">
-          Diese Website verwendet nur <strong>technisch notwendige Cookies</strong> für Login-Sessions
-          und Sprach-Einstellung. Keine Tracking-Cookies, kein Werbe-Tracking.
+          {t.text}
           {' '}
-          <Link href="/impressum" className="underline hover:text-primary">Datenschutz</Link>
+          <Link href="/impressum" className="underline hover:text-primary">{t.privacy}</Link>
         </p>
         <div className="flex w-full gap-2 sm:w-auto">
           <button
             onClick={dismiss}
             className="flex-1 border border-border px-4 py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground sm:flex-initial"
           >
-            Ok
+            {t.ok}
           </button>
           <button
             onClick={accept}
             className="flex-1 bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wider text-primary-foreground hover:opacity-90 sm:flex-initial"
           >
-            Akzeptieren
+            {t.accept}
           </button>
         </div>
       </div>

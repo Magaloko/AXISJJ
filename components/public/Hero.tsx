@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { useState, useEffect, useCallback } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import type { HeroSlide } from '@/app/actions/hero-slides'
+import { translations, type Lang } from '@/lib/i18n'
 
 function TextSlide({ slide }: { slide: HeroSlide }) {
   return (
@@ -81,9 +82,10 @@ function PromoSlide({ slide }: { slide: HeroSlide }) {
   )
 }
 
-export function Hero({ slides }: { slides: HeroSlide[] }) {
+export function Hero({ slides, lang }: { slides: HeroSlide[]; lang: Lang }) {
   const [current, setCurrent] = useState(0)
   const [paused, setPaused] = useState(false)
+  const th = translations[lang].public.hero
 
   const next = useCallback(() => setCurrent(c => (c + 1) % slides.length), [slides.length])
   const prev = useCallback(() => setCurrent(c => (c - 1 + slides.length) % slides.length), [slides.length])
@@ -103,10 +105,10 @@ export function Hero({ slides }: { slides: HeroSlide[] }) {
       </div>
       {slides.length > 1 && (
         <>
-          <button onClick={prev} className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white backdrop-blur-sm transition-all hover:bg-black/70" aria-label="Vorheriger Slide">
+          <button onClick={prev} className="absolute left-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white backdrop-blur-sm transition-all hover:bg-black/70" aria-label={th.prevSlide}>
             <ChevronLeft size={24} />
           </button>
-          <button onClick={next} className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white backdrop-blur-sm transition-all hover:bg-black/70" aria-label="Naechster Slide">
+          <button onClick={next} className="absolute right-4 top-1/2 z-20 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white backdrop-blur-sm transition-all hover:bg-black/70" aria-label={th.nextSlide}>
             <ChevronRight size={24} />
           </button>
           <div className="absolute bottom-6 left-1/2 z-20 flex -translate-x-1/2 gap-2">

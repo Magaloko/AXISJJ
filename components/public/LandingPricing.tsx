@@ -10,6 +10,7 @@ import { motion } from 'framer-motion'
 import Link from 'next/link'
 import { useRef, useState } from 'react'
 import { type PricingCategory, type PricingPlan, type PricingTier } from '@/lib/pricing'
+import { translations, type Lang } from '@/lib/i18n'
 
 const CATEGORY_ICONS: Record<PricingCategory, LucideIcon> = {
   students: GraduationCap,
@@ -19,23 +20,20 @@ const CATEGORY_ICONS: Record<PricingCategory, LucideIcon> = {
 
 type Duration = 12 | 6 | 3 | 1
 
-const DURATION_LABELS: Record<Duration, string> = {
-  12: '12 Monate',
-  6: '6 Monate',
-  3: '3 Monate',
-  1: '1 Monat',
-}
-
 const DURATIONS: Duration[] = [12, 6, 3, 1]
 
 function DurationSwitch({
   selected,
   onChange,
   className,
+  durationLabels,
+  save30Label,
 }: {
   selected: Duration
   onChange: (d: Duration) => void
   className?: string
+  durationLabels: Record<Duration, string>
+  save30Label: string
 }) {
   return (
     <div className={cn('flex justify-center', className)}>
@@ -57,10 +55,10 @@ function DurationSwitch({
               />
             )}
             <span className="relative">
-              {DURATION_LABELS[d]}
+              {durationLabels[d]}
               {d === 12 && (
                 <span className="ml-2 hidden rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary sm:inline">
-                  Spare 30%
+                  {save30Label}
                 </span>
               )}
             </span>
@@ -75,11 +73,19 @@ function tierFor(plan: PricingPlan, duration: Duration): PricingTier {
   return plan.tiers.find((t) => t.durationMonths === duration) ?? plan.tiers[0]
 }
 
-interface LandingPricingProps { plans: PricingPlan[] }
+interface LandingPricingProps { plans: PricingPlan[]; lang: Lang }
 
-export function LandingPricing({ plans: PRICING_PLANS }: LandingPricingProps) {
+export function LandingPricing({ plans: PRICING_PLANS, lang }: LandingPricingProps) {
   const [duration, setDuration] = useState<Duration>(12)
   const pricingRef = useRef<HTMLDivElement>(null)
+  const tp = translations[lang].public.pricing
+
+  const DURATION_LABELS: Record<Duration, string> = {
+    12: tp.duration12,
+    6: tp.duration6,
+    3: tp.duration3,
+    1: tp.duration1,
+  }
 
   const revealVariants = {
     visible: (i: number) => ({
@@ -103,7 +109,7 @@ export function LandingPricing({ plans: PRICING_PLANS }: LandingPricingProps) {
             containerClassName="justify-start"
             transition={{ type: 'spring', stiffness: 250, damping: 40, delay: 0 }}
           >
-            Dein Plan wartet auf dich
+            {tp.heading}
           </VerticalCutReveal>
         </h2>
 
@@ -114,7 +120,7 @@ export function LandingPricing({ plans: PRICING_PLANS }: LandingPricingProps) {
           customVariants={revealVariants}
           className="w-full text-sm text-muted-foreground md:text-base"
         >
-          Studenten, Erwachsene, Kinder — alle Preise inkl. USt. · Keine Anmeldegebühr.
+          {tp.subtitle}
         </TimelineContent>
 
         <TimelineContent
@@ -123,7 +129,7 @@ export function LandingPricing({ plans: PRICING_PLANS }: LandingPricingProps) {
           timelineRef={pricingRef}
           customVariants={revealVariants}
         >
-          <DurationSwitch selected={duration} onChange={setDuration} />
+          <DurationSwitch selected={duration} onChange={setDuration} durationLabels={DURATION_LABELS} save30Label={tp.save30} />
         </TimelineContent>
       </article>
 
@@ -157,7 +163,7 @@ export function LandingPricing({ plans: PRICING_PLANS }: LandingPricingProps) {
                     </div>
                     {isPopular && (
                       <span className="rounded-full bg-primary px-3 py-1 text-xs font-bold text-primary-foreground">
-                        Beliebt
+                        {tp.popular}
                       </span>
                     )}
                   </div>
@@ -169,15 +175,15 @@ export function LandingPricing({ plans: PRICING_PLANS }: LandingPricingProps) {
                         format={{ style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }}
                       />
                     </span>
-                    <span className="ml-2 text-sm text-muted-foreground">/Monat</span>
+                    <span className="ml-2 text-sm text-muted-foreground">{tp.perMonth}</span>
                   </div>
                   {tier.totalPrice !== null && (
                     <p className="mt-1 font-mono text-xs text-muted-foreground">
-                      gesamt <NumberFlow
+                      {tp.total} <NumberFlow
                         value={tier.totalPrice}
                         format={{ style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }}
                       />
-                      {duration === 12 && <span className="ml-2 font-sans font-bold text-primary">· Spare 30%</span>}
+                      {duration === 12 && <span className="ml-2 font-sans font-bold text-primary">· {tp.save30}</span>}
                     </p>
                   )}
                 </CardHeader>
@@ -192,11 +198,11 @@ export function LandingPricing({ plans: PRICING_PLANS }: LandingPricingProps) {
                         : 'border border-border bg-foreground text-background',
                     )}
                   >
-                    Probetraining buchen
+                    {tp.bookTrial}
                   </Link>
 
                   <div className="space-y-3 border-t border-border pt-4">
-                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Alle Laufzeiten</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{tp.allDurations}</p>
                     <ul className="space-y-1.5">
                       {plan.tiers.map((t) => (
                         <li
@@ -210,9 +216,9 @@ export function LandingPricing({ plans: PRICING_PLANS }: LandingPricingProps) {
                             {t.durationMonths === duration && (
                               <CheckCheck size={14} className="text-primary" />
                             )}
-                            {DURATION_LABELS[t.durationMonths]}
+                            {DURATION_LABELS[t.durationMonths as Duration]}
                           </span>
-                          <span className="font-mono">{t.pricePerMonth}€/Mon.</span>
+                          <span className="font-mono">{t.pricePerMonth}{tp.perMonthAbbr}</span>
                         </li>
                       ))}
                     </ul>
@@ -238,7 +244,7 @@ export function LandingPricing({ plans: PRICING_PLANS }: LandingPricingProps) {
         className="mt-6 text-center"
       >
         <Link href="/preise" className="text-sm font-bold text-primary hover:underline">
-          Vollständige Preisübersicht ansehen →
+          {tp.fullOverview}
         </Link>
       </TimelineContent>
     </section>

@@ -39,20 +39,20 @@ import { Footer } from '../Footer'
 
 describe('Footer', () => {
   it('renders gym address from settings', async () => {
-    const ui = await Footer()
+    const ui = await Footer({ lang: 'de' })
     render(ui)
     expect(screen.getByText(/strindberggasse/i)).toBeInTheDocument()
   })
 
   it('renders Kontakt link pointing to /kontakt', async () => {
-    const ui = await Footer()
+    const ui = await Footer({ lang: 'de' })
     render(ui)
     const kontaktLink = screen.getByRole('link', { name: /^kontakt$/i })
     expect(kontaktLink).toHaveAttribute('href', '/kontakt')
   })
 
   it('renders Impressum and Datenschutz links', async () => {
-    const ui = await Footer()
+    const ui = await Footer({ lang: 'de' })
     render(ui)
     expect(screen.getByRole('link', { name: /impressum/i })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /datenschutz/i })).toBeInTheDocument()

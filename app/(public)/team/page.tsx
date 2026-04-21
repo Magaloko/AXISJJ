@@ -1,5 +1,7 @@
+import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { CoachSection } from '@/components/public/CoachSection'
+import { resolveLang } from '@/lib/i18n/resolve-lang'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -8,7 +10,9 @@ export const metadata: Metadata = {
     'Lerne die Coaches von AXIS Jiu-Jitsu Vienna kennen. Angeführt von Shamsudin Baisarov, Österreichs erstem tschetschenischem BJJ-Schwarzgurt.',
 }
 
-export default function TeamPage() {
+export default async function TeamPage() {
+  const rawLang = (await cookies()).get('lang')?.value
+  const lang = resolveLang(rawLang)
   return (
     <div className="pt-20">
       <div className="mx-auto max-w-7xl px-4 pt-10 sm:px-6">
@@ -24,7 +28,7 @@ export default function TeamPage() {
         </p>
       </div>
 
-      <CoachSection />
+      <CoachSection lang={lang} />
 
       <div className="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
         <div className="border border-border bg-card p-8 text-center">

@@ -4,7 +4,7 @@ import { ProgramsGrid } from '../ProgramsGrid'
 
 describe('ProgramsGrid', () => {
   it('renders all 4 program cards', () => {
-    render(<ProgramsGrid />)
+    render(<ProgramsGrid lang="de" />)
     expect(screen.getByText('Fundamentals')).toBeInTheDocument()
     expect(screen.getByText(/all levels gi/i)).toBeInTheDocument()
     expect(screen.getByText(/no-gi/i)).toBeInTheDocument()

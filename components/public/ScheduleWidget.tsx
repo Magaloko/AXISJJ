@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { cn } from '@/lib/utils/cn'
+import { translations, type Lang } from '@/lib/i18n'
 
 export interface PublicSession {
   id: string
@@ -21,13 +22,7 @@ export interface PublicDaySchedule {
 
 interface Props {
   schedule: PublicDaySchedule[]
-}
-
-const LEVEL_LABELS: Record<PublicSession['level'], string> = {
-  beginner: 'Anfänger',
-  all:      'Alle Levels',
-  advanced: 'Blue Belt+',
-  kids:     'Kids',
+  lang: Lang
 }
 
 const LEVEL_BAR: Record<PublicSession['level'], string> = {
@@ -44,7 +39,7 @@ const LEVEL_TEXT: Record<PublicSession['level'], string> = {
   kids:     'text-yellow-400',
 }
 
-function ClassCard({ cls }: { cls: PublicSession }) {
+function ClassCard({ cls, levelLabels }: { cls: PublicSession; levelLabels: Record<PublicSession['level'], string> }) {
   return (
     <div className="relative overflow-hidden border border-border bg-card p-3 transition-colors hover:border-primary/50 hover:bg-muted">
       <div className={cn('absolute left-0 top-0 h-full w-1', LEVEL_BAR[cls.level])} />
@@ -64,7 +59,7 @@ function ClassCard({ cls }: { cls: PublicSession }) {
           {cls.time} – {cls.endTime}
         </p>
         <p className={cn('mt-0.5 text-[10px] font-semibold uppercase tracking-wider', LEVEL_TEXT[cls.level])}>
-          {LEVEL_LABELS[cls.level]}
+          {levelLabels[cls.level]}
         </p>
         <p className="mt-1.5 truncate text-[10px] text-muted-foreground">
           👤 {cls.trainer}
@@ -74,18 +69,26 @@ function ClassCard({ cls }: { cls: PublicSession }) {
   )
 }
 
-export function ScheduleWidget({ schedule }: Props) {
+export function ScheduleWidget({ schedule, lang }: Props) {
   const [activeDay, setActiveDay] = useState(0)
+  const ts = translations[lang].public.schedule
+
+  const LEVEL_LABELS: Record<PublicSession['level'], string> = {
+    beginner: ts.levelBeginner,
+    all:      ts.levelAll,
+    advanced: ts.levelAdvanced,
+    kids:     ts.levelKids,
+  }
 
   return (
     <section id="trainingsplan" className="bg-background py-16 sm:py-24">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="mb-10">
           <p className="mb-1 text-xs font-bold uppercase tracking-[0.3em] text-primary">
-            Schedule · Trainingsplan
+            {ts.eyebrow}
           </p>
           <h2 className="text-3xl font-black text-foreground sm:text-4xl">
-            WÖCHENTLICHER STUNDENPLAN
+            {ts.heading}
           </h2>
         </div>
 
@@ -100,12 +103,12 @@ export function ScheduleWidget({ schedule }: Props) {
                 </div>
                 {day.sessions.length === 0 ? (
                   <div className="flex h-20 items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground/40">
-                    Kein Training
+                    {ts.noTraining}
                   </div>
                 ) : (
                   <div className="flex flex-col gap-2">
                     {day.sessions.map(cls => (
-                      <ClassCard key={`${cls.id}`} cls={cls} />
+                      <ClassCard key={`${cls.id}`} cls={cls} levelLabels={LEVEL_LABELS} />
                     ))}
                   </div>
                 )}
@@ -136,11 +139,11 @@ export function ScheduleWidget({ schedule }: Props) {
             {schedule[activeDay]?.dayLabel}
           </p>
           {(schedule[activeDay]?.sessions.length ?? 0) === 0 ? (
-            <p className="text-sm text-muted-foreground">Kein Training an diesem Tag.</p>
+            <p className="text-sm text-muted-foreground">{ts.noTrainingDay}</p>
           ) : (
             <div className="flex flex-col gap-2">
               {schedule[activeDay]?.sessions.map(cls => (
-                <ClassCard key={cls.id} cls={cls} />
+                <ClassCard key={cls.id} cls={cls} levelLabels={LEVEL_LABELS} />
               ))}
             </div>
           )}
@@ -156,7 +159,7 @@ export function ScheduleWidget({ schedule }: Props) {
           ))}
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
-          * Stundenplan kann variieren. Aktuelle Änderungen auf @axisjj_at.
+          {ts.footnote}
         </p>
       </div>
     </section>

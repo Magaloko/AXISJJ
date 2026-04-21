@@ -1,6 +1,8 @@
+import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { ScheduleWidget } from '@/components/public/ScheduleWidget'
 import { getWeekSchedule } from '@/lib/schedule'
+import { resolveLang } from '@/lib/i18n/resolve-lang'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -10,6 +12,8 @@ export const metadata: Metadata = {
 }
 
 export default async function TrainingsplanPage() {
+  const rawLang = (await cookies()).get('lang')?.value
+  const lang = resolveLang(rawLang)
   const schedule = await getWeekSchedule()
 
   return (
@@ -24,7 +28,7 @@ export default async function TrainingsplanPage() {
         </p>
       </div>
 
-      <ScheduleWidget schedule={schedule} />
+      <ScheduleWidget schedule={schedule} lang={lang} />
 
       <div className="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
         <div className="border border-border bg-card p-8 text-center">

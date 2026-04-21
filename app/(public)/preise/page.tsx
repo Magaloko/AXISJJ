@@ -1,11 +1,15 @@
+import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { getPricingPlans } from '@/lib/pricing'
 import { PricingCard } from '@/components/public/PricingCard'
+import { resolveLang } from '@/lib/i18n/resolve-lang'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Preise | AXIS Jiu-Jitsu' }
 
 export default async function PreisePage() {
+  const rawLang = (await cookies()).get('lang')?.value
+  const lang = resolveLang(rawLang)
   const plans = await getPricingPlans()
   return (
     <div className="mx-auto max-w-6xl px-6 py-12">
@@ -16,7 +20,7 @@ export default async function PreisePage() {
 
       <div className="grid gap-6 md:grid-cols-3">
         {plans.map(plan => (
-          <PricingCard key={plan.category} plan={plan} />
+          <PricingCard key={plan.category} plan={plan} lang={lang} />
         ))}
       </div>
 

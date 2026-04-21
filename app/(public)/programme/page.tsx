@@ -1,5 +1,7 @@
+import { cookies } from 'next/headers'
 import Link from 'next/link'
 import { ProgramsGrid } from '@/components/public/ProgramsGrid'
+import { resolveLang } from '@/lib/i18n/resolve-lang'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -8,7 +10,9 @@ export const metadata: Metadata = {
     'BJJ Programme bei AXIS Jiu-Jitsu Vienna: Fundamentals, Gi, No-Gi, Kids und Wettkampftraining. Für jede Stufe das passende Training.',
 }
 
-export default function ProgrammePage() {
+export default async function ProgrammePage() {
+  const rawLang = (await cookies()).get('lang')?.value
+  const lang = resolveLang(rawLang)
   return (
     <div className="pt-20">
       <div className="mx-auto max-w-7xl px-4 pt-10 sm:px-6">
@@ -24,7 +28,7 @@ export default function ProgrammePage() {
         </p>
       </div>
 
-      <ProgramsGrid />
+      <ProgramsGrid lang={lang} />
 
       <div className="mx-auto max-w-7xl px-4 pb-16 sm:px-6">
         <div className="border border-border bg-card p-8 text-center">

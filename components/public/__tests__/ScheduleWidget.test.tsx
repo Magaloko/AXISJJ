@@ -21,24 +21,24 @@ const mockSchedule: PublicDaySchedule[] = [
 
 describe('ScheduleWidget', () => {
   it('renders all 7 day tab buttons', () => {
-    render(<ScheduleWidget schedule={mockSchedule} />)
+    render(<ScheduleWidget schedule={mockSchedule} lang="de" />)
     expect(screen.getByRole('button', { name: 'MO' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'SO' })).toBeInTheDocument()
   })
 
   it('shows Monday classes by default', () => {
-    render(<ScheduleWidget schedule={mockSchedule} />)
+    render(<ScheduleWidget schedule={mockSchedule} lang="de" />)
     expect(screen.getAllByText('Fundamentals').length).toBeGreaterThan(0)
   })
 
   it('switches to Saturday on SA click', async () => {
-    render(<ScheduleWidget schedule={mockSchedule} />)
+    render(<ScheduleWidget schedule={mockSchedule} lang="de" />)
     await userEvent.click(screen.getByRole('button', { name: 'SA' }))
     expect(screen.getAllByText('Kids BJJ').length).toBeGreaterThan(0)
   })
 
   it('shows GI or NO-GI badge for each class', () => {
-    render(<ScheduleWidget schedule={mockSchedule} />)
+    render(<ScheduleWidget schedule={mockSchedule} lang="de" />)
     expect(screen.getAllByText(/^(GI|NO-GI)$/).length).toBeGreaterThan(0)
   })
 })

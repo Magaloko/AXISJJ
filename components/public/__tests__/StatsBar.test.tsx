@@ -4,7 +4,7 @@ import { StatsBar } from '../StatsBar'
 
 describe('StatsBar', () => {
   it('renders 4 stat items', () => {
-    render(<StatsBar />)
+    render(<StatsBar lang="de" />)
     expect(screen.getByText(/klassen/i)).toBeInTheDocument()
     expect(screen.getAllByText(/gi/i).length).toBeGreaterThan(0)
     expect(screen.getByText(/black belt/i)).toBeInTheDocument()

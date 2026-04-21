@@ -4,18 +4,21 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { MapPin, Calendar } from 'lucide-react'
 import type { TournamentPublic } from '@/app/actions/public-tournaments'
+import { translations, type Lang } from '@/lib/i18n'
 
 interface Props {
   tournament: TournamentPublic
   index: number
+  lang: Lang
 }
 
 function formatDate(iso: string): string {
   return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
-export function TournamentCard({ tournament, index }: Props) {
+export function TournamentCard({ tournament, index, lang }: Props) {
   const { name, date, endDate, location, type, description, approvedParticipants } = tournament
+  const tt = translations[lang].public.tournaments
 
   return (
     <motion.article
@@ -30,7 +33,7 @@ export function TournamentCard({ tournament, index }: Props) {
         <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 ${
           type === 'internal' ? 'bg-primary/20 text-primary' : 'bg-foreground/10 text-foreground'
         }`}>
-          {type === 'internal' ? 'Intern' : 'Extern'}
+          {type === 'internal' ? tt.typeInternal : tt.typeExternal}
         </span>
       </div>
 
@@ -50,7 +53,7 @@ export function TournamentCard({ tournament, index }: Props) {
       {approvedParticipants.length > 0 && (
         <div>
           <p className="mb-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            {approvedParticipants.length} Teilnehmer bestätigt
+            {approvedParticipants.length} {tt.participantsConfirmed}
           </p>
           <div className="flex gap-3 overflow-x-auto pb-2">
             {approvedParticipants.map((p, i) => (

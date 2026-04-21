@@ -1,11 +1,18 @@
-const STATS = [
-  { value: '10+',  label: 'Klassen / Woche',  sublabel: 'Classes per week' },
-  { value: 'GI',   label: 'Gi + No-Gi',        sublabel: 'Both styles' },
-  { value: '⬛ BB', label: 'Black Belt Coach',  sublabel: 'Head Coach' },
-  { value: 'KIDS', label: 'Kinder willkommen', sublabel: 'ab 6 Jahren' },
-]
+import { translations, type Lang } from '@/lib/i18n'
 
-export function StatsBar() {
+interface StatsBarProps {
+  lang: Lang
+}
+
+export function StatsBar({ lang }: StatsBarProps) {
+  const ts = translations[lang].public.stats
+  const STATS = [
+    { value: '10+',  label: ts.classesPerWeek,  sublabel: ts.classesPerWeekSub },
+    { value: 'GI',   label: ts.bothStyles,       sublabel: ts.bothStylesSub },
+    { value: '⬛ BB', label: ts.blackBeltCoach,  sublabel: ts.blackBeltCoachSub },
+    { value: 'KIDS', label: ts.kidsWelcome,      sublabel: ts.kidsWelcomeSub },
+  ]
+
   return (
     <div className="border-t border-primary/30 bg-card">
       <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px px-4 py-6 sm:grid-cols-4 sm:px-6">
