@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useTransition } from 'react'
 import { Check, X, Trophy } from 'lucide-react'
 import { submitQuizAttempt } from '@/app/actions/quizzes'
+import { AnimatedCheckIcon } from '@/components/ui/icons/animated-icons'
 
 interface Question {
   id: string
@@ -71,8 +72,9 @@ export function QuizPlayer({ quizId, questions }: Props) {
             <p className="mt-3 text-sm font-bold text-primary">+{result.xpEarned} XP</p>
           )}
           {result.newBadges.length > 0 && (
-            <p className="mt-2 text-sm text-primary">
-              🎉 {result.newBadges.length} neue{result.newBadges.length === 1 ? 's' : ''} Badge freigeschaltet!
+            <p className="mt-2 flex items-center justify-center gap-2 text-sm text-primary">
+              <AnimatedCheckIcon size={18} animate="once" className="text-primary" />
+              {result.newBadges.length} neue{result.newBadges.length === 1 ? 's' : ''} Badge freigeschaltet!
             </p>
           )}
         </div>

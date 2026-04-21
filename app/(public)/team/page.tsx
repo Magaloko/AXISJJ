@@ -14,7 +14,7 @@ export default async function TeamPage() {
   const rawLang = (await cookies()).get('lang')?.value
   const lang = resolveLang(rawLang)
   return (
-    <div className="pt-20">
+    <div>
       <div className="mx-auto max-w-7xl px-4 pt-10 sm:px-6">
         <p className="mb-1 text-xs font-bold uppercase tracking-[0.3em] text-primary">
           Team · Coaches

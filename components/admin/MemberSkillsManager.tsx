@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { updateMemberSkillStatus } from '@/app/actions/skills'
+import { Check, Circle } from 'lucide-react'
 
 type Status = 'not_started' | 'in_progress' | 'mastered'
 
@@ -12,10 +13,22 @@ const NEXT: Record<Status, Status> = {
   mastered: 'not_started',
 }
 
-const LABELS: Record<Status, string> = {
-  not_started: '—',
-  in_progress: '🟡 WIP',
-  mastered: '✅ Ok',
+function StatusLabel({ status }: { status: Status }) {
+  if (status === 'not_started') return <span>—</span>
+  if (status === 'in_progress') {
+    return (
+      <span className="flex items-center gap-1">
+        <Circle size={10} strokeWidth={3} fill="currentColor" />
+        WIP
+      </span>
+    )
+  }
+  return (
+    <span className="flex items-center gap-1">
+      <Check size={12} strokeWidth={3} />
+      Ok
+    </span>
+  )
 }
 
 const COLOR: Record<Status, string> = {
@@ -122,7 +135,7 @@ export function MemberSkillsManager({ profileId }: Props) {
                     className={`flex w-full items-center justify-between border px-3 py-1.5 text-xs transition-colors disabled:opacity-50 ${COLOR[s.status]}`}
                   >
                     <span className="font-semibold text-left">{s.name}</span>
-                    <span className="ml-3 font-bold">{LABELS[s.status]}</span>
+                    <span className="ml-3 font-bold"><StatusLabel status={s.status} /></span>
                   </button>
                 ))}
               </div>

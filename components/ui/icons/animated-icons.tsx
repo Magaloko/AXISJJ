@@ -78,7 +78,7 @@ const AnimatedIconBase = React.forwardRef<SVGSVGElement, AnimatedIconBaseProps>(
 )
 AnimatedIconBase.displayName = 'AnimatedIconBase'
 
-// 🔥 Flame Icon — flickering
+// Flame Icon — flickering
 export const FlameIcon = React.forwardRef<SVGSVGElement, AnimatedIconProps>(
   ({ animate = 'always', ...props }, ref) => (
     <AnimatedIconBase
@@ -108,7 +108,7 @@ export const FlameIcon = React.forwardRef<SVGSVGElement, AnimatedIconProps>(
 )
 FlameIcon.displayName = 'FlameIcon'
 
-// ⚡ Lightning Icon — pulse with glow
+// Lightning Icon — pulse with glow
 export const LightningIcon = React.forwardRef<SVGSVGElement, AnimatedIconProps>(
   ({ animate = 'hover', ...props }, ref) => (
     <AnimatedIconBase ref={ref} animate={animate} variants={pulseVariants} {...props}>
@@ -150,7 +150,7 @@ export const TrophyIcon = React.forwardRef<SVGSVGElement, AnimatedIconProps>(
 )
 TrophyIcon.displayName = 'TrophyIcon'
 
-// 🥇🥈🥉 Medal Icon — shine sweep (uses SMIL, not framer-motion)
+// Medal Icon — shine sweep (uses SMIL, not framer-motion)
 interface MedalIconProps extends Omit<React.SVGAttributes<SVGSVGElement>, 'children'> {
   size?: number
   place?: 1 | 2 | 3
@@ -268,7 +268,7 @@ export const TargetIcon = React.forwardRef<SVGSVGElement, AnimatedIconProps>(
 )
 TargetIcon.displayName = 'TargetIcon'
 
-// 💪 Flex/Strength Icon — float
+// Flex/Strength Icon — float
 export const StrengthIcon = React.forwardRef<SVGSVGElement, AnimatedIconProps>(
   ({ animate = 'hover', ...props }, ref) => (
     <AnimatedIconBase ref={ref} animate={animate} variants={floatVariants} {...props}>
@@ -292,7 +292,7 @@ export const StrengthIcon = React.forwardRef<SVGSVGElement, AnimatedIconProps>(
 )
 StrengthIcon.displayName = 'StrengthIcon'
 
-// 🥋 Gi Icon (animated) — subtle float
+// Gi Icon (animated) — subtle float
 export const AnimatedGiIcon = React.forwardRef<SVGSVGElement, AnimatedIconProps>(
   ({ animate = 'hover', ...props }, ref) => (
     <AnimatedIconBase ref={ref} animate={animate} variants={floatVariants} {...props}>

@@ -2,22 +2,27 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { formatDistanceToNow, parseISO } from 'date-fns'
 import { de } from 'date-fns/locale'
+import {
+  Pencil, UserCog, Plus, FileEdit, XCircle, Award,
+  Tag, Trash2, Settings, Clock, ScrollText, FileText,
+  type LucideIcon,
+} from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Audit-Log | Admin' }
 
-const ACTION_ICONS: Record<string, string> = {
-  'member.updated':      '✏️',
-  'member.role_changed': '👤',
-  'session.created':     '➕',
-  'session.updated':     '📝',
-  'session.cancelled':   '❌',
-  'belt.promoted':       '🥋',
-  'classtype.upserted':  '🏷️',
-  'classtype.deleted':   '🗑️',
-  'gym.info_updated':    '⚙️',
-  'gym.hours_updated':   '🕐',
-  'gym.policies_updated':'📜',
+const ACTION_ICONS: Record<string, LucideIcon> = {
+  'member.updated':       Pencil,
+  'member.role_changed':  UserCog,
+  'session.created':      Plus,
+  'session.updated':      FileEdit,
+  'session.cancelled':    XCircle,
+  'belt.promoted':        Award,
+  'classtype.upserted':   Tag,
+  'classtype.deleted':    Trash2,
+  'gym.info_updated':     Settings,
+  'gym.hours_updated':    Clock,
+  'gym.policies_updated': ScrollText,
 }
 
 const ACTION_LABELS: Record<string, string> = {
@@ -87,11 +92,12 @@ export default async function AuditPage() {
             <tbody>
               {entries.map(e => {
                 const metaStr = formatMeta(e.meta)
+                const Icon = ACTION_ICONS[e.action] ?? FileText
                 return (
                   <tr key={e.id} className="border-b border-border/50 hover:bg-muted/30">
                     <td className="p-3">
                       <div className="flex items-center gap-2">
-                        <span>{ACTION_ICONS[e.action] ?? '📋'}</span>
+                        <Icon size={14} className="shrink-0 text-muted-foreground" strokeWidth={2} />
                         <span className="font-semibold text-foreground">
                           {ACTION_LABELS[e.action] ?? e.action}
                         </span>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { TrainingLogDrawer } from './TrainingLogDrawer'
+import { AnimatedGiIcon } from '@/components/ui/icons/animated-icons'
 
 interface Props {
   sessionId: string | null
@@ -16,9 +17,12 @@ export function TrainingLogBanner({ sessionId }: Props) {
   return (
     <>
       <div className="mb-6 flex items-center justify-between border border-primary/30 bg-primary/5 px-5 py-4">
-        <div>
-          <p className="text-sm font-black text-foreground">🥋 Du warst heute im Training!</p>
-          <p className="text-xs text-muted-foreground">Wie war es? Logge deine Session.</p>
+        <div className="flex items-center gap-3">
+          <AnimatedGiIcon size={28} animate="hover" className="text-primary shrink-0" />
+          <div>
+            <p className="text-sm font-black text-foreground">Du warst heute im Training!</p>
+            <p className="text-xs text-muted-foreground">Wie war es? Logge deine Session.</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <button

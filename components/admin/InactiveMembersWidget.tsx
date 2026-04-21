@@ -1,4 +1,5 @@
 import type { InactiveMember } from '@/app/actions/owner-insights'
+import { CheckCircle2 } from 'lucide-react'
 
 interface Props { members: InactiveMember[] }
 
@@ -7,7 +8,10 @@ export function InactiveMembersWidget({ members }: Props) {
     return (
       <div className="border border-border bg-card p-6">
         <p className="mb-1 text-xs font-bold uppercase tracking-widest text-muted-foreground">Inaktive Mitglieder</p>
-        <p className="mb-5 text-sm font-semibold text-foreground">Alle aktiv 💪</p>
+        <p className="mb-5 flex items-center gap-2 text-sm font-semibold text-foreground">
+          <CheckCircle2 size={16} className="text-primary" strokeWidth={2} />
+          Alle aktiv
+        </p>
         <p className="text-sm text-muted-foreground">Alle Mitglieder haben in den letzten 30 Tagen trainiert.</p>
       </div>
     )

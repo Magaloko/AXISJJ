@@ -37,7 +37,7 @@ describe('formatEvent - lead.created', () => {
     expect(out.emailText).toContain('Max Mustermann')
     expect(out.emailHtml).toContain('<strong>')
     expect(out.emailHtml).toContain('Max Mustermann')
-    expect(out.telegramMarkdown.startsWith('🆕')).toBe(true)
+    expect(out.telegramMarkdown).toContain('Neuer Lead')
     expect(out.telegramMarkdown).toContain('Max Mustermann')
   })
 })
@@ -82,12 +82,12 @@ describe('formatEvent - booking.created', () => {
 })
 
 describe('formatEvent - checkin.recorded', () => {
-  it('starts with check emoji in telegram', () => {
+  it('has Check-in title in telegram', () => {
     const out = formatEvent({
       type: 'checkin.recorded',
       data: { memberName: 'Bob', className: 'BJJ', startsAt: '2026-04-20T18:00:00.000Z' },
     })
-    expect(out.telegramMarkdown.startsWith('✅')).toBe(true)
+    expect(out.telegramMarkdown).toContain('Check\\-in')
   })
 })
 

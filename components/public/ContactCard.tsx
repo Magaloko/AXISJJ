@@ -1,5 +1,6 @@
 import type { GymSettings } from '@/lib/gym-settings'
 import { translations, type Lang } from '@/lib/i18n'
+import { Phone, Mail, Globe } from 'lucide-react'
 
 interface Props { settings: GymSettings; lang: Lang }
 
@@ -19,9 +20,24 @@ export function ContactCard({ settings, lang }: Props) {
       {(postal_code || city) && <p>{[postal_code, city].filter(Boolean).join(' ')}</p>}
       {country && <p>{country}</p>}
       <div className="space-y-1 pt-2 text-muted-foreground">
-        {phone && <p>📞 <a href={`tel:${phone.replace(/\s/g, '')}`} className="hover:text-foreground">{phone}</a></p>}
-        {email && <p>✉️ <a href={`mailto:${email}`} className="hover:text-foreground">{email}</a></p>}
-        {website && <p>🌐 <a href={website} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">{website}</a></p>}
+        {phone && (
+          <p className="flex items-center gap-2">
+            <Phone size={14} strokeWidth={2} className="shrink-0" />
+            <a href={`tel:${phone.replace(/\s/g, '')}`} className="hover:text-foreground">{phone}</a>
+          </p>
+        )}
+        {email && (
+          <p className="flex items-center gap-2">
+            <Mail size={14} strokeWidth={2} className="shrink-0" />
+            <a href={`mailto:${email}`} className="hover:text-foreground">{email}</a>
+          </p>
+        )}
+        {website && (
+          <p className="flex items-center gap-2">
+            <Globe size={14} strokeWidth={2} className="shrink-0" />
+            <a href={website} target="_blank" rel="noopener noreferrer" className="hover:text-foreground">{website}</a>
+          </p>
+        )}
       </div>
       {mapQuery && (
         <a href={mapQuery} target="_blank" rel="noopener noreferrer"
