@@ -137,10 +137,13 @@
     justify-content: center;
     width: 44px; height: 44px;
     border-radius: 0.75rem;
-    font-size: 1.5rem;
     margin-bottom: 1rem;
     background: var(--primary-soft);
+    color: var(--primary);
   }
+  .card-icon svg { width: 22px; height: 22px; }
+  .h-with-icon { display: flex; align-items: center; gap: 0.75rem; }
+  .h-with-icon svg { width: 26px; height: 26px; color: var(--primary); flex-shrink: 0; }
   .card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
   .card p { font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
 
@@ -243,8 +246,10 @@
     background: transparent;
     border: none;
     color: var(--muted);
-    font-size: 1rem;
-    padding: 0.25rem 0.55rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.35rem 0.7rem;
     border-radius: 999px;
     cursor: pointer;
     transition: all 0.2s;
@@ -285,9 +290,9 @@
 <div class="bg-orb o3"></div>
 
 <div class="lang-switcher" role="toolbar" aria-label="Language">
-  <button data-lang="de" aria-label="Deutsch" title="Deutsch">🇩🇪</button>
-  <button data-lang="en" aria-label="English" title="English">🇬🇧</button>
-  <button data-lang="ru" aria-label="Русский" title="Русский">🇷🇺</button>
+  <button data-lang="de" aria-label="Deutsch" title="Deutsch">DE</button>
+  <button data-lang="en" aria-label="English" title="English">EN</button>
+  <button data-lang="ru" aria-label="Русский" title="Русский">RU</button>
 </div>
 
 <nav class="jump-nav">
@@ -315,32 +320,32 @@
     <h2 data-i18n="member.heading">Dein Training, dein Fortschritt</h2>
     <div class="grid">
       <div class="card anim">
-        <div class="card-icon">📅</div>
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg></div>
         <h4 data-i18n="member.card1.title">Klassen buchen</h4>
         <p data-i18n="member.card1.text">Wochenplan ansehen, mit einem Klick buchen. Bei voller Klasse kommst du automatisch auf die Warteliste.</p>
       </div>
       <div class="card anim">
-        <div class="card-icon">📱</div>
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></div>
         <h4 data-i18n="member.card2.title">Check-In mit QR</h4>
         <p data-i18n="member.card2.text">Zeig deinen QR-Code am Handy, der Coach scannt — fertig. Du bekommst automatisch XP.</p>
       </div>
       <div class="card anim">
-        <div class="card-icon">🏆</div>
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2z"/></svg></div>
         <h4 data-i18n="member.card3.title">Turniere</h4>
         <p data-i18n="member.card3.text">Anstehende Turniere durchsehen, mit Gewichtsklasse und Gi/No-Gi anmelden. Dein Status wird dir gezeigt.</p>
       </div>
       <div class="card anim">
-        <div class="card-icon">🥋</div>
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg></div>
         <h4 data-i18n="member.card4.title">Gurt-Fortschritt</h4>
         <p data-i18n="member.card4.text">Sieh wo du stehst und was dir bis zum nächsten Gurt fehlt — Zeit und Trainings.</p>
       </div>
       <div class="card anim">
-        <div class="card-icon">⚡</div>
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
         <h4 data-i18n="member.card5.title">XP & Badges</h4>
         <p data-i18n="member.card5.text">Sammle XP durch Training, Quiz und Regel-Spiel. Vergleich dich auf dem Leaderboard.</p>
       </div>
       <div class="card anim">
-        <div class="card-icon">📊</div>
+        <div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
         <h4 data-i18n="member.card6.title">Training-Tagebuch</h4>
         <p data-i18n="member.card6.text">Logge jede Session mit Stimmung und Notizen. Deine Charts zeigen dir den Fortschritt.</p>
       </div>
@@ -353,22 +358,22 @@
     <span class="role-badge badge-coach" data-i18n="coach.badge">· Rolle: Coach ·</span>
     <h2 data-i18n="coach.heading">Unterrichten, organisieren, Turniere schaffen</h2>
     <div class="grid">
-      <div class="card anim"><div class="card-icon">🎯</div>
+      <div class="card anim"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg></div>
         <h4 data-i18n="coach.card1.title">Check-In</h4>
         <p data-i18n="coach.card1.text">QR scannen oder manuell suchen. Jeder Check-In ist an die aktuelle Session verknüpft.</p></div>
-      <div class="card anim"><div class="card-icon">📋</div>
+      <div class="card anim"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 12h6M9 16h6"/></svg></div>
         <h4 data-i18n="coach.card2.title">Klassen verwalten</h4>
         <p data-i18n="coach.card2.text">Sessions erstellen (einmalig oder wiederkehrend), Teilnehmer sehen, Notizen hinterlegen.</p></div>
-      <div class="card anim"><div class="card-icon">🏅</div>
+      <div class="card anim"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15M11 12 5.12 2.2M13 12l5.88-9.8M8 7h8"/><circle cx="12" cy="17" r="5"/></svg></div>
         <h4 data-i18n="coach.card3.title">Turniere erstellen</h4>
         <p data-i18n="coach.card3.text">Intern oder extern — mit Datum, Ort, Anmeldeschluss. Owner genehmigt, dann ist es live.</p></div>
-      <div class="card anim"><div class="card-icon">✓</div>
+      <div class="card anim"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
         <h4 data-i18n="coach.card4.title">Anmeldungen prüfen</h4>
         <p data-i18n="coach.card4.text">Mitglieder melden sich für dein Turnier an — du bestätigst oder lehnst ab.</p></div>
-      <div class="card anim"><div class="card-icon">📝</div>
+      <div class="card anim"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
         <h4 data-i18n="coach.card5.title">Coach-Notizen</h4>
         <p data-i18n="coach.card5.text">Plan vor der Session, Reflexion danach. Privat und nur für Coaches sichtbar.</p></div>
-      <div class="card anim"><div class="card-icon">👥</div>
+      <div class="card anim"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
         <h4 data-i18n="coach.card6.title">Meine Schüler</h4>
         <p data-i18n="coach.card6.text">Wer hat bei dir in den letzten 30 Tagen trainiert? Übersicht im Dashboard.</p></div>
     </div>
@@ -381,28 +386,28 @@
     <h2 data-i18n="owner.heading">Volle Kontrolle, klare Übersicht</h2>
     <p style="color: var(--muted); margin-bottom: 2rem;" data-i18n="owner.subtitle">Als Owner bist du gleichzeitig Head Coach — dein Dashboard zeigt die Trainer-Ansicht. Business-Metriken findest du unter Berichte.</p>
     <div class="grid">
-      <div class="card anim"><div class="card-icon">👤</div>
+      <div class="card anim"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
         <h4 data-i18n="owner.card1.title">Mitgliederverwaltung</h4>
         <p data-i18n="owner.card1.text">Profile bearbeiten, Abos verwalten, Rollen zuweisen (Mitglied ↔ Coach).</p></div>
-      <div class="card anim"><div class="card-icon">💼</div>
+      <div class="card anim"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div>
         <h4 data-i18n="owner.card2.title">Coach-Profil pflegen</h4>
         <p data-i18n="owner.card2.text">Für jeden Coach: Bio, Spezialisierung, Erfolge, Reihenfolge auf der Landing Page.</p></div>
-      <div class="card anim"><div class="card-icon">✓</div>
+      <div class="card anim"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
         <h4 data-i18n="owner.card3.title">Turniere genehmigen</h4>
         <p data-i18n="owner.card3.text">Coaches erstellen Turniere — du gibst das Go. Deine Turniere sind direkt live.</p></div>
-      <div class="card anim"><div class="card-icon">📈</div>
+      <div class="card anim"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
         <h4 data-i18n="owner.card4.title">Business-Berichte</h4>
         <p data-i18n="owner.card4.text">Umsatz, Konversionsrate, Auslastung, Top-Klassen, inaktive Mitglieder — alles in Berichte.</p></div>
-      <div class="card anim"><div class="card-icon">🎨</div>
+      <div class="card anim"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg></div>
         <h4 data-i18n="owner.card5.title">Content</h4>
         <p data-i18n="owner.card5.text">Blog, Hero-Slider, Klassentyp-Bilder, Curriculum — die Landing Page in deiner Hand.</p></div>
-      <div class="card anim"><div class="card-icon">⚙️</div>
+      <div class="card anim"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
         <h4 data-i18n="owner.card6.title">Einstellungen</h4>
         <p data-i18n="owner.card6.text">Preise, Klassentypen (mit Bildern), Gym-Info, Öffnungszeiten, Richtlinien.</p></div>
-      <div class="card anim"><div class="card-icon">📊</div>
+      <div class="card anim"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></div>
         <h4 data-i18n="owner.card7.title">Leads / CRM</h4>
         <p data-i18n="owner.card7.text">Interessenten-Pipeline: Neu → Kontaktiert → Konvertiert → Verloren.</p></div>
-      <div class="card anim"><div class="card-icon">🔒</div>
+      <div class="card anim"><div class="card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
         <h4 data-i18n="owner.card8.title">Audit-Log</h4>
         <p data-i18n="owner.card8.text">Jede administrative Aktion wird protokolliert — wer, wann, was.</p></div>
     </div>
@@ -414,7 +419,7 @@
     <span class="role-badge badge-owner" data-i18n="flows.badge">· Abläufe ·</span>
     <h2 data-i18n="flows.heading">Typische Workflows</h2>
 
-    <h3 style="margin-top: 3rem;" data-i18n="flows.a.heading">🏅 Ein Turnier von A bis Z</h3>
+    <h3 class="h-with-icon" style="margin-top: 3rem;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15M11 12 5.12 2.2M13 12l5.88-9.8M8 7h8"/><circle cx="12" cy="17" r="5"/></svg><span data-i18n="flows.a.heading">Ein Turnier von A bis Z</span></h3>
     <div class="workflow">
       <div class="step anim"><div class="step-num">1</div>
         <h4 data-i18n="flows.a.s1.h">Coach erstellt Turnier</h4>
@@ -435,7 +440,7 @@
 
     <div class="divider"><span data-i18n="flows.more">Und mehr</span></div>
 
-    <h3 data-i18n="flows.b.heading">🎓 Mitglied → Coach befördern</h3>
+    <h3 class="h-with-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg><span data-i18n="flows.b.heading">Mitglied → Coach befördern</span></h3>
     <div class="workflow">
       <div class="step anim"><div class="step-num">1</div>
         <h4 data-i18n="flows.b.s1.h">Rolle ändern</h4>
@@ -448,7 +453,7 @@
         <p data-i18n="flows.b.s3.t">"Auf Landing Page anzeigen" aktivieren → Coach erscheint im öffentlichen Slider.</p></div>
     </div>
 
-    <h3 style="margin-top: 3rem;" data-i18n="flows.c.heading">📅 Neue Klasse anlegen</h3>
+    <h3 class="h-with-icon" style="margin-top: 3rem;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4M16 2v4M3 10h18"/><rect x="3" y="4" width="18" height="18" rx="2"/></svg><span data-i18n="flows.c.heading">Neue Klasse anlegen</span></h3>
     <div class="workflow">
       <div class="step anim"><div class="step-num">1</div>
         <h4 data-i18n="flows.c.s1.h">Klassentyp erstellen (einmal)</h4>
@@ -500,17 +505,17 @@ const I18N = {
     'owner.card7.title':'Leads / CRM','owner.card7.text':'Interessenten-Pipeline: Neu → Kontaktiert → Konvertiert → Verloren.',
     'owner.card8.title':'Audit-Log','owner.card8.text':'Jede administrative Aktion wird protokolliert — wer, wann, was.',
     'flows.badge':'· Abläufe ·','flows.heading':'Typische Workflows','flows.more':'Und mehr',
-    'flows.a.heading':'🏅 Ein Turnier von A bis Z',
+    'flows.a.heading':'Ein Turnier von A bis Z',
     'flows.a.s1.h':'Coach erstellt Turnier','flows.a.s1.t':'Turniere → Neues Turnier → Name, Datum, Ort, Typ. Status: Ausstehend.',
     'flows.a.s2.h':'Owner genehmigt','flows.a.s2.t':'Owner öffnet Turniere-Liste → ✓ Genehmigen. Status: Genehmigt.',
     'flows.a.s3.h':'Landing Page + Mitglieder-Bereich','flows.a.s3.t':'Turnier erscheint automatisch auf der öffentlichen Seite und im Mitglieder-Dashboard.',
     'flows.a.s4.h':'Mitglieder melden sich an','flows.a.s4.t':'Gewichtsklasse, Gi/No-Gi, Notizen → Senden. Status: Ausstehend.',
     'flows.a.s5.h':'Coach prüft Anmeldungen','flows.a.s5.t':'Bestätigen oder Ablehnen pro Teilnehmer. Bestätigte erscheinen im öffentlichen Teilnehmer-Slider.',
-    'flows.b.heading':'🎓 Mitglied → Coach befördern',
+    'flows.b.heading':'Mitglied → Coach befördern',
     'flows.b.s1.h':'Rolle ändern','flows.b.s1.t':'Einstellungen → Rollen → Mitglied auswählen → Coach zuweisen.',
     'flows.b.s2.h':'Coach-Profil füllen','flows.b.s2.t':'Mitglieder → Profil öffnen → Website-Profil: Bio, Spezialisierung, Erfolge.',
     'flows.b.s3.h':'Sichtbar schalten','flows.b.s3.t':'"Auf Landing Page anzeigen" aktivieren → Coach erscheint im öffentlichen Slider.',
-    'flows.c.heading':'📅 Neue Klasse anlegen',
+    'flows.c.heading':'Neue Klasse anlegen',
     'flows.c.s1.h':'Klassentyp erstellen (einmal)','flows.c.s1.t':'Einstellungen → Klassentypen → Neu. Name, Level, Bild hochladen oder URL einfügen.',
     'flows.c.s2.h':'Session planen','flows.c.s2.t':'Training → Neue Session → Klassentyp wählen, Datum, Zeit, Kapazität, Coach.',
     'flows.c.s3.h':'Wiederkehrend (optional)','flows.c.s3.t':'Weekly Recurring markieren — Sessions werden für kommende Wochen automatisch angelegt.',
@@ -546,17 +551,17 @@ const I18N = {
     'owner.card7.title':'Leads / CRM','owner.card7.text':'Lead pipeline: New → Contacted → Converted → Lost.',
     'owner.card8.title':'Audit log','owner.card8.text':'Every admin action is logged — who, when, what.',
     'flows.badge':'· Workflows ·','flows.heading':'Typical workflows','flows.more':'And more',
-    'flows.a.heading':'🏅 A tournament from A to Z',
+    'flows.a.heading':'A tournament from A to Z',
     'flows.a.s1.h':'Coach creates the tournament','flows.a.s1.t':'Tournaments → New → Name, date, location, type. Status: Pending.',
     'flows.a.s2.h':'Owner approves','flows.a.s2.t':'Owner opens tournament list → ✓ Approve. Status: Approved.',
     'flows.a.s3.h':'Landing page + member area','flows.a.s3.t':'Tournament appears automatically on the public site and in member dashboard.',
     'flows.a.s4.h':'Members register','flows.a.s4.t':'Weight class, Gi/No-Gi, notes → Submit. Status: Pending.',
     'flows.a.s5.h':'Coach reviews registrations','flows.a.s5.t':'Approve or deny per participant. Approved athletes appear in the public participant slider.',
-    'flows.b.heading':'🎓 Promote member → coach',
+    'flows.b.heading':'Promote member → coach',
     'flows.b.s1.h':'Change role','flows.b.s1.t':'Settings → Roles → select member → assign coach.',
     'flows.b.s2.h':'Fill coach profile','flows.b.s2.t':'Members → open profile → Website profile: bio, specialization, achievements.',
     'flows.b.s3.h':'Make visible','flows.b.s3.t':'Enable "Show on landing page" → coach appears in the public slider.',
-    'flows.c.heading':'📅 Add a new class',
+    'flows.c.heading':'Add a new class',
     'flows.c.s1.h':'Create class type (once)','flows.c.s1.t':'Settings → Class types → New. Name, level, upload image or paste URL.',
     'flows.c.s2.h':'Plan a session','flows.c.s2.t':'Training → New session → choose type, date, time, capacity, coach.',
     'flows.c.s3.h':'Recurring (optional)','flows.c.s3.t':'Mark as weekly recurring — sessions are auto-created for upcoming weeks.',
@@ -592,17 +597,17 @@ const I18N = {
     'owner.card7.title':'Заявки / CRM','owner.card7.text':'Воронка заявок: Новые → Контакт → Конверсия → Потеряны.',
     'owner.card8.title':'Журнал','owner.card8.text':'Каждое административное действие записывается — кто, когда, что.',
     'flows.badge':'· Процессы ·','flows.heading':'Типичные сценарии','flows.more':'И ещё',
-    'flows.a.heading':'🏅 Турнир от А до Я',
+    'flows.a.heading':'Турнир от А до Я',
     'flows.a.s1.h':'Тренер создаёт турнир','flows.a.s1.t':'Турниры → Новый → Название, дата, место, тип. Статус: Ожидает.',
     'flows.a.s2.h':'Владелец одобряет','flows.a.s2.t':'Владелец открывает список турниров → ✓ Одобрить. Статус: Одобрен.',
     'flows.a.s3.h':'Главная + раздел участника','flows.a.s3.t':'Турнир автоматически появляется на публичном сайте и в панели участника.',
     'flows.a.s4.h':'Участники записываются','flows.a.s4.t':'Весовая категория, Ги/Без ги, заметки → Отправить. Статус: Ожидает.',
     'flows.a.s5.h':'Тренер проверяет заявки','flows.a.s5.t':'Подтвердить или отклонить каждого. Подтверждённые появляются в публичном слайдере.',
-    'flows.b.heading':'🎓 Повышение участника до тренера',
+    'flows.b.heading':'Повышение участника до тренера',
     'flows.b.s1.h':'Изменить роль','flows.b.s1.t':'Настройки → Роли → выбрать участника → назначить тренером.',
     'flows.b.s2.h':'Заполнить профиль тренера','flows.b.s2.t':'Участники → открыть профиль → Веб-профиль: биография, специализация, достижения.',
     'flows.b.s3.h':'Сделать видимым','flows.b.s3.t':'Включить "Показывать на главной" → тренер появится в публичном слайдере.',
-    'flows.c.heading':'📅 Добавить новое занятие',
+    'flows.c.heading':'Добавить новое занятие',
     'flows.c.s1.h':'Создать тип занятия (один раз)','flows.c.s1.t':'Настройки → Типы занятий → Новый. Название, уровень, загрузить фото или URL.',
     'flows.c.s2.h':'Спланировать сессию','flows.c.s2.t':'Тренировки → Новая сессия → выбрать тип, дату, время, вместимость, тренера.',
     'flows.c.s3.h':'Повторяющиеся (необязательно)','flows.c.s3.t':'Отметить как еженедельные — сессии создаются автоматически для следующих недель.',
