@@ -11,7 +11,7 @@ import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { createClient } from '@/lib/supabase/client'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
-import type { Lang } from '@/lib/i18n'
+import { translations, type Lang } from '@/lib/i18n'
 
 type Role = 'coach' | 'owner'
 
@@ -21,59 +21,81 @@ interface NavItem {
   Icon: React.ElementType
 }
 
-// ── Desktop sidebar sections ────────────────────────────────────────────────
+// ── Nav item factories ───────────────────────────────────────────────────────
 
-const opsItems: NavItem[] = [
-  { href: '/admin/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
-  { href: '/admin/checkin',   label: 'Check-In',  Icon: CheckSquare },
-  { href: '/admin/klassen',   label: 'Training',  Icon: CalendarDays },
-  { href: '/admin/turniere',  label: 'Turniere',  Icon: Trophy },
-]
+function getOpsItems(lang: Lang): NavItem[] {
+  const n = translations[lang].admin.nav
+  return [
+    { href: '/admin/dashboard', label: n.dashboard, Icon: LayoutDashboard },
+    { href: '/admin/checkin',   label: n.checkin,   Icon: CheckSquare },
+    { href: '/admin/klassen',   label: n.klassen,   Icon: CalendarDays },
+    { href: '/admin/turniere',  label: n.turniere,  Icon: Trophy },
+  ]
+}
 
-const mitgliederItems: NavItem[] = [
-  { href: '/admin/mitglieder', label: 'Mitglieder', Icon: Users },
-  { href: '/admin/guertel',    label: 'Gürtel',     Icon: Award },
-  { href: '/admin/leads',      label: 'Leads',      Icon: ClipboardList },
-]
+function getMitgliederItems(lang: Lang): NavItem[] {
+  const n = translations[lang].admin.nav
+  return [
+    { href: '/admin/mitglieder', label: n.mitglieder, Icon: Users },
+    { href: '/admin/guertel',    label: n.guertel,    Icon: Award },
+    { href: '/admin/leads',      label: n.leads,      Icon: ClipboardList },
+  ]
+}
 
-const businessItems: NavItem[] = [
-  { href: '/admin/berichte', label: 'Berichte', Icon: FileText },
-]
+function getBusinessItems(lang: Lang): NavItem[] {
+  const n = translations[lang].admin.nav
+  return [
+    { href: '/admin/berichte', label: n.berichte, Icon: FileText },
+  ]
+}
 
-const contentItems: NavItem[] = [
-  { href: '/admin/blog',       label: 'Blog',        Icon: BookOpen },
-  { href: '/admin/curriculum', label: 'Curriculum',  Icon: GraduationCap },
-  { href: '/admin/hero',       label: 'Hero Slider', Icon: MonitorPlay },
-]
+function getContentItems(lang: Lang): NavItem[] {
+  const n = translations[lang].admin.nav
+  return [
+    { href: '/admin/blog',       label: n.blog,       Icon: BookOpen },
+    { href: '/admin/curriculum', label: n.curriculum, Icon: GraduationCap },
+    { href: '/admin/hero',       label: n.hero,       Icon: MonitorPlay },
+  ]
+}
 
-const systemItems: NavItem[] = [
-  { href: '/admin/gym',           label: 'Gym',          Icon: Building2 },
-  { href: '/admin/einstellungen', label: 'Einstellungen', Icon: Settings },
-  { href: '/admin/audit',         label: 'Audit-Log',    Icon: ScrollText },
-]
+function getSystemItems(lang: Lang): NavItem[] {
+  const n = translations[lang].admin.nav
+  return [
+    { href: '/admin/gym',           label: n.gym,           Icon: Building2 },
+    { href: '/admin/einstellungen', label: n.einstellungen, Icon: Settings },
+    { href: '/admin/audit',         label: n.audit,         Icon: ScrollText },
+  ]
+}
 
-// ── Mobile bottom tabs ───────────────────────────────────────────────────────
+function getCoachBottomTabs(lang: Lang): NavItem[] {
+  const n = translations[lang].admin.nav
+  return [
+    { href: '/admin/dashboard', label: n.dashboard, Icon: LayoutDashboard },
+    { href: '/admin/checkin',   label: n.checkin,   Icon: CheckSquare },
+    { href: '/admin/klassen',   label: n.klassen,   Icon: CalendarDays },
+    { href: '/admin/turniere',  label: n.turniere,  Icon: Trophy },
+  ]
+}
 
-const coachBottomTabs: NavItem[] = [
-  { href: '/admin/dashboard', label: 'Dashboard', Icon: LayoutDashboard },
-  { href: '/admin/checkin',   label: 'Check-In',  Icon: CheckSquare },
-  { href: '/admin/klassen',   label: 'Training',  Icon: CalendarDays },
-  { href: '/admin/turniere',  label: 'Turniere',  Icon: Trophy },
-]
+function getOwnerBottomTabs(lang: Lang): NavItem[] {
+  const n = translations[lang].admin.nav
+  return [
+    { href: '/admin/dashboard',  label: n.dashboard,  Icon: LayoutDashboard },
+    { href: '/admin/mitglieder', label: n.mitglieder, Icon: Users },
+    { href: '/admin/checkin',    label: n.checkin,    Icon: CheckSquare },
+    { href: '/admin/berichte',   label: n.berichte,   Icon: FileText },
+  ]
+}
 
-const ownerBottomTabs: NavItem[] = [
-  { href: '/admin/dashboard',  label: 'Dashboard',  Icon: LayoutDashboard },
-  { href: '/admin/mitglieder', label: 'Mitglieder', Icon: Users },
-  { href: '/admin/checkin',    label: 'Check-In',   Icon: CheckSquare },
-  { href: '/admin/berichte',   label: 'Berichte',   Icon: FileText },
-]
-
-const ownerMoreItems: NavItem[] = [
-  { href: '/admin/turniere', label: 'Turniere', Icon: Trophy },
-  ...mitgliederItems.filter(i => i.href !== '/admin/mitglieder'),
-  ...contentItems,
-  ...systemItems,
-]
+function getOwnerMoreItems(lang: Lang): NavItem[] {
+  const n = translations[lang].admin.nav
+  return [
+    { href: '/admin/turniere', label: n.turniere, Icon: Trophy },
+    ...getMitgliederItems(lang).filter(i => i.href !== '/admin/mitglieder'),
+    ...getContentItems(lang),
+    ...getSystemItems(lang),
+  ]
+}
 
 // ── Shared helpers ───────────────────────────────────────────────────────────
 
@@ -113,9 +135,18 @@ interface SidebarContentProps {
 }
 
 function SidebarContent({ role, roleBadge, userName, pathname, onLogout, currentLang }: SidebarContentProps) {
+  const t = translations[currentLang].admin
+  const s = t.sections
+
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(href + '/')
   }
+
+  const opsItems = getOpsItems(currentLang)
+  const mitgliederItems = getMitgliederItems(currentLang)
+  const businessItems = getBusinessItems(currentLang)
+  const contentItems = getContentItems(currentLang)
+  const systemItems = getSystemItems(currentLang)
 
   return (
     <>
@@ -125,29 +156,29 @@ function SidebarContent({ role, roleBadge, userName, pathname, onLogout, current
       </div>
 
       <nav className="flex-1 overflow-y-auto p-3">
-        {role === 'owner' && <SectionLabel label="OPS" />}
+        {role === 'owner' && <SectionLabel label={s.ops} />}
         {opsItems.map(item => (
           <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
         ))}
 
         {role === 'owner' && (
           <>
-            <SectionLabel label="Mitglieder" />
+            <SectionLabel label={s.mitglieder} />
             {mitgliederItems.map(item => (
               <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
             ))}
 
-            <SectionLabel label="Business" />
+            <SectionLabel label={s.business} />
             {businessItems.map(item => (
               <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
             ))}
 
-            <SectionLabel label="Content" />
+            <SectionLabel label={s.content} />
             {contentItems.map(item => (
               <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
             ))}
 
-            <SectionLabel label="System" />
+            <SectionLabel label={s.system} />
             {systemItems.map(item => (
               <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
             ))}
@@ -162,7 +193,7 @@ function SidebarContent({ role, roleBadge, userName, pathname, onLogout, current
           className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <LogOut size={16} />
-          Abmelden
+          {t.common.logout}
         </button>
       </div>
     </>
@@ -175,10 +206,12 @@ interface BottomBarProps {
   role: Role
   pathname: string
   onMoreClick: () => void
+  currentLang: Lang
 }
 
-function BottomBar({ role, pathname, onMoreClick }: BottomBarProps) {
-  const tabs = role === 'coach' ? coachBottomTabs : ownerBottomTabs
+function BottomBar({ role, pathname, onMoreClick, currentLang }: BottomBarProps) {
+  const tabs = role === 'coach' ? getCoachBottomTabs(currentLang) : getOwnerBottomTabs(currentLang)
+  const more = translations[currentLang].admin.common.more
 
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(href + '/')
@@ -205,7 +238,7 @@ function BottomBar({ role, pathname, onMoreClick }: BottomBarProps) {
           className="flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-muted-foreground transition-colors"
         >
           <MoreHorizontal size={20} />
-          Mehr
+          {more}
         </button>
       )}
     </nav>
@@ -222,6 +255,9 @@ interface MoreSheetProps {
 }
 
 function MoreSheet({ pathname, onClose, onLogout, currentLang }: MoreSheetProps) {
+  const t = translations[currentLang].admin
+  const ownerMoreItems = getOwnerMoreItems(currentLang)
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
@@ -239,7 +275,7 @@ function MoreSheet({ pathname, onClose, onLogout, currentLang }: MoreSheetProps)
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
       <div className="absolute bottom-0 left-0 right-0 rounded-t-2xl border-t border-border bg-card pb-6">
         <div className="flex items-center justify-between border-b border-border px-4 py-3">
-          <span className="text-sm font-bold text-foreground">Mehr</span>
+          <span className="text-sm font-bold text-foreground">{t.common.more}</span>
           <button onClick={onClose} className="p-1 text-muted-foreground">
             <X size={20} />
           </button>
@@ -267,7 +303,7 @@ function MoreSheet({ pathname, onClose, onLogout, currentLang }: MoreSheetProps)
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <LogOut size={16} />
-            Abmelden
+            {t.common.logout}
           </button>
         </div>
       </div>
@@ -315,6 +351,7 @@ export function AdminNav({ role, userName, currentLang }: Props) {
         role={role}
         pathname={pathname}
         onMoreClick={() => setMoreOpen(true)}
+        currentLang={currentLang}
       />
 
       {/* Owner "Mehr" sheet */}

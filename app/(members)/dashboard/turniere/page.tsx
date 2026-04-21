@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation'
 import { MemberTournamentList } from '@/components/members/MemberTournamentList'
 import { getMyRegistrations } from '@/app/actions/tournament-registrations'
 import type { Tournament } from '@/app/actions/tournaments'
+import { cookies } from 'next/headers'
+import { resolveLang } from '@/lib/i18n/resolve-lang'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Turniere' }
@@ -11,6 +13,12 @@ export default async function MemberTournamentsPage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles').select('language').eq('id', user.id).single()
+
+  const rawLang = (await cookies()).get('lang')?.value
+  const lang = resolveLang(rawLang, profile?.language)
 
   const today = new Date().toISOString().split('T')[0]
   const { data } = await supabase
@@ -23,5 +31,5 @@ export default async function MemberTournamentsPage() {
   const tournaments = (data ?? []) as Tournament[]
   const myRegistrations = await getMyRegistrations()
 
-  return <MemberTournamentList tournaments={tournaments} myRegistrations={myRegistrations} />
+  return <MemberTournamentList tournaments={tournaments} myRegistrations={myRegistrations} lang={lang} />
 }

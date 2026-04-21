@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTournamentsForAdmin } from '@/app/actions/tournaments'
 import { TournamentList } from '@/components/admin/TournamentList'
+import { cookies } from 'next/headers'
+import { resolveLang } from '@/lib/i18n/resolve-lang'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Turniere | Admin' }
@@ -12,11 +14,14 @@ export default async function AdminTournamentsPage() {
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
-    .from('profiles').select('role').eq('id', user.id).single()
+    .from('profiles').select('role, language').eq('id', user.id).single()
   const role = profile?.role
   if (role !== 'coach' && role !== 'owner') redirect('/dashboard')
 
+  const rawLang = (await cookies()).get('lang')?.value
+  const lang = resolveLang(rawLang, profile?.language)
+
   const tournaments = await getTournamentsForAdmin()
 
-  return <TournamentList tournaments={tournaments} role={role as 'coach' | 'owner'} />
+  return <TournamentList tournaments={tournaments} role={role as 'coach' | 'owner'} lang={lang} />
 }

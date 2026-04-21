@@ -7,14 +7,19 @@ import {
   updateRegistrationStatus,
   type Registration,
 } from '@/app/actions/tournament-registrations'
+import { translations, type Lang } from '@/lib/i18n'
 
 interface Props {
   tournamentId: string
   tournamentName: string
   onClose: () => void
+  lang: Lang
 }
 
-export function RegistrationReviewPanel({ tournamentId, tournamentName, onClose }: Props) {
+export function RegistrationReviewPanel({ tournamentId, tournamentName, onClose, lang }: Props) {
+  const t = translations[lang].admin.registrations
+  const tc = translations[lang].admin.common
+
   const [registrations, setRegistrations] = useState<Registration[]>([])
   const [loading, setLoading] = useState(true)
   const [isPending, startTransition] = useTransition()
@@ -44,12 +49,12 @@ export function RegistrationReviewPanel({ tournamentId, tournamentName, onClose 
         <button onClick={onClose} className="text-muted-foreground">✕</button>
       </div>
       <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
-        Anmeldungen
+        {t.heading}
       </p>
       {loading ? (
-        <p className="text-sm text-muted-foreground">Lädt…</p>
+        <p className="text-sm text-muted-foreground">{tc.loading}</p>
       ) : registrations.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Noch keine Anmeldungen.</p>
+        <p className="text-sm text-muted-foreground">{t.empty}</p>
       ) : (
         <ul className="space-y-3">
           {registrations.map(r => (
@@ -65,18 +70,18 @@ export function RegistrationReviewPanel({ tournamentId, tournamentName, onClose 
                   r.status === 'denied' ? 'bg-destructive/20 text-destructive' :
                   'bg-muted text-muted-foreground'
                 }`}>
-                  {r.status === 'approved' ? 'Bestätigt' : r.status === 'denied' ? 'Abgelehnt' : 'Ausstehend'}
+                  {r.status === 'approved' ? t.statusApproved : r.status === 'denied' ? t.statusDenied : t.statusPending}
                 </span>
                 {r.status !== 'approved' && (
                   <button disabled={isPending} onClick={() => review(r.id, 'approved')}
                           className="border border-primary px-2 py-1 text-[10px] text-primary">
-                    ✓ Bestätigen
+                    {t.approveBtn}
                   </button>
                 )}
                 {r.status !== 'denied' && (
                   <button disabled={isPending} onClick={() => review(r.id, 'denied')}
                           className="border border-destructive px-2 py-1 text-[10px] text-destructive">
-                    ✗ Ablehnen
+                    {t.denyBtn}
                   </button>
                 )}
               </div>
