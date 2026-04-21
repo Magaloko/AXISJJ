@@ -32,23 +32,25 @@ export async function updateProfile(
 }
 
 export async function updateLanguage(
-  lang: 'de' | 'en'
+  lang: 'de' | 'en' | 'ru'
 ): Promise<{ success?: boolean; error?: string }> {
-  if (lang !== 'de' && lang !== 'en') return { error: 'Ungültige Sprache.' }
-  const supabase = await createClient()
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) return { error: 'Nicht eingeloggt.' }
+  if (lang !== 'de' && lang !== 'en' && lang !== 'ru') return { error: 'Ungültige Sprache.' }
 
-  const { error } = await supabase
-    .from('profiles')
-    .update({ language: lang })
-    .eq('id', user.id)
-
-  if (error) return { error: 'Speichern fehlgeschlagen.' }
-
+  // Always set cookie (works for logged-out users too)
   const cookieStore = await cookies()
   cookieStore.set('lang', lang, { path: '/', maxAge: 60 * 60 * 24 * 365, httpOnly: false })
 
-  revalidatePath('/members', 'layout')
+  // If logged in, also persist to profile
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ language: lang })
+      .eq('id', user.id)
+    if (error) return { error: 'Speichern fehlgeschlagen.' }
+  }
+
+  revalidatePath('/', 'layout')
   return { success: true }
 }

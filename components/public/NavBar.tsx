@@ -6,6 +6,8 @@ import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Menu, X, LogIn } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import type { Lang } from '@/lib/i18n'
 
 const NAV_LINKS = [
   { href: '/trainingsplan', label: 'Trainingsplan' },
@@ -21,7 +23,11 @@ function isActive(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`)
 }
 
-export function NavBar() {
+interface NavBarProps {
+  currentLang: Lang
+}
+
+export function NavBar({ currentLang }: NavBarProps) {
   const pathname = usePathname() ?? '/'
   const [open, setOpen] = useState(false)
 
@@ -77,6 +83,7 @@ export function NavBar() {
           </div>
 
           <div className="hidden items-center gap-4 md:flex">
+            <LanguageSwitcher currentLang={currentLang} />
             <Link
               href="/login"
               aria-label="Login"
@@ -173,6 +180,10 @@ export function NavBar() {
           >
             1 WOCHE GRATIS
           </Link>
+
+          <div className="mt-6 border-t border-border pt-4">
+            <LanguageSwitcher currentLang={currentLang} variant="full" />
+          </div>
         </div>
       </aside>
     </>

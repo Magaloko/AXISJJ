@@ -5,7 +5,7 @@ import { NavBar } from '../NavBar'
 
 describe('NavBar', () => {
   it('renders a link with the logo image', () => {
-    render(<NavBar />)
+    render(<NavBar currentLang="de" />)
     // Logo link goes to homepage
     const logoLink = screen.getByRole('link', { name: /axis jiu jitsu/i })
     expect(logoLink).toBeInTheDocument()
@@ -13,13 +13,13 @@ describe('NavBar', () => {
   })
 
   it('renders trial CTA link', () => {
-    render(<NavBar />)
+    render(<NavBar currentLang="de" />)
     const cta = screen.getByRole('link', { name: /1 woche gratis/i })
     expect(cta).toHaveAttribute('href', '/trial')
   })
 
   it('toggles mobile menu on hamburger click', async () => {
-    render(<NavBar />)
+    render(<NavBar currentLang="de" />)
     // Mobile menu links hidden initially
     const trainingsplanLinks = screen.getAllByText('Trainingsplan')
     // At least one exists (desktop nav)

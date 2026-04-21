@@ -7,7 +7,7 @@ export interface Database {
         Row: {
           id: string; full_name: string; email: string; phone: string | null
           date_of_birth: string | null; role: 'member' | 'coach' | 'owner'
-          avatar_url: string | null; language: 'de' | 'en'; created_at: string
+          avatar_url: string | null; language: 'de' | 'en' | 'ru'; created_at: string
         }
         Insert: Omit<Database['public']['Tables']['profiles']['Row'], 'created_at'>
         Update: Partial<Database['public']['Tables']['profiles']['Insert']>

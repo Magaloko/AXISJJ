@@ -7,6 +7,7 @@ import { LayoutDashboard, Calendar, Award, BookOpen, Settings, LogOut, Graduatio
 import { cn } from '@/lib/utils/cn'
 import { translations, type Lang } from '@/lib/i18n'
 import { createClient } from '@/lib/supabase/client'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 
 interface NavItem {
   href: string
@@ -81,7 +82,8 @@ export function MemberNav({ userName, lang = 'de' }: Props) {
           })}
         </nav>
 
-        <div className="border-t border-border p-4">
+        <div className="border-t border-border p-4 space-y-2">
+          <LanguageSwitcher currentLang={lang} variant="full" />
           <button
             onClick={handleLogout}
             className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"

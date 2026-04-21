@@ -10,6 +10,8 @@ import {
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { createClient } from '@/lib/supabase/client'
+import { LanguageSwitcher } from '@/components/LanguageSwitcher'
+import type { Lang } from '@/lib/i18n'
 
 type Role = 'coach' | 'owner'
 
@@ -107,9 +109,10 @@ interface SidebarContentProps {
   userName: string
   pathname: string
   onLogout: () => void
+  currentLang: Lang
 }
 
-function SidebarContent({ role, roleBadge, userName, pathname, onLogout }: SidebarContentProps) {
+function SidebarContent({ role, roleBadge, userName, pathname, onLogout, currentLang }: SidebarContentProps) {
   function isActive(href: string) {
     return pathname === href || pathname.startsWith(href + '/')
   }
@@ -152,7 +155,8 @@ function SidebarContent({ role, roleBadge, userName, pathname, onLogout }: Sideb
         )}
       </nav>
 
-      <div className="border-t border-border p-3">
+      <div className="border-t border-border p-3 space-y-2">
+        <LanguageSwitcher currentLang={currentLang} variant="full" />
         <button
           onClick={onLogout}
           className="flex w-full items-center gap-3 px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -214,9 +218,10 @@ interface MoreSheetProps {
   pathname: string
   onClose: () => void
   onLogout: () => void
+  currentLang: Lang
 }
 
-function MoreSheet({ pathname, onClose, onLogout }: MoreSheetProps) {
+function MoreSheet({ pathname, onClose, onLogout, currentLang }: MoreSheetProps) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
@@ -255,7 +260,8 @@ function MoreSheet({ pathname, onClose, onLogout }: MoreSheetProps) {
             </Link>
           ))}
         </nav>
-        <div className="border-t border-border p-3">
+        <div className="border-t border-border p-3 space-y-2">
+          <LanguageSwitcher currentLang={currentLang} variant="full" />
           <button
             onClick={onLogout}
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -274,9 +280,10 @@ function MoreSheet({ pathname, onClose, onLogout }: MoreSheetProps) {
 interface Props {
   role: Role
   userName: string
+  currentLang: Lang
 }
 
-export function AdminNav({ role, userName }: Props) {
+export function AdminNav({ role, userName, currentLang }: Props) {
   const pathname = usePathname()
   const router = useRouter()
   const [moreOpen, setMoreOpen] = useState(false)
@@ -299,6 +306,7 @@ export function AdminNav({ role, userName }: Props) {
           userName={userName}
           pathname={pathname}
           onLogout={handleLogout}
+          currentLang={currentLang}
         />
       </aside>
 
@@ -315,6 +323,7 @@ export function AdminNav({ role, userName }: Props) {
           pathname={pathname}
           onClose={() => setMoreOpen(false)}
           onLogout={handleLogout}
+          currentLang={currentLang}
         />
       )}
     </>
