@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react'
+import { Award } from 'lucide-react'
 import { translations, type Lang } from '@/lib/i18n'
 
 interface StatsBarProps {
@@ -6,10 +8,10 @@ interface StatsBarProps {
 
 export function StatsBar({ lang }: StatsBarProps) {
   const ts = translations[lang].public.stats
-  const STATS = [
+  const STATS: { value: string | ReactNode; label: string; sublabel: string }[] = [
     { value: '10+',  label: ts.classesPerWeek,  sublabel: ts.classesPerWeekSub },
     { value: 'GI',   label: ts.bothStyles,       sublabel: ts.bothStylesSub },
-    { value: '⬛ BB', label: ts.blackBeltCoach,  sublabel: ts.blackBeltCoachSub },
+    { value: <Award size={28} strokeWidth={2} />, label: ts.blackBeltCoach, sublabel: ts.blackBeltCoachSub },
     { value: 'KIDS', label: ts.kidsWelcome,      sublabel: ts.kidsWelcomeSub },
   ]
 
@@ -19,8 +21,8 @@ export function StatsBar({ lang }: StatsBarProps) {
         {STATS.map(stat => (
           <div key={stat.label} className="flex flex-col items-center px-4 py-4 text-center">
             <span
-              className="mb-1 text-2xl font-black text-primary sm:text-3xl"
-              style={{ fontFamily: 'var(--font-mono)' }}
+              className="mb-1 flex items-center justify-center text-2xl font-black text-primary sm:text-3xl"
+              style={{ fontFamily: 'var(--font-mono)', minHeight: '2rem' }}
             >
               {stat.value}
             </span>
