@@ -4,6 +4,7 @@ import { getGymSettings } from '@/lib/gym-settings'
 import { OpeningHoursDisplay } from './OpeningHoursDisplay'
 import { ContactCard } from './ContactCard'
 import { translations, type Lang } from '@/lib/i18n'
+import { TextHoverEffect } from '@/components/ui/hover-footer'
 
 interface FooterProps {
   lang: Lang
@@ -16,14 +17,14 @@ export async function Footer({ lang }: FooterProps) {
   const tn = translations[lang].public.navbar
 
   return (
-    <footer className="border-t border-border bg-card py-12">
+    <footer className="border-t border-border bg-card py-12 relative overflow-hidden">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
 
         <div className="grid gap-10 sm:grid-cols-3">
 
           <div>
             <Image
-              src="/images/logo.jpg"
+              src="/images/logo.png"
               alt="AXIS JIU JITSU"
               width={56}
               height={56}
@@ -89,6 +90,10 @@ export async function Footer({ lang }: FooterProps) {
           </div>
         </div>
 
+      </div>
+
+      <div className="lg:flex hidden h-48 -mb-16 relative z-10">
+        <TextHoverEffect text="AXIS" />
       </div>
     </footer>
   )
