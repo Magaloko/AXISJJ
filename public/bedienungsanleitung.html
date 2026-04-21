@@ -97,25 +97,11 @@
     opacity: 0;
     animation: fadeUp 0.8s 1s forwards, bounce 2s 1.5s infinite;
   }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes bounce {
-    0%,100% { transform: translateY(0); }
-    50%     { transform: translateY(8px); }
-  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
 
-  /* Sections */
-  section.role {
-    position: relative;
-    padding: 5rem 1.5rem;
-    z-index: 1;
-  }
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-  }
+  section.role { position: relative; padding: 5rem 1.5rem; z-index: 1; }
+  .container { max-width: 900px; margin: 0 auto; }
   .role-badge {
     display: inline-block;
     padding: 0.4rem 1rem;
@@ -130,27 +116,10 @@
   .badge-coach  { background: rgba(16, 185, 129, 0.15); color: var(--coach);  border: 1px solid rgba(16, 185, 129, 0.3); }
   .badge-owner  { background: rgba(245, 158, 11, 0.15); color: var(--owner);  border: 1px solid rgba(245, 158, 11, 0.3); }
 
-  h2 {
-    font-size: clamp(2rem, 5vw, 3.5rem);
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    margin-bottom: 2rem;
-    line-height: 1.1;
-  }
-  h3 {
-    font-size: 1.3rem;
-    font-weight: 700;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-  }
+  h2 { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; letter-spacing: -0.02em; margin-bottom: 2rem; line-height: 1.1; }
+  h3 { font-size: 1.3rem; font-weight: 700; margin-top: 2rem; margin-bottom: 1rem; }
 
-  /* Grid of cards */
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 1rem;
-    margin-top: 2rem;
-  }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; margin-top: 2rem; }
   .card {
     background: var(--card);
     border: 1px solid var(--border);
@@ -160,15 +129,8 @@
     opacity: 0;
     transform: translateY(20px);
   }
-  .card.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  .card:hover {
-    transform: translateY(-4px);
-    border-color: var(--primary);
-    box-shadow: 0 10px 40px rgba(239, 68, 68, 0.1);
-  }
+  .card.visible { opacity: 1; transform: translateY(0); }
+  .card:hover { transform: translateY(-4px); border-color: var(--primary); box-shadow: 0 10px 40px rgba(239, 68, 68, 0.1); }
   .card-icon {
     display: inline-flex;
     align-items: center;
@@ -179,22 +141,10 @@
     margin-bottom: 1rem;
     background: var(--primary-soft);
   }
-  .card h4 {
-    font-size: 1rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-  }
-  .card p {
-    font-size: 0.9rem;
-    color: var(--muted);
-    line-height: 1.5;
-  }
+  .card h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .card p { font-size: 0.9rem; color: var(--muted); line-height: 1.5; }
 
-  /* Workflow steps */
-  .workflow {
-    margin-top: 2rem;
-    position: relative;
-  }
+  .workflow { margin-top: 2rem; position: relative; }
   .workflow::before {
     content: '';
     position: absolute;
@@ -212,10 +162,7 @@
     transform: translateX(-20px);
     transition: all 0.6s ease;
   }
-  .step.visible {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  .step.visible { opacity: 1; transform: translateX(0); }
   .step-num {
     position: absolute;
     left: 0;
@@ -231,27 +178,14 @@
     font-size: 1rem;
     box-shadow: 0 0 20px var(--primary-soft);
   }
-  .step h4 {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 0.4rem;
-  }
-  .step p {
-    color: var(--muted);
-    font-size: 0.95rem;
-  }
+  .step h4 { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .step p { color: var(--muted); font-size: 0.95rem; }
 
-  /* Role split divider */
-  .divider {
-    position: relative;
-    text-align: center;
-    margin: 5rem 0 3rem;
-  }
+  .divider { position: relative; text-align: center; margin: 5rem 0 3rem; }
   .divider::before {
     content: '';
     position: absolute;
-    top: 50%;
-    left: 0; right: 0;
+    top: 50%; left: 0; right: 0;
     height: 1px;
     background: linear-gradient(to right, transparent, var(--border), transparent);
   }
@@ -266,7 +200,7 @@
     text-transform: uppercase;
   }
 
-  /* Nav */
+  /* Jump nav */
   .jump-nav {
     position: fixed;
     top: 1rem;
@@ -289,12 +223,36 @@
     color: var(--muted);
     transition: all 0.2s;
   }
-  .jump-nav a:hover {
-    color: var(--fg);
-    background: var(--card);
-  }
+  .jump-nav a:hover { color: var(--fg); background: var(--card); }
 
-  /* Footer */
+  /* Lang switcher */
+  .lang-switcher {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    display: flex;
+    gap: 0.25rem;
+    z-index: 10;
+    background: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(12px);
+    padding: 0.4rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+  }
+  .lang-switcher button {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    font-size: 1rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: all 0.2s;
+    line-height: 1;
+  }
+  .lang-switcher button:hover { color: var(--fg); background: var(--card); }
+  .lang-switcher button.active { background: var(--primary); color: white; }
+
   footer {
     text-align: center;
     padding: 3rem 1rem;
@@ -304,17 +262,16 @@
     margin-top: 3rem;
   }
 
-  /* Mobile adjustments */
   @media (max-width: 600px) {
     section.role { padding: 3rem 1rem; }
     .jump-nav { bottom: 1rem; top: auto; right: 0.5rem; left: 0.5rem; justify-content: center; }
     .jump-nav a { font-size: 0.65rem; padding: 0.3rem 0.6rem; }
+    .lang-switcher { top: 0.5rem; left: 50%; transform: translateX(-50%); }
     .step { padding-left: 3rem; }
     .workflow::before { left: 15px; }
     .step-num { width: 32px; height: 32px; font-size: 0.85rem; }
   }
 
-  /* Motion preferences */
   @media (prefers-reduced-motion: reduce) {
     * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
     .bg-orb { animation: none !important; }
@@ -327,268 +284,379 @@
 <div class="bg-orb o2"></div>
 <div class="bg-orb o3"></div>
 
+<div class="lang-switcher" role="toolbar" aria-label="Language">
+  <button data-lang="de" aria-label="Deutsch" title="Deutsch">🇩🇪</button>
+  <button data-lang="en" aria-label="English" title="English">🇬🇧</button>
+  <button data-lang="ru" aria-label="Русский" title="Русский">🇷🇺</button>
+</div>
+
 <nav class="jump-nav">
-  <a href="#hero">Start</a>
-  <a href="#mitglied">Mitglied</a>
-  <a href="#coach">Coach</a>
-  <a href="#owner">Owner</a>
-  <a href="#workflows">Abläufe</a>
+  <a href="#hero" data-i18n="nav.start">Start</a>
+  <a href="#mitglied" data-i18n="nav.member">Mitglied</a>
+  <a href="#coach" data-i18n="nav.coach">Coach</a>
+  <a href="#owner" data-i18n="nav.owner">Owner</a>
+  <a href="#workflows" data-i18n="nav.flows">Abläufe</a>
 </nav>
 
 <section class="hero" id="hero">
-  <p class="hero-eyebrow">AXIS Jiu-Jitsu · Vienna</p>
+  <p class="hero-eyebrow" data-i18n="hero.eyebrow">AXIS Jiu-Jitsu · Vienna</p>
   <h1>
-    Deine <span class="accent">Plattform</span><br/>
-    auf einen Blick
+    <span data-i18n="hero.line1">Deine</span>
+    <span class="accent" data-i18n="hero.accent">Plattform</span><br/>
+    <span data-i18n="hero.line2">auf einen Blick</span>
   </h1>
-  <p>Alles was du wissen musst — egal ob du Mitglied, Coach oder Inhaber bist. Einfach. Klar. Mobil.</p>
-  <p class="scroll-down">↓ Scroll zum Start</p>
+  <p data-i18n="hero.subtitle">Alles was du wissen musst — egal ob du Mitglied, Coach oder Inhaber bist. Einfach. Klar. Mobil.</p>
+  <p class="scroll-down" data-i18n="hero.scroll">↓ Scroll zum Start</p>
 </section>
 
-<!-- MITGLIED -->
 <section class="role" id="mitglied">
   <div class="container">
-    <span class="role-badge badge-member">· Rolle: Mitglied ·</span>
-    <h2>Dein Training, dein Fortschritt</h2>
-
+    <span class="role-badge badge-member" data-i18n="member.badge">· Rolle: Mitglied ·</span>
+    <h2 data-i18n="member.heading">Dein Training, dein Fortschritt</h2>
     <div class="grid">
       <div class="card anim">
         <div class="card-icon">📅</div>
-        <h4>Klassen buchen</h4>
-        <p>Wochenplan ansehen, mit einem Klick buchen. Bei voller Klasse kommst du automatisch auf die Warteliste.</p>
+        <h4 data-i18n="member.card1.title">Klassen buchen</h4>
+        <p data-i18n="member.card1.text">Wochenplan ansehen, mit einem Klick buchen. Bei voller Klasse kommst du automatisch auf die Warteliste.</p>
       </div>
       <div class="card anim">
         <div class="card-icon">📱</div>
-        <h4>Check-In mit QR</h4>
-        <p>Zeig deinen QR-Code am Handy, der Coach scannt — fertig. Du bekommst automatisch XP.</p>
+        <h4 data-i18n="member.card2.title">Check-In mit QR</h4>
+        <p data-i18n="member.card2.text">Zeig deinen QR-Code am Handy, der Coach scannt — fertig. Du bekommst automatisch XP.</p>
       </div>
       <div class="card anim">
         <div class="card-icon">🏆</div>
-        <h4>Turniere</h4>
-        <p>Anstehende Turniere durchsehen, mit Gewichtsklasse und Gi/No-Gi anmelden. Dein Status wird dir gezeigt.</p>
+        <h4 data-i18n="member.card3.title">Turniere</h4>
+        <p data-i18n="member.card3.text">Anstehende Turniere durchsehen, mit Gewichtsklasse und Gi/No-Gi anmelden. Dein Status wird dir gezeigt.</p>
       </div>
       <div class="card anim">
         <div class="card-icon">🥋</div>
-        <h4>Gurt-Fortschritt</h4>
-        <p>Sieh wo du stehst und was dir bis zum nächsten Gurt fehlt — Zeit und Trainings.</p>
+        <h4 data-i18n="member.card4.title">Gurt-Fortschritt</h4>
+        <p data-i18n="member.card4.text">Sieh wo du stehst und was dir bis zum nächsten Gurt fehlt — Zeit und Trainings.</p>
       </div>
       <div class="card anim">
         <div class="card-icon">⚡</div>
-        <h4>XP & Badges</h4>
-        <p>Sammle XP durch Training, Quiz und Regel-Spiel. Vergleich dich auf dem Leaderboard.</p>
+        <h4 data-i18n="member.card5.title">XP & Badges</h4>
+        <p data-i18n="member.card5.text">Sammle XP durch Training, Quiz und Regel-Spiel. Vergleich dich auf dem Leaderboard.</p>
       </div>
       <div class="card anim">
         <div class="card-icon">📊</div>
-        <h4>Training-Tagebuch</h4>
-        <p>Logge jede Session mit Stimmung und Notizen. Deine Charts zeigen dir den Fortschritt.</p>
+        <h4 data-i18n="member.card6.title">Training-Tagebuch</h4>
+        <p data-i18n="member.card6.text">Logge jede Session mit Stimmung und Notizen. Deine Charts zeigen dir den Fortschritt.</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- COACH -->
 <section class="role" id="coach">
   <div class="container">
-    <span class="role-badge badge-coach">· Rolle: Coach ·</span>
-    <h2>Unterrichten, organisieren, Turniere schaffen</h2>
-
+    <span class="role-badge badge-coach" data-i18n="coach.badge">· Rolle: Coach ·</span>
+    <h2 data-i18n="coach.heading">Unterrichten, organisieren, Turniere schaffen</h2>
     <div class="grid">
-      <div class="card anim">
-        <div class="card-icon">🎯</div>
-        <h4>Check-In</h4>
-        <p>QR scannen oder manuell suchen. Jeder Check-In ist an die aktuelle Session verknüpft.</p>
-      </div>
-      <div class="card anim">
-        <div class="card-icon">📋</div>
-        <h4>Klassen verwalten</h4>
-        <p>Sessions erstellen (einmalig oder wiederkehrend), Teilnehmer sehen, Notizen hinterlegen.</p>
-      </div>
-      <div class="card anim">
-        <div class="card-icon">🏅</div>
-        <h4>Turniere erstellen</h4>
-        <p>Intern oder extern — mit Datum, Ort, Anmeldeschluss. Owner genehmigt, dann ist es live.</p>
-      </div>
-      <div class="card anim">
-        <div class="card-icon">✓</div>
-        <h4>Anmeldungen prüfen</h4>
-        <p>Mitglieder melden sich für dein Turnier an — du bestätigst oder lehnst ab.</p>
-      </div>
-      <div class="card anim">
-        <div class="card-icon">📝</div>
-        <h4>Coach-Notizen</h4>
-        <p>Plan vor der Session, Reflexion danach. Privat und nur für Coaches sichtbar.</p>
-      </div>
-      <div class="card anim">
-        <div class="card-icon">👥</div>
-        <h4>Meine Schüler</h4>
-        <p>Wer hat bei dir in den letzten 30 Tagen trainiert? Übersicht im Dashboard.</p>
-      </div>
+      <div class="card anim"><div class="card-icon">🎯</div>
+        <h4 data-i18n="coach.card1.title">Check-In</h4>
+        <p data-i18n="coach.card1.text">QR scannen oder manuell suchen. Jeder Check-In ist an die aktuelle Session verknüpft.</p></div>
+      <div class="card anim"><div class="card-icon">📋</div>
+        <h4 data-i18n="coach.card2.title">Klassen verwalten</h4>
+        <p data-i18n="coach.card2.text">Sessions erstellen (einmalig oder wiederkehrend), Teilnehmer sehen, Notizen hinterlegen.</p></div>
+      <div class="card anim"><div class="card-icon">🏅</div>
+        <h4 data-i18n="coach.card3.title">Turniere erstellen</h4>
+        <p data-i18n="coach.card3.text">Intern oder extern — mit Datum, Ort, Anmeldeschluss. Owner genehmigt, dann ist es live.</p></div>
+      <div class="card anim"><div class="card-icon">✓</div>
+        <h4 data-i18n="coach.card4.title">Anmeldungen prüfen</h4>
+        <p data-i18n="coach.card4.text">Mitglieder melden sich für dein Turnier an — du bestätigst oder lehnst ab.</p></div>
+      <div class="card anim"><div class="card-icon">📝</div>
+        <h4 data-i18n="coach.card5.title">Coach-Notizen</h4>
+        <p data-i18n="coach.card5.text">Plan vor der Session, Reflexion danach. Privat und nur für Coaches sichtbar.</p></div>
+      <div class="card anim"><div class="card-icon">👥</div>
+        <h4 data-i18n="coach.card6.title">Meine Schüler</h4>
+        <p data-i18n="coach.card6.text">Wer hat bei dir in den letzten 30 Tagen trainiert? Übersicht im Dashboard.</p></div>
     </div>
   </div>
 </section>
 
-<!-- OWNER -->
 <section class="role" id="owner">
   <div class="container">
-    <span class="role-badge badge-owner">· Rolle: Owner / Head Coach ·</span>
-    <h2>Volle Kontrolle, klare Übersicht</h2>
-    <p style="color: var(--muted); margin-bottom: 2rem;">Als Owner bist du gleichzeitig Head Coach — dein Dashboard zeigt die Trainer-Ansicht. Business-Metriken findest du unter <strong style="color: var(--fg);">Berichte</strong>.</p>
-
+    <span class="role-badge badge-owner" data-i18n="owner.badge">· Rolle: Owner / Head Coach ·</span>
+    <h2 data-i18n="owner.heading">Volle Kontrolle, klare Übersicht</h2>
+    <p style="color: var(--muted); margin-bottom: 2rem;" data-i18n="owner.subtitle">Als Owner bist du gleichzeitig Head Coach — dein Dashboard zeigt die Trainer-Ansicht. Business-Metriken findest du unter Berichte.</p>
     <div class="grid">
-      <div class="card anim">
-        <div class="card-icon">👤</div>
-        <h4>Mitgliederverwaltung</h4>
-        <p>Profile bearbeiten, Abos verwalten, Rollen zuweisen (Mitglied ↔ Coach).</p>
-      </div>
-      <div class="card anim">
-        <div class="card-icon">💼</div>
-        <h4>Coach-Profil pflegen</h4>
-        <p>Für jeden Coach: Bio, Spezialisierung, Erfolge, Reihenfolge auf der Landing Page.</p>
-      </div>
-      <div class="card anim">
-        <div class="card-icon">✓</div>
-        <h4>Turniere genehmigen</h4>
-        <p>Coaches erstellen Turniere — du gibst das Go. Deine Turniere sind direkt live.</p>
-      </div>
-      <div class="card anim">
-        <div class="card-icon">📈</div>
-        <h4>Business-Berichte</h4>
-        <p>Umsatz, Konversionsrate, Auslastung, Top-Klassen, inaktive Mitglieder — alles in Berichte.</p>
-      </div>
-      <div class="card anim">
-        <div class="card-icon">🎨</div>
-        <h4>Content</h4>
-        <p>Blog, Hero-Slider, Klassentyp-Bilder, Curriculum — die Landing Page in deiner Hand.</p>
-      </div>
-      <div class="card anim">
-        <div class="card-icon">⚙️</div>
-        <h4>Einstellungen</h4>
-        <p>Preise, Klassentypen (mit Bildern), Gym-Info, Öffnungszeiten, Richtlinien.</p>
-      </div>
-      <div class="card anim">
-        <div class="card-icon">📊</div>
-        <h4>Leads / CRM</h4>
-        <p>Interessenten-Pipeline: Neu → Kontaktiert → Konvertiert → Verloren.</p>
-      </div>
-      <div class="card anim">
-        <div class="card-icon">🔒</div>
-        <h4>Audit-Log</h4>
-        <p>Jede administrative Aktion wird protokolliert — wer, wann, was.</p>
-      </div>
+      <div class="card anim"><div class="card-icon">👤</div>
+        <h4 data-i18n="owner.card1.title">Mitgliederverwaltung</h4>
+        <p data-i18n="owner.card1.text">Profile bearbeiten, Abos verwalten, Rollen zuweisen (Mitglied ↔ Coach).</p></div>
+      <div class="card anim"><div class="card-icon">💼</div>
+        <h4 data-i18n="owner.card2.title">Coach-Profil pflegen</h4>
+        <p data-i18n="owner.card2.text">Für jeden Coach: Bio, Spezialisierung, Erfolge, Reihenfolge auf der Landing Page.</p></div>
+      <div class="card anim"><div class="card-icon">✓</div>
+        <h4 data-i18n="owner.card3.title">Turniere genehmigen</h4>
+        <p data-i18n="owner.card3.text">Coaches erstellen Turniere — du gibst das Go. Deine Turniere sind direkt live.</p></div>
+      <div class="card anim"><div class="card-icon">📈</div>
+        <h4 data-i18n="owner.card4.title">Business-Berichte</h4>
+        <p data-i18n="owner.card4.text">Umsatz, Konversionsrate, Auslastung, Top-Klassen, inaktive Mitglieder — alles in Berichte.</p></div>
+      <div class="card anim"><div class="card-icon">🎨</div>
+        <h4 data-i18n="owner.card5.title">Content</h4>
+        <p data-i18n="owner.card5.text">Blog, Hero-Slider, Klassentyp-Bilder, Curriculum — die Landing Page in deiner Hand.</p></div>
+      <div class="card anim"><div class="card-icon">⚙️</div>
+        <h4 data-i18n="owner.card6.title">Einstellungen</h4>
+        <p data-i18n="owner.card6.text">Preise, Klassentypen (mit Bildern), Gym-Info, Öffnungszeiten, Richtlinien.</p></div>
+      <div class="card anim"><div class="card-icon">📊</div>
+        <h4 data-i18n="owner.card7.title">Leads / CRM</h4>
+        <p data-i18n="owner.card7.text">Interessenten-Pipeline: Neu → Kontaktiert → Konvertiert → Verloren.</p></div>
+      <div class="card anim"><div class="card-icon">🔒</div>
+        <h4 data-i18n="owner.card8.title">Audit-Log</h4>
+        <p data-i18n="owner.card8.text">Jede administrative Aktion wird protokolliert — wer, wann, was.</p></div>
     </div>
   </div>
 </section>
 
-<!-- WORKFLOWS -->
 <section class="role" id="workflows">
   <div class="container">
-    <span class="role-badge badge-owner">· Abläufe ·</span>
-    <h2>Typische Workflows</h2>
+    <span class="role-badge badge-owner" data-i18n="flows.badge">· Abläufe ·</span>
+    <h2 data-i18n="flows.heading">Typische Workflows</h2>
 
-    <h3 style="margin-top: 3rem;">🏅 Ein Turnier von A bis Z</h3>
+    <h3 style="margin-top: 3rem;" data-i18n="flows.a.heading">🏅 Ein Turnier von A bis Z</h3>
     <div class="workflow">
-      <div class="step anim">
-        <div class="step-num">1</div>
-        <h4>Coach erstellt Turnier</h4>
-        <p>Turniere → Neues Turnier → Name, Datum, Ort, Typ. Status: Ausstehend.</p>
-      </div>
-      <div class="step anim">
-        <div class="step-num">2</div>
-        <h4>Owner genehmigt</h4>
-        <p>Owner öffnet Turniere-Liste → ✓ Genehmigen. Status: Genehmigt.</p>
-      </div>
-      <div class="step anim">
-        <div class="step-num">3</div>
-        <h4>Landing Page + Mitglieder-Bereich</h4>
-        <p>Turnier erscheint automatisch auf der öffentlichen Seite und im Mitglieder-Dashboard.</p>
-      </div>
-      <div class="step anim">
-        <div class="step-num">4</div>
-        <h4>Mitglieder melden sich an</h4>
-        <p>Gewichtsklasse, Gi/No-Gi, Notizen → Senden. Status: Ausstehend.</p>
-      </div>
-      <div class="step anim">
-        <div class="step-num">5</div>
-        <h4>Coach prüft Anmeldungen</h4>
-        <p>Bestätigen oder Ablehnen pro Teilnehmer. Bestätigte erscheinen im öffentlichen Teilnehmer-Slider.</p>
-      </div>
+      <div class="step anim"><div class="step-num">1</div>
+        <h4 data-i18n="flows.a.s1.h">Coach erstellt Turnier</h4>
+        <p data-i18n="flows.a.s1.t">Turniere → Neues Turnier → Name, Datum, Ort, Typ. Status: Ausstehend.</p></div>
+      <div class="step anim"><div class="step-num">2</div>
+        <h4 data-i18n="flows.a.s2.h">Owner genehmigt</h4>
+        <p data-i18n="flows.a.s2.t">Owner öffnet Turniere-Liste → ✓ Genehmigen. Status: Genehmigt.</p></div>
+      <div class="step anim"><div class="step-num">3</div>
+        <h4 data-i18n="flows.a.s3.h">Landing Page + Mitglieder-Bereich</h4>
+        <p data-i18n="flows.a.s3.t">Turnier erscheint automatisch auf der öffentlichen Seite und im Mitglieder-Dashboard.</p></div>
+      <div class="step anim"><div class="step-num">4</div>
+        <h4 data-i18n="flows.a.s4.h">Mitglieder melden sich an</h4>
+        <p data-i18n="flows.a.s4.t">Gewichtsklasse, Gi/No-Gi, Notizen → Senden. Status: Ausstehend.</p></div>
+      <div class="step anim"><div class="step-num">5</div>
+        <h4 data-i18n="flows.a.s5.h">Coach prüft Anmeldungen</h4>
+        <p data-i18n="flows.a.s5.t">Bestätigen oder Ablehnen pro Teilnehmer. Bestätigte erscheinen im öffentlichen Teilnehmer-Slider.</p></div>
     </div>
 
-    <div class="divider"><span>Und mehr</span></div>
+    <div class="divider"><span data-i18n="flows.more">Und mehr</span></div>
 
-    <h3>🎓 Mitglied → Coach befördern</h3>
+    <h3 data-i18n="flows.b.heading">🎓 Mitglied → Coach befördern</h3>
     <div class="workflow">
-      <div class="step anim">
-        <div class="step-num">1</div>
-        <h4>Rolle ändern</h4>
-        <p>Einstellungen → Rollen → Mitglied auswählen → Coach zuweisen.</p>
-      </div>
-      <div class="step anim">
-        <div class="step-num">2</div>
-        <h4>Coach-Profil füllen</h4>
-        <p>Mitglieder → Profil öffnen → Website-Profil: Bio, Spezialisierung, Erfolge.</p>
-      </div>
-      <div class="step anim">
-        <div class="step-num">3</div>
-        <h4>Sichtbar schalten</h4>
-        <p>"Auf Landing Page anzeigen" aktivieren → Coach erscheint im öffentlichen Slider.</p>
-      </div>
+      <div class="step anim"><div class="step-num">1</div>
+        <h4 data-i18n="flows.b.s1.h">Rolle ändern</h4>
+        <p data-i18n="flows.b.s1.t">Einstellungen → Rollen → Mitglied auswählen → Coach zuweisen.</p></div>
+      <div class="step anim"><div class="step-num">2</div>
+        <h4 data-i18n="flows.b.s2.h">Coach-Profil füllen</h4>
+        <p data-i18n="flows.b.s2.t">Mitglieder → Profil öffnen → Website-Profil: Bio, Spezialisierung, Erfolge.</p></div>
+      <div class="step anim"><div class="step-num">3</div>
+        <h4 data-i18n="flows.b.s3.h">Sichtbar schalten</h4>
+        <p data-i18n="flows.b.s3.t">"Auf Landing Page anzeigen" aktivieren → Coach erscheint im öffentlichen Slider.</p></div>
     </div>
 
-    <h3 style="margin-top: 3rem;">📅 Neue Klasse anlegen</h3>
+    <h3 style="margin-top: 3rem;" data-i18n="flows.c.heading">📅 Neue Klasse anlegen</h3>
     <div class="workflow">
-      <div class="step anim">
-        <div class="step-num">1</div>
-        <h4>Klassentyp erstellen (einmal)</h4>
-        <p>Einstellungen → Klassentypen → Neu. Name, Level, Bild hochladen oder URL einfügen.</p>
-      </div>
-      <div class="step anim">
-        <div class="step-num">2</div>
-        <h4>Session planen</h4>
-        <p>Training → Neue Session → Klassentyp wählen, Datum, Zeit, Kapazität, Coach.</p>
-      </div>
-      <div class="step anim">
-        <div class="step-num">3</div>
-        <h4>Wiederkehrend (optional)</h4>
-        <p>Weekly Recurring markieren — Sessions werden für kommende Wochen automatisch angelegt.</p>
-      </div>
+      <div class="step anim"><div class="step-num">1</div>
+        <h4 data-i18n="flows.c.s1.h">Klassentyp erstellen (einmal)</h4>
+        <p data-i18n="flows.c.s1.t">Einstellungen → Klassentypen → Neu. Name, Level, Bild hochladen oder URL einfügen.</p></div>
+      <div class="step anim"><div class="step-num">2</div>
+        <h4 data-i18n="flows.c.s2.h">Session planen</h4>
+        <p data-i18n="flows.c.s2.t">Training → Neue Session → Klassentyp wählen, Datum, Zeit, Kapazität, Coach.</p></div>
+      <div class="step anim"><div class="step-num">3</div>
+        <h4 data-i18n="flows.c.s3.h">Wiederkehrend (optional)</h4>
+        <p data-i18n="flows.c.s3.t">Weekly Recurring markieren — Sessions werden für kommende Wochen automatisch angelegt.</p></div>
     </div>
   </div>
 </section>
 
 <footer>
   <p><strong>AXIS JJ · Wien</strong></p>
-  <p style="margin-top: 0.5rem;">Detaillierte Anleitung: <a href="/docs/manual/README.md" style="color: var(--primary);">docs/manual/</a></p>
+  <p style="margin-top: 0.5rem;" data-i18n="footer.text">Detaillierte Anleitung: <a href="/docs/manual/README.md" style="color: var(--primary);">docs/manual/</a></p>
 </footer>
 
 <script>
-  // Intersection observer for card animations
-  const animItems = document.querySelectorAll('.anim');
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((entry, i) => {
-      if (entry.isIntersecting) {
-        setTimeout(() => entry.target.classList.add('visible'), i * 60);
-        io.unobserve(entry.target);
-      }
-    });
-  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-  animItems.forEach(el => io.observe(el));
+const I18N = {
+  de: {
+    'nav.start':'Start','nav.member':'Mitglied','nav.coach':'Coach','nav.owner':'Owner','nav.flows':'Abläufe',
+    'hero.eyebrow':'AXIS Jiu-Jitsu · Vienna','hero.line1':'Deine','hero.accent':'Plattform','hero.line2':'auf einen Blick',
+    'hero.subtitle':'Alles was du wissen musst — egal ob du Mitglied, Coach oder Inhaber bist. Einfach. Klar. Mobil.',
+    'hero.scroll':'↓ Scroll zum Start',
+    'member.badge':'· Rolle: Mitglied ·','member.heading':'Dein Training, dein Fortschritt',
+    'member.card1.title':'Klassen buchen','member.card1.text':'Wochenplan ansehen, mit einem Klick buchen. Bei voller Klasse kommst du automatisch auf die Warteliste.',
+    'member.card2.title':'Check-In mit QR','member.card2.text':'Zeig deinen QR-Code am Handy, der Coach scannt — fertig. Du bekommst automatisch XP.',
+    'member.card3.title':'Turniere','member.card3.text':'Anstehende Turniere durchsehen, mit Gewichtsklasse und Gi/No-Gi anmelden. Dein Status wird dir gezeigt.',
+    'member.card4.title':'Gurt-Fortschritt','member.card4.text':'Sieh wo du stehst und was dir bis zum nächsten Gurt fehlt — Zeit und Trainings.',
+    'member.card5.title':'XP & Badges','member.card5.text':'Sammle XP durch Training, Quiz und Regel-Spiel. Vergleich dich auf dem Leaderboard.',
+    'member.card6.title':'Training-Tagebuch','member.card6.text':'Logge jede Session mit Stimmung und Notizen. Deine Charts zeigen dir den Fortschritt.',
+    'coach.badge':'· Rolle: Coach ·','coach.heading':'Unterrichten, organisieren, Turniere schaffen',
+    'coach.card1.title':'Check-In','coach.card1.text':'QR scannen oder manuell suchen. Jeder Check-In ist an die aktuelle Session verknüpft.',
+    'coach.card2.title':'Klassen verwalten','coach.card2.text':'Sessions erstellen (einmalig oder wiederkehrend), Teilnehmer sehen, Notizen hinterlegen.',
+    'coach.card3.title':'Turniere erstellen','coach.card3.text':'Intern oder extern — mit Datum, Ort, Anmeldeschluss. Owner genehmigt, dann ist es live.',
+    'coach.card4.title':'Anmeldungen prüfen','coach.card4.text':'Mitglieder melden sich für dein Turnier an — du bestätigst oder lehnst ab.',
+    'coach.card5.title':'Coach-Notizen','coach.card5.text':'Plan vor der Session, Reflexion danach. Privat und nur für Coaches sichtbar.',
+    'coach.card6.title':'Meine Schüler','coach.card6.text':'Wer hat bei dir in den letzten 30 Tagen trainiert? Übersicht im Dashboard.',
+    'owner.badge':'· Rolle: Owner / Head Coach ·','owner.heading':'Volle Kontrolle, klare Übersicht',
+    'owner.subtitle':'Als Owner bist du gleichzeitig Head Coach — dein Dashboard zeigt die Trainer-Ansicht. Business-Metriken findest du unter Berichte.',
+    'owner.card1.title':'Mitgliederverwaltung','owner.card1.text':'Profile bearbeiten, Abos verwalten, Rollen zuweisen (Mitglied ↔ Coach).',
+    'owner.card2.title':'Coach-Profil pflegen','owner.card2.text':'Für jeden Coach: Bio, Spezialisierung, Erfolge, Reihenfolge auf der Landing Page.',
+    'owner.card3.title':'Turniere genehmigen','owner.card3.text':'Coaches erstellen Turniere — du gibst das Go. Deine Turniere sind direkt live.',
+    'owner.card4.title':'Business-Berichte','owner.card4.text':'Umsatz, Konversionsrate, Auslastung, Top-Klassen, inaktive Mitglieder — alles in Berichte.',
+    'owner.card5.title':'Content','owner.card5.text':'Blog, Hero-Slider, Klassentyp-Bilder, Curriculum — die Landing Page in deiner Hand.',
+    'owner.card6.title':'Einstellungen','owner.card6.text':'Preise, Klassentypen (mit Bildern), Gym-Info, Öffnungszeiten, Richtlinien.',
+    'owner.card7.title':'Leads / CRM','owner.card7.text':'Interessenten-Pipeline: Neu → Kontaktiert → Konvertiert → Verloren.',
+    'owner.card8.title':'Audit-Log','owner.card8.text':'Jede administrative Aktion wird protokolliert — wer, wann, was.',
+    'flows.badge':'· Abläufe ·','flows.heading':'Typische Workflows','flows.more':'Und mehr',
+    'flows.a.heading':'🏅 Ein Turnier von A bis Z',
+    'flows.a.s1.h':'Coach erstellt Turnier','flows.a.s1.t':'Turniere → Neues Turnier → Name, Datum, Ort, Typ. Status: Ausstehend.',
+    'flows.a.s2.h':'Owner genehmigt','flows.a.s2.t':'Owner öffnet Turniere-Liste → ✓ Genehmigen. Status: Genehmigt.',
+    'flows.a.s3.h':'Landing Page + Mitglieder-Bereich','flows.a.s3.t':'Turnier erscheint automatisch auf der öffentlichen Seite und im Mitglieder-Dashboard.',
+    'flows.a.s4.h':'Mitglieder melden sich an','flows.a.s4.t':'Gewichtsklasse, Gi/No-Gi, Notizen → Senden. Status: Ausstehend.',
+    'flows.a.s5.h':'Coach prüft Anmeldungen','flows.a.s5.t':'Bestätigen oder Ablehnen pro Teilnehmer. Bestätigte erscheinen im öffentlichen Teilnehmer-Slider.',
+    'flows.b.heading':'🎓 Mitglied → Coach befördern',
+    'flows.b.s1.h':'Rolle ändern','flows.b.s1.t':'Einstellungen → Rollen → Mitglied auswählen → Coach zuweisen.',
+    'flows.b.s2.h':'Coach-Profil füllen','flows.b.s2.t':'Mitglieder → Profil öffnen → Website-Profil: Bio, Spezialisierung, Erfolge.',
+    'flows.b.s3.h':'Sichtbar schalten','flows.b.s3.t':'"Auf Landing Page anzeigen" aktivieren → Coach erscheint im öffentlichen Slider.',
+    'flows.c.heading':'📅 Neue Klasse anlegen',
+    'flows.c.s1.h':'Klassentyp erstellen (einmal)','flows.c.s1.t':'Einstellungen → Klassentypen → Neu. Name, Level, Bild hochladen oder URL einfügen.',
+    'flows.c.s2.h':'Session planen','flows.c.s2.t':'Training → Neue Session → Klassentyp wählen, Datum, Zeit, Kapazität, Coach.',
+    'flows.c.s3.h':'Wiederkehrend (optional)','flows.c.s3.t':'Weekly Recurring markieren — Sessions werden für kommende Wochen automatisch angelegt.',
+    'footer.text':'Detaillierte Anleitung: <a href="/docs/manual/README.md" style="color: var(--primary);">docs/manual/</a>',
+  },
+  en: {
+    'nav.start':'Start','nav.member':'Member','nav.coach':'Coach','nav.owner':'Owner','nav.flows':'Workflows',
+    'hero.eyebrow':'AXIS Jiu-Jitsu · Vienna','hero.line1':'Your','hero.accent':'platform','hero.line2':'at a glance',
+    'hero.subtitle':"Everything you need to know — whether you're a member, coach, or owner. Simple. Clear. Mobile.",
+    'hero.scroll':'↓ Scroll to start',
+    'member.badge':'· Role: Member ·','member.heading':'Your training, your progress',
+    'member.card1.title':'Book classes','member.card1.text':'See the weekly schedule, book with one click. If a class is full, you automatically join the waitlist.',
+    'member.card2.title':'QR Check-In','member.card2.text':'Show your QR code on your phone, the coach scans — done. You automatically earn XP.',
+    'member.card3.title':'Tournaments','member.card3.text':'Browse upcoming tournaments, register with weight class and Gi/No-Gi. Your status is shown.',
+    'member.card4.title':'Belt progress','member.card4.text':'See where you stand and what you need for the next belt — time and trainings.',
+    'member.card5.title':'XP & Badges','member.card5.text':'Earn XP through training, quizzes, and the rule game. Compare yourself on the leaderboard.',
+    'member.card6.title':'Training log','member.card6.text':'Log every session with mood and notes. Your charts show your progress.',
+    'coach.badge':'· Role: Coach ·','coach.heading':'Teach, organize, build tournaments',
+    'coach.card1.title':'Check-In','coach.card1.text':'Scan QR or search manually. Each check-in is linked to the current session.',
+    'coach.card2.title':'Manage classes','coach.card2.text':'Create sessions (one-off or recurring), see attendees, leave notes.',
+    'coach.card3.title':'Create tournaments','coach.card3.text':"Internal or external — with date, location, registration deadline. Owner approves, then it's live.",
+    'coach.card4.title':'Review registrations','coach.card4.text':'Members sign up for your tournament — you confirm or deny.',
+    'coach.card5.title':'Coach notes','coach.card5.text':'Plan before the session, reflect after. Private, visible only to coaches.',
+    'coach.card6.title':'My students','coach.card6.text':"Who has trained with you in the last 30 days? Overview on the dashboard.",
+    'owner.badge':'· Role: Owner / Head Coach ·','owner.heading':'Full control, clear overview',
+    'owner.subtitle':'As owner you are also head coach — your dashboard shows the coach view. Business metrics are in Reports.',
+    'owner.card1.title':'Member management','owner.card1.text':'Edit profiles, manage subscriptions, assign roles (member ↔ coach).',
+    'owner.card2.title':'Coach profiles','owner.card2.text':'For each coach: bio, specialization, achievements, order on the landing page.',
+    'owner.card3.title':'Approve tournaments','owner.card3.text':'Coaches create tournaments — you give the go-ahead. Your tournaments go live directly.',
+    'owner.card4.title':'Business reports','owner.card4.text':'Revenue, conversion rate, utilization, top classes, inactive members — all in Reports.',
+    'owner.card5.title':'Content','owner.card5.text':'Blog, hero slider, class type images, curriculum — the landing page in your hands.',
+    'owner.card6.title':'Settings','owner.card6.text':'Pricing, class types (with images), gym info, opening hours, policies.',
+    'owner.card7.title':'Leads / CRM','owner.card7.text':'Lead pipeline: New → Contacted → Converted → Lost.',
+    'owner.card8.title':'Audit log','owner.card8.text':'Every admin action is logged — who, when, what.',
+    'flows.badge':'· Workflows ·','flows.heading':'Typical workflows','flows.more':'And more',
+    'flows.a.heading':'🏅 A tournament from A to Z',
+    'flows.a.s1.h':'Coach creates the tournament','flows.a.s1.t':'Tournaments → New → Name, date, location, type. Status: Pending.',
+    'flows.a.s2.h':'Owner approves','flows.a.s2.t':'Owner opens tournament list → ✓ Approve. Status: Approved.',
+    'flows.a.s3.h':'Landing page + member area','flows.a.s3.t':'Tournament appears automatically on the public site and in member dashboard.',
+    'flows.a.s4.h':'Members register','flows.a.s4.t':'Weight class, Gi/No-Gi, notes → Submit. Status: Pending.',
+    'flows.a.s5.h':'Coach reviews registrations','flows.a.s5.t':'Approve or deny per participant. Approved athletes appear in the public participant slider.',
+    'flows.b.heading':'🎓 Promote member → coach',
+    'flows.b.s1.h':'Change role','flows.b.s1.t':'Settings → Roles → select member → assign coach.',
+    'flows.b.s2.h':'Fill coach profile','flows.b.s2.t':'Members → open profile → Website profile: bio, specialization, achievements.',
+    'flows.b.s3.h':'Make visible','flows.b.s3.t':'Enable "Show on landing page" → coach appears in the public slider.',
+    'flows.c.heading':'📅 Add a new class',
+    'flows.c.s1.h':'Create class type (once)','flows.c.s1.t':'Settings → Class types → New. Name, level, upload image or paste URL.',
+    'flows.c.s2.h':'Plan a session','flows.c.s2.t':'Training → New session → choose type, date, time, capacity, coach.',
+    'flows.c.s3.h':'Recurring (optional)','flows.c.s3.t':'Mark as weekly recurring — sessions are auto-created for upcoming weeks.',
+    'footer.text':'Detailed manual: <a href="/docs/manual/README.md" style="color: var(--primary);">docs/manual/</a>',
+  },
+  ru: {
+    'nav.start':'Начало','nav.member':'Участник','nav.coach':'Тренер','nav.owner':'Владелец','nav.flows':'Процессы',
+    'hero.eyebrow':'AXIS Jiu-Jitsu · Вена','hero.line1':'Ваша','hero.accent':'платформа','hero.line2':'с первого взгляда',
+    'hero.subtitle':'Всё, что нужно знать — будь вы участник, тренер или владелец. Просто. Ясно. Мобильно.',
+    'hero.scroll':'↓ Прокрутите вниз',
+    'member.badge':'· Роль: Участник ·','member.heading':'Ваши тренировки, ваш прогресс',
+    'member.card1.title':'Бронирование занятий','member.card1.text':'Посмотрите недельное расписание, забронируйте в один клик. При полной группе вы попадаете в лист ожидания.',
+    'member.card2.title':'Регистрация по QR','member.card2.text':'Покажите QR-код на телефоне, тренер сканирует — готово. Вы автоматически получаете XP.',
+    'member.card3.title':'Турниры','member.card3.text':'Смотрите ближайшие турниры, записывайтесь с указанием веса и Ги/Без ги. Ваш статус отображается.',
+    'member.card4.title':'Прогресс по поясам','member.card4.text':'Смотрите, где вы находитесь и что нужно для следующего пояса — время и тренировки.',
+    'member.card5.title':'XP и бейджи','member.card5.text':'Получайте XP за тренировки, тесты и игру правил. Сравните себя на лидерборде.',
+    'member.card6.title':'Дневник тренировок','member.card6.text':'Записывайте каждую сессию с настроением и заметками. Графики покажут ваш прогресс.',
+    'coach.badge':'· Роль: Тренер ·','coach.heading':'Учите, организуйте, создавайте турниры',
+    'coach.card1.title':'Регистрация','coach.card1.text':'Сканируйте QR или ищите вручную. Каждая регистрация привязана к текущему занятию.',
+    'coach.card2.title':'Управление занятиями','coach.card2.text':'Создавайте занятия (разовые или регулярные), просматривайте участников, оставляйте заметки.',
+    'coach.card3.title':'Создание турниров','coach.card3.text':'Внутренние или внешние — с датой, местом, сроком регистрации. Владелец одобряет, и турнир становится активным.',
+    'coach.card4.title':'Проверка заявок','coach.card4.text':'Участники записываются на ваш турнир — вы подтверждаете или отклоняете.',
+    'coach.card5.title':'Заметки тренера','coach.card5.text':'План до занятия, рефлексия после. Приватно, только для тренеров.',
+    'coach.card6.title':'Мои ученики','coach.card6.text':'Кто тренировался у вас за последние 30 дней? Обзор на панели.',
+    'owner.badge':'· Роль: Владелец / Главный тренер ·','owner.heading':'Полный контроль, ясная картина',
+    'owner.subtitle':'Как владелец вы одновременно главный тренер — ваша панель показывает вид тренера. Бизнес-метрики находятся в разделе Отчёты.',
+    'owner.card1.title':'Управление участниками','owner.card1.text':'Редактирование профилей, управление абонементами, назначение ролей (участник ↔ тренер).',
+    'owner.card2.title':'Профили тренеров','owner.card2.text':'Для каждого тренера: биография, специализация, достижения, порядок на главной.',
+    'owner.card3.title':'Одобрение турниров','owner.card3.text':'Тренеры создают турниры — вы одобряете. Ваши турниры активны сразу.',
+    'owner.card4.title':'Бизнес-отчёты','owner.card4.text':'Выручка, конверсия, загрузка, топ-занятия, неактивные участники — всё в Отчётах.',
+    'owner.card5.title':'Контент','owner.card5.text':'Блог, слайдер, фото типов занятий, учебный план — главная в ваших руках.',
+    'owner.card6.title':'Настройки','owner.card6.text':'Цены, типы занятий (с фото), данные зала, часы работы, правила.',
+    'owner.card7.title':'Заявки / CRM','owner.card7.text':'Воронка заявок: Новые → Контакт → Конверсия → Потеряны.',
+    'owner.card8.title':'Журнал','owner.card8.text':'Каждое административное действие записывается — кто, когда, что.',
+    'flows.badge':'· Процессы ·','flows.heading':'Типичные сценарии','flows.more':'И ещё',
+    'flows.a.heading':'🏅 Турнир от А до Я',
+    'flows.a.s1.h':'Тренер создаёт турнир','flows.a.s1.t':'Турниры → Новый → Название, дата, место, тип. Статус: Ожидает.',
+    'flows.a.s2.h':'Владелец одобряет','flows.a.s2.t':'Владелец открывает список турниров → ✓ Одобрить. Статус: Одобрен.',
+    'flows.a.s3.h':'Главная + раздел участника','flows.a.s3.t':'Турнир автоматически появляется на публичном сайте и в панели участника.',
+    'flows.a.s4.h':'Участники записываются','flows.a.s4.t':'Весовая категория, Ги/Без ги, заметки → Отправить. Статус: Ожидает.',
+    'flows.a.s5.h':'Тренер проверяет заявки','flows.a.s5.t':'Подтвердить или отклонить каждого. Подтверждённые появляются в публичном слайдере.',
+    'flows.b.heading':'🎓 Повышение участника до тренера',
+    'flows.b.s1.h':'Изменить роль','flows.b.s1.t':'Настройки → Роли → выбрать участника → назначить тренером.',
+    'flows.b.s2.h':'Заполнить профиль тренера','flows.b.s2.t':'Участники → открыть профиль → Веб-профиль: биография, специализация, достижения.',
+    'flows.b.s3.h':'Сделать видимым','flows.b.s3.t':'Включить "Показывать на главной" → тренер появится в публичном слайдере.',
+    'flows.c.heading':'📅 Добавить новое занятие',
+    'flows.c.s1.h':'Создать тип занятия (один раз)','flows.c.s1.t':'Настройки → Типы занятий → Новый. Название, уровень, загрузить фото или URL.',
+    'flows.c.s2.h':'Спланировать сессию','flows.c.s2.t':'Тренировки → Новая сессия → выбрать тип, дату, время, вместимость, тренера.',
+    'flows.c.s3.h':'Повторяющиеся (необязательно)','flows.c.s3.t':'Отметить как еженедельные — сессии создаются автоматически для следующих недель.',
+    'footer.text':'Подробное руководство: <a href="/docs/manual/README.md" style="color: var(--primary);">docs/manual/</a>',
+  },
+};
 
-  // Jump-nav active highlight
-  const navLinks = document.querySelectorAll('.jump-nav a');
-  const sections = document.querySelectorAll('section');
-  window.addEventListener('scroll', () => {
-    let active = 'hero';
-    sections.forEach(s => {
-      const rect = s.getBoundingClientRect();
-      if (rect.top <= 100) active = s.id;
-    });
-    navLinks.forEach(a => {
-      const href = a.getAttribute('href').replace('#', '');
-      a.style.color = href === active ? 'var(--fg)' : '';
-      a.style.background = href === active ? 'var(--card)' : '';
-    });
+function applyLang(lang) {
+  document.documentElement.lang = lang;
+  const dict = I18N[lang] || I18N.de;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (dict[key]) el.innerHTML = dict[key];
   });
+  document.querySelectorAll('.lang-switcher button').forEach(btn => {
+    btn.classList.toggle('active', btn.getAttribute('data-lang') === lang);
+  });
+  try { localStorage.setItem('axisjj_manual_lang', lang); } catch(e) {}
+}
+
+document.querySelectorAll('.lang-switcher button').forEach(btn => {
+  btn.addEventListener('click', () => applyLang(btn.getAttribute('data-lang')));
+});
+
+let savedLang = 'de';
+try { savedLang = localStorage.getItem('axisjj_manual_lang') || 'de'; } catch(e) {}
+if (!I18N[savedLang]) savedLang = 'de';
+applyLang(savedLang);
+
+const animItems = document.querySelectorAll('.anim');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 60);
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+animItems.forEach(el => io.observe(el));
+
+const navLinks = document.querySelectorAll('.jump-nav a');
+const sections = document.querySelectorAll('section');
+window.addEventListener('scroll', () => {
+  let active = 'hero';
+  sections.forEach(s => {
+    const rect = s.getBoundingClientRect();
+    if (rect.top <= 100) active = s.id;
+  });
+  navLinks.forEach(a => {
+    const href = a.getAttribute('href').replace('#', '');
+    a.style.color = href === active ? 'var(--fg)' : '';
+    a.style.background = href === active ? 'var(--card)' : '';
+  });
+});
 </script>
 
 </body>
