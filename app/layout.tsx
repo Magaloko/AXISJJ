@@ -47,9 +47,9 @@ export const metadata: Metadata = {
     type: 'website',
     images: [
       {
-        url: '/images/logo-full1.png',
-        width: 1632,
-        height: 624,
+        url: '/images/logo-full.png',
+        width: 384,
+        height: 147,
         alt: 'AXIS Jiu-Jitsu Vienna',
       },
     ],
