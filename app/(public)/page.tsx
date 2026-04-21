@@ -5,6 +5,7 @@ import { CoachSection } from '@/components/public/CoachSection'
 import { ProgramsGrid } from '@/components/public/ProgramsGrid'
 import { LandingPricing } from '@/components/public/LandingPricing'
 import { TrialCTA } from '@/components/public/TrialCTA'
+import { TournamentSection } from '@/components/public/TournamentSection'
 import { getPricingPlans } from '@/lib/pricing'
 import { getWeekSchedule } from '@/lib/schedule'
 import { getActiveHeroSlides } from '@/app/actions/hero-slides'
@@ -28,6 +29,7 @@ export default async function HomePage() {
       <TrialCTA />
       <StatsBar />
       <CoachSection />
+      <TournamentSection />
       <ProgramsGrid />
       <LandingPricing plans={pricingPlans} />
       <ScheduleWidget schedule={schedule} />
