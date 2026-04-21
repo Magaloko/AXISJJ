@@ -5,16 +5,19 @@ import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import { profileSchema } from './profile.schema'
+import { getActionErrors } from '@/lib/i18n/action-lang'
 
 export async function updateProfile(
   data: z.infer<typeof profileSchema>
 ): Promise<{ success?: boolean; error?: string }> {
+  const e = await getActionErrors()
+
   const parsed = profileSchema.safeParse(data)
-  if (!parsed.success) return { error: 'Ungültige Eingabe.' }
+  if (!parsed.success) return { error: e.invalidInput }
 
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) return { error: 'Nicht eingeloggt.' }
+  if (authError || !user) return { error: e.notAuthenticated }
 
   const { error } = await supabase
     .from('profiles')
@@ -25,7 +28,7 @@ export async function updateProfile(
     })
     .eq('id', user.id)
 
-  if (error) return { error: 'Speichern fehlgeschlagen.' }
+  if (error) return { error: e.saveFailed }
 
   revalidatePath('/konto')
   return { success: true }
@@ -34,7 +37,9 @@ export async function updateProfile(
 export async function updateLanguage(
   lang: 'de' | 'en' | 'ru'
 ): Promise<{ success?: boolean; error?: string }> {
-  if (lang !== 'de' && lang !== 'en' && lang !== 'ru') return { error: 'Ungültige Sprache.' }
+  const e = await getActionErrors()
+
+  if (lang !== 'de' && lang !== 'en' && lang !== 'ru') return { error: e.invalidLanguage }
 
   // Always set cookie (works for logged-out users too)
   const cookieStore = await cookies()
@@ -48,7 +53,7 @@ export async function updateLanguage(
       .from('profiles')
       .update({ language: lang })
       .eq('id', user.id)
-    if (error) return { error: 'Speichern fehlgeschlagen.' }
+    if (error) return { error: e.saveFailed }
   }
 
   revalidatePath('/', 'layout')

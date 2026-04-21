@@ -7,6 +7,7 @@ import { notify } from '@/lib/notifications'
 import { assertOwner } from '@/lib/auth'
 import { memberUpdateSchema, memberRoleSchema } from './members.schema'
 import { logAudit } from '@/lib/audit'
+import { getActionErrors } from '@/lib/i18n/action-lang'
 
 export type MemberUpdate = {
   full_name?: string
@@ -18,8 +19,10 @@ export async function updateMember(
   profileId: string,
   data: MemberUpdate,
 ): Promise<{ success?: true; error?: string }> {
+  const e = await getActionErrors()
+
   const parsed = memberUpdateSchema.safeParse(data)
-  if (!parsed.success) return { error: 'Ungültige Eingabe.' }
+  if (!parsed.success) return { error: e.invalidInput }
 
   const check = await assertOwner()
   if ('error' in check) return { error: check.error }
@@ -30,14 +33,14 @@ export async function updateMember(
   if (parsed.data.phone !== undefined) payload.phone = parsed.data.phone?.trim() || null
   if (parsed.data.date_of_birth !== undefined) payload.date_of_birth = parsed.data.date_of_birth || null
 
-  if (!Object.keys(payload).length) return { error: 'Keine Änderungen.' }
+  if (!Object.keys(payload).length) return { error: e.noChanges }
 
   const changedFields = Object.keys(payload)
 
   const { error } = await supabase.from('profiles')
     .update(payload)
     .eq('id', profileId)
-  if (error) return { error: 'Update fehlgeschlagen.' }
+  if (error) return { error: e.updateFailed }
 
   revalidatePath('/admin/mitglieder')
 
@@ -71,11 +74,13 @@ export async function updateMemberRole(
   profileId: string,
   role: 'member' | 'coach',
 ): Promise<{ success?: true; error?: string }> {
-  if (!memberRoleSchema.safeParse(role).success) return { error: 'Ungültige Rolle.' }
+  const e = await getActionErrors()
+
+  if (!memberRoleSchema.safeParse(role).success) return { error: e.invalidRole }
 
   const check = await assertOwner()
   if ('error' in check) return { error: check.error }
-  if (check.userId === profileId) return { error: 'Eigene Rolle kann nicht geändert werden.' }
+  if (check.userId === profileId) return { error: e.selfRoleChange }
 
   const supabase = await createClient()
 
@@ -89,7 +94,7 @@ export async function updateMemberRole(
   const { error } = await supabase.from('profiles')
     .update({ role })
     .eq('id', profileId)
-  if (error) return { error: 'Rollen-Update fehlgeschlagen.' }
+  if (error) return { error: e.memberRoleUpdateFailed }
 
   revalidatePath('/admin/mitglieder')
   revalidatePath('/admin/einstellungen')

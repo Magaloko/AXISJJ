@@ -8,24 +8,34 @@ import { resolveLang } from './resolve-lang'
 import { translations, type Lang } from '.'
 
 export async function getActionLang(): Promise<Lang> {
-  const rawLang = (await cookies()).get('lang')?.value
+  let rawLang: string | undefined
+  let inRequestScope = false
+  try {
+    rawLang = (await cookies()).get('lang')?.value
+    inRequestScope = true
+  } catch {
+    // cookies() unavailable outside request scope (e.g. tests) — skip to default
+    return 'de'
+  }
   // Quick path: cookie set — use it
   if (rawLang === 'de' || rawLang === 'en' || rawLang === 'ru') return rawLang
 
   // Fall back to DB profile language for logged-in users
-  try {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const { data } = await supabase
-        .from('profiles')
-        .select('language')
-        .eq('id', user.id)
-        .single()
-      return resolveLang(rawLang, data?.language)
+  if (inRequestScope) {
+    try {
+      const supabase = await createClient()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('language')
+          .eq('id', user.id)
+          .single()
+        return resolveLang(rawLang, data?.language)
+      }
+    } catch {
+      // ignore — fall through to default
     }
-  } catch {
-    // ignore — fall through to default
   }
   return 'de'
 }
