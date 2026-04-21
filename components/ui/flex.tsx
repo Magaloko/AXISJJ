@@ -7,7 +7,6 @@ interface FlexProps extends React.HTMLAttributes<HTMLDivElement> {
   align?: 'start' | 'center' | 'end' | 'stretch'
   justify?: 'start' | 'center' | 'end' | 'between' | 'around'
   wrap?: boolean
-  as?: keyof JSX.IntrinsicElements
 }
 
 const GAP_MAP = {
@@ -41,14 +40,13 @@ const Flex = React.forwardRef<HTMLDivElement, FlexProps>(
       align = 'stretch',
       justify = 'start',
       wrap = false,
-      as: Component = 'div',
       className,
       ...props
     },
     ref,
   ) => (
-    <Component
-      ref={ref as React.Ref<any>}
+    <div
+      ref={ref}
       className={cn(
         'flex',
         direction === 'col' ? 'flex-col' : 'flex-row',
