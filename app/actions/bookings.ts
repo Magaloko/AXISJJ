@@ -4,11 +4,14 @@ import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
+import { getActionErrors } from '@/lib/i18n/action-lang'
 
 export async function bookClass(sessionId: string): Promise<{ success?: boolean; status?: string; error?: string }> {
+  const e = await getActionErrors()
+
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) return { error: 'Nicht eingeloggt' }
+  if (authError || !user) return { error: e.notAuthenticated }
 
   const { data: result, error: rpcError } = await supabase.rpc('book_class', {
     p_session_id: sessionId,
@@ -17,7 +20,7 @@ export async function bookClass(sessionId: string): Promise<{ success?: boolean;
 
   if (rpcError) {
     console.error('[bookings] book_class RPC error:', rpcError)
-    return { error: `Buchung fehlgeschlagen: ${rpcError.message}` }
+    return { error: `${e.bookingFailed}: ${rpcError.message}` }
   }
   if (result?.error) return { error: result.error }
 
@@ -56,9 +59,11 @@ export async function bookClass(sessionId: string): Promise<{ success?: boolean;
 }
 
 export async function cancelBooking(bookingId: string): Promise<{ success?: boolean; error?: string }> {
+  const e = await getActionErrors()
+
   const supabase = await createClient()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
-  if (authError || !user) return { error: 'Nicht eingeloggt' }
+  if (authError || !user) return { error: e.notAuthenticated }
 
   const { data: cancelled, error } = await supabase
     .from('bookings')
@@ -67,8 +72,8 @@ export async function cancelBooking(bookingId: string): Promise<{ success?: bool
     .eq('profile_id', user.id)
     .select('id, session_id')
 
-  if (error) return { error: 'Stornierung fehlgeschlagen. Bitte versuche es erneut.' }
-  if (!cancelled || cancelled.length === 0) return { error: 'Buchung nicht gefunden.' }
+  if (error) return { error: 'Stornierung fehlgeschlagen. Bitte versuche es erneut.' } // TODO: i18n
+  if (!cancelled || cancelled.length === 0) return { error: 'Buchung nicht gefunden.' } // TODO: i18n
 
   // Atomic waitlist promotion via RPC — promotes first waitlisted and decrements
   // all remaining positions in a single transaction.

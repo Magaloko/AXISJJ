@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
 import { assertStaff } from '@/lib/auth'
+import { getActionErrors } from '@/lib/i18n/action-lang'
 
 export async function checkIn(
   profileId: string,
@@ -11,6 +12,8 @@ export async function checkIn(
 ): Promise<{ success?: boolean; memberName?: string; error?: string }> {
   const auth = await assertStaff()
   if ('error' in auth) return { error: auth.error }
+
+  const e = await getActionErrors()
 
   const supabase = await createClient()
 
@@ -21,7 +24,7 @@ export async function checkIn(
     .eq('id', profileId)
     .single()
 
-  if (!profile) return { error: 'Mitglied nicht gefunden.' }
+  if (!profile) return { error: 'Mitglied nicht gefunden.' } // TODO: i18n
 
   const { error } = await supabase
     .from('attendances')
@@ -30,7 +33,7 @@ export async function checkIn(
       { onConflict: 'profile_id,session_id' }
     )
 
-  if (error) return { error: 'Check-In fehlgeschlagen. Bitte erneut versuchen.' }
+  if (error) return { error: e.saveFailed }
 
   const memberName = profile.full_name ?? 'Unbekannt'
 

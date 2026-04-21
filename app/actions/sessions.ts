@@ -8,6 +8,7 @@ import { assertStaff } from '@/lib/auth'
 import { sessionFormSchema } from './sessions.schema'
 import { logAudit } from '@/lib/audit'
 import { z } from 'zod'
+import { getActionErrors } from '@/lib/i18n/action-lang'
 
 export type SessionFormData = {
   id?: string
@@ -28,6 +29,8 @@ export async function upsertSession(
   const auth = await assertStaff()
   if ('error' in auth) return { error: auth.error }
 
+  const e = await getActionErrors()
+
   const supabase = await createClient()
   const isNew = !data.id
 
@@ -45,7 +48,7 @@ export async function upsertSession(
     .select()
     .single()
 
-  if (error) return { error: 'Speichern fehlgeschlagen. Bitte erneut versuchen.' }
+  if (error) return { error: e.saveFailed }
 
   revalidatePath('/admin/klassen')
 
@@ -109,7 +112,7 @@ export async function cancelSession(
     .update({ cancelled: true })
     .eq('id', sessionId)
 
-  if (error) return { error: 'Absagen fehlgeschlagen. Bitte erneut versuchen.' }
+  if (error) return { error: 'Absagen fehlgeschlagen. Bitte erneut versuchen.' } // TODO: i18n
 
   revalidatePath('/admin/klassen')
   revalidatePath('/admin/checkin')

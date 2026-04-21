@@ -6,6 +6,7 @@ import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
 import { assertOwner } from '@/lib/auth'
 import { logAudit } from '@/lib/audit'
+import { getActionErrors } from '@/lib/i18n/action-lang'
 
 export async function promoteToNextBelt(profileId: string): Promise<{
   success?: true
@@ -25,12 +26,14 @@ export async function promoteToNextBelt(profileId: string): Promise<{
     .limit(1)
     .maybeSingle()
 
-  if (!currentRank) return { error: 'Kein aktueller Gürtel gefunden.' }
+  const e = await getActionErrors()
+
+  if (!currentRank) return { error: 'Kein aktueller Gürtel gefunden.' } // TODO: i18n
 
   const currentBelt = Array.isArray(currentRank.belt_ranks)
     ? currentRank.belt_ranks[0]
     : currentRank.belt_ranks
-  if (!currentBelt) return { error: 'Gürtel-Reihenfolge ungültig.' }
+  if (!currentBelt) return { error: 'Gürtel-Reihenfolge ungültig.' } // TODO: i18n
 
   const { data: nextBelt } = await supabase
     .from('belt_ranks')
@@ -40,7 +43,7 @@ export async function promoteToNextBelt(profileId: string): Promise<{
     .limit(1)
     .maybeSingle()
 
-  if (!nextBelt) return { error: 'Kein höherer Gürtel verfügbar.' }
+  if (!nextBelt) return { error: 'Kein höherer Gürtel verfügbar.' } // TODO: i18n
 
   const { error: insertError } = await supabase.from('profile_ranks').insert({
     profile_id: profileId,
@@ -50,7 +53,7 @@ export async function promoteToNextBelt(profileId: string): Promise<{
   })
   if (insertError) {
     console.error('[promotions] insert error:', insertError)
-    return { error: `Promotion fehlgeschlagen: ${insertError.message}` }
+    return { error: `${e.saveFailed}: ${insertError.message}` }
   }
 
   revalidatePath('/admin/dashboard')

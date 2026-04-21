@@ -8,6 +8,7 @@ import { notify } from '@/lib/notifications'
 import { LeadSchema } from './leads.schema'
 import { assertStaff } from '@/lib/auth'
 import { z } from 'zod'
+import { getActionErrors } from '@/lib/i18n/action-lang'
 
 const newLeadSchema = z.object({
   full_name: z.string().min(2, 'Name ist Pflicht'),
@@ -72,10 +73,12 @@ export async function updateLeadStatus(
   leadId: string,
   status: LeadStatus,
 ): Promise<{ success?: true; error?: string }> {
-  if (!VALID_LEAD_STATUS.includes(status)) return { error: 'Ungültiger Status.' }
+  if (!VALID_LEAD_STATUS.includes(status)) return { error: 'Ungültiger Status.' } // TODO: i18n
 
   const auth = await assertStaff()
   if ('error' in auth) return { error: auth.error }
+
+  const e = await getActionErrors()
 
   const supabase = await createClient()
 
@@ -87,7 +90,7 @@ export async function updateLeadStatus(
     .single()
 
   const { error } = await supabase.from('leads').update({ status }).eq('id', leadId)
-  if (error) return { error: 'Status-Update fehlgeschlagen.' }
+  if (error) return { error: e.updateFailed }
 
   revalidatePath('/admin/leads')
   revalidatePath('/admin/dashboard')
@@ -117,6 +120,8 @@ export async function createLead(
   const auth = await assertStaff()
   if ('error' in auth) return { error: auth.error }
 
+  const e = await getActionErrors()
+
   const supabase = await createClient()
   const { error } = await supabase.from('leads').insert({
     full_name: parsed.data.full_name.trim(),
@@ -126,7 +131,7 @@ export async function createLead(
     source: parsed.data.source,
     status: 'new',
   })
-  if (error) return { error: 'Lead-Erstellung fehlgeschlagen.' }
+  if (error) return { error: e.saveFailed }
 
   revalidatePath('/admin/leads')
   revalidatePath('/admin/dashboard')

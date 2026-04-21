@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { assertOwner } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
+import { getActionErrors } from '@/lib/i18n/action-lang'
 
 export interface CoachProfileData {
   profileId: string
@@ -48,6 +49,8 @@ export async function upsertCoachProfile(
   const auth = await assertOwner()
   if ('error' in auth) return { error: auth.error }
 
+  const e = await getActionErrors()
+
   const supabase = await createClient()
   const { error } = await supabase
     .from('coach_profiles')
@@ -63,7 +66,7 @@ export async function upsertCoachProfile(
       { onConflict: 'profile_id' },
     )
 
-  if (error) return { error: 'Profil konnte nicht gespeichert werden.' }
+  if (error) return { error: e.coachProfileSaveFailed }
 
   revalidatePath('/')
   revalidatePath('/admin/mitglieder')

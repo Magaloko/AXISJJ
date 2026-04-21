@@ -6,6 +6,7 @@ import { waitUntil } from '@vercel/functions'
 import { notify } from '@/lib/notifications'
 import { assertOwner } from '@/lib/auth'
 import { classTypeSchema } from './class-types.schema'
+import { getActionErrors } from '@/lib/i18n/action-lang'
 
 export type ClassTypeData = {
   id?: string
@@ -23,6 +24,8 @@ export async function upsertClassType(data: ClassTypeData): Promise<{ success?: 
   const ok = await assertOwner()
   if ('error' in ok) return { error: ok.error }
 
+  const e = await getActionErrors()
+
   const isNew = !parsed.data.id
   const supabase = await createClient()
 
@@ -34,7 +37,7 @@ export async function upsertClassType(data: ClassTypeData): Promise<{ success?: 
     gi: parsed.data.gi,
     image_url: parsed.data.image_url ?? null,
   })
-  if (error) return { error: 'Speichern fehlgeschlagen.' }
+  if (error) return { error: e.saveFailed }
 
   revalidatePath('/admin/einstellungen')
   revalidatePath('/admin/klassen')
@@ -50,13 +53,15 @@ export async function deleteClassType(id: string): Promise<{ success?: true; err
   const ok = await assertOwner()
   if ('error' in ok) return { error: ok.error }
 
+  const e = await getActionErrors()
+
   const supabase = await createClient()
   const { count, error: countError } = await supabase
     .from('class_sessions')
     .select('*', { count: 'exact', head: true })
     .eq('class_type_id', id)
-  if (countError) return { error: 'Prüfung fehlgeschlagen.' }
-  if ((count ?? 0) > 0) return { error: 'Noch aktive Sessions — zuerst Sessions absagen.' }
+  if (countError) return { error: e.classTypeCheckFailed }
+  if ((count ?? 0) > 0) return { error: e.classTypeDeleteBlocked }
 
   // Fetch name before delete for notification
   const { data: existing } = await supabase
@@ -66,7 +71,7 @@ export async function deleteClassType(id: string): Promise<{ success?: true; err
     .single()
 
   const { error } = await supabase.from('class_types').delete().eq('id', id)
-  if (error) return { error: 'Löschen fehlgeschlagen.' }
+  if (error) return { error: e.deleteFailed }
 
   revalidatePath('/admin/einstellungen')
   revalidatePath('/admin/klassen')
