@@ -156,7 +156,11 @@ export interface Database {
       coach_profiles: {
         Row: {
           id: string
-          profile_id: string
+          profile_id: string | null
+          display_name: string | null
+          avatar_url: string | null
+          belt_name: string | null
+          belt_color_hex: string | null
           specialization: string | null
           bio: string | null
           achievements: string | null
@@ -167,7 +171,11 @@ export interface Database {
         }
         Insert: {
           id?: string
-          profile_id: string
+          profile_id?: string | null
+          display_name?: string | null
+          avatar_url?: string | null
+          belt_name?: string | null
+          belt_color_hex?: string | null
           specialization?: string | null
           bio?: string | null
           achievements?: string | null

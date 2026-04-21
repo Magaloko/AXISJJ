@@ -27,7 +27,7 @@ export async function getCoachProfile(profileId: string): Promise<CoachProfileDa
 
   if (!data) return null
   return {
-    profileId: data.profile_id,
+    profileId: data.profile_id ?? profileId,
     specialization: data.specialization,
     bio: data.bio,
     achievements: data.achievements,

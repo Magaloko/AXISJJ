@@ -18,13 +18,18 @@ export async function getPublicCoaches(): Promise<CoachPublicProfile[]> {
   const { data, error } = await supabase
     .from('coach_profiles')
     .select(`
+      id,
       profile_id,
+      display_name,
+      avatar_url,
+      belt_name,
+      belt_color_hex,
       specialization,
       bio,
       achievements,
       display_order,
       is_pinned,
-      profiles!inner(
+      profiles(
         full_name,
         avatar_url,
         profile_ranks(
@@ -49,17 +54,18 @@ export async function getPublicCoaches(): Promise<CoachPublicProfile[]> {
       (a, b) => new Date(b.promoted_at).getTime() - new Date(a.promoted_at).getTime(),
     )
     const latestRankBelts = sorted[0]?.belt_ranks ?? null
-    const belt = Array.isArray(latestRankBelts) ? latestRankBelts[0] : latestRankBelts
+    const profileBelt = Array.isArray(latestRankBelts) ? latestRankBelts[0] : latestRankBelts
 
+    // Prefer linked profile data, fall back to standalone coach_profiles fields
     return {
-      profileId: row.profile_id,
-      name: profile?.full_name ?? 'Coach',
-      avatarUrl: profile?.avatar_url ?? null,
+      profileId: row.profile_id ?? row.id,
+      name: profile?.full_name ?? row.display_name ?? 'Coach',
+      avatarUrl: profile?.avatar_url ?? row.avatar_url ?? null,
       specialization: row.specialization,
       bio: row.bio,
       achievements: row.achievements,
-      beltName: belt?.name ?? null,
-      beltColorHex: belt?.color_hex ?? null,
+      beltName: profileBelt?.name ?? row.belt_name ?? null,
+      beltColorHex: profileBelt?.color_hex ?? row.belt_color_hex ?? null,
       displayOrder: row.display_order,
     }
   })
