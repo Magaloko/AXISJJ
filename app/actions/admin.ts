@@ -47,7 +47,10 @@ export async function getTodaySessions(): Promise<{
     .lte('starts_at', todayEnd.toISOString())
     .order('starts_at', { ascending: true })
 
-  if (error) return { error: 'Daten konnten nicht geladen werden.' }
+  if (error) {
+    console.error('[getTodaySessions] query error:', error)
+    return { error: `Daten konnten nicht geladen werden: ${error.message}` }
+  }
 
   const sessions: TodaySession[] = (data ?? []).map((s) => {
     const confirmedCount = s.bookings?.filter(b => b.status === 'confirmed').length ?? 0
@@ -81,15 +84,21 @@ export async function getSessionBookings(sessionId: string): Promise<{
       .select('id, profile_id, status, profiles(full_name)')
       .eq('session_id', sessionId)
       .eq('status', 'confirmed')
-      .order('profiles(full_name)', { ascending: true }),
+      .order('full_name', { referencedTable: 'profiles', ascending: true }),
     supabase
       .from('attendances')
       .select('profile_id, checked_in_at')
       .eq('session_id', sessionId),
   ])
 
-  if (bookingsResult.error) return { error: 'Buchungen konnten nicht geladen werden.' }
-  if (attendancesResult.error) return { error: 'Anwesenheitsdaten konnten nicht geladen werden.' }
+  if (bookingsResult.error) {
+    console.error('[getSessionBookings] bookings error:', bookingsResult.error)
+    return { error: `Buchungen: ${bookingsResult.error.message}` }
+  }
+  if (attendancesResult.error) {
+    console.error('[getSessionBookings] attendances error:', attendancesResult.error)
+    return { error: `Anwesenheiten: ${attendancesResult.error.message}` }
+  }
 
   const attendanceMap = new Map<string, string>()
   for (const a of attendancesResult.data ?? []) {
