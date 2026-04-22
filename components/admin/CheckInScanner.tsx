@@ -8,7 +8,6 @@ import { translations, type Lang } from '@/lib/i18n'
 
 interface Props {
   sessionId: string
-  onCheckedIn: (profileId: string) => void
   lang: Lang
 }
 
@@ -17,7 +16,7 @@ type ScanResult =
   | { type: 'error'; message: string }
   | null
 
-export function CheckInScanner({ sessionId, onCheckedIn, lang }: Props) {
+export function CheckInScanner({ sessionId, lang }: Props) {
   const t = translations[lang].admin.checkinExtra
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -83,7 +82,6 @@ export function CheckInScanner({ sessionId, onCheckedIn, lang }: Props) {
     const result = await checkIn(profileId, sessionId)
     if (result.success && result.memberName) {
       setScanResult({ type: 'success', memberName: result.memberName })
-      onCheckedIn(profileId)
     } else {
       setScanResult({ type: 'error', message: result.error ?? t.scanError })
     }

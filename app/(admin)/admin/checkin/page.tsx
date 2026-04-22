@@ -129,7 +129,6 @@ export default async function CheckInPage({ searchParams }: Props) {
               </p>
               <CheckInScanner
                 sessionId={selectedSession.id}
-                onCheckedIn={() => {}}
                 lang={lang}
               />
             </div>
