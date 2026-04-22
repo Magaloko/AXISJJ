@@ -7,6 +7,7 @@ import { AdminStatCard } from '@/components/admin/AdminStatCard'
 import { PromotionsWidget } from '@/components/admin/PromotionsWidget'
 import { CoachTodaySchedule } from '@/components/admin/CoachTodaySchedule'
 import { MyStudentsWidget } from '@/components/admin/MyStudentsWidget'
+import { MissingCheckinsWidget } from '@/components/admin/MissingCheckinsWidget'
 import type { TodaySession } from '@/app/actions/admin'
 import type { Metadata } from 'next'
 
@@ -158,8 +159,13 @@ export default async function AdminDashboardPage() {
         <NextClassCard session={upcomingSession} formatTime={formatTime} />
       )}
 
-      {/* Today's full schedule */}
-      <TodayScheduleCard sessions={data.todaySessions ?? []} formatTime={formatTime} />
+      {/* Today's attendance summary + schedule, side-by-side on wide screens */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <TodayScheduleCard sessions={data.todaySessions ?? []} formatTime={formatTime} />
+        {data.todayAttendance && data.todayAttendance.booked > 0 && (
+          <MissingCheckinsWidget summary={data.todayAttendance} />
+        )}
+      </div>
 
       {/* Promotions ready */}
       {data.promotionsReady && data.promotionsReady.length > 0 && (

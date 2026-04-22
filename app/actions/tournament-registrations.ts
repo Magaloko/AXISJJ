@@ -44,7 +44,10 @@ export async function registerForTournament(
       { onConflict: 'tournament_id,profile_id' },
     )
 
-  if (error) return { error: e.registrationFailed }
+  if (error) {
+    console.error('[tournament-registrations] register error:', error)
+    return { error: `${e.registrationFailed}: ${error.message}` }
+  }
 
   revalidatePath('/dashboard/turniere')
   revalidatePath('/admin/turniere')
@@ -71,7 +74,10 @@ export async function updateRegistrationStatus(
     .update({ status })
     .eq('id', registrationId)
 
-  if (error) return { error: e.updateFailed }
+  if (error) {
+    console.error('[tournament-registrations] update status error:', error)
+    return { error: `${e.updateFailed}: ${error.message}` }
+  }
 
   revalidatePath('/admin/turniere')
   revalidatePath('/')

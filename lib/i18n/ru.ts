@@ -11,11 +11,19 @@ export const ru = {
     title: 'Панель',
     trainingsTotal: 'Всего тренировок',
     activeBookings: 'Активные брони',
+    leaderboardLabel: 'Таблица лидеров',
+    leaderboardTop10: 'Топ-10',
+    leaderboardEmpty: 'В этом месяце ещё нет тренировок. Будь первым!',
+    leaderboardYou: 'Ты',
+    trainingPartnersLabel: 'Твой уровень',
+    trainingPartnersEmpty: 'Как только у других участников будет такой же пояс, они появятся здесь.',
+    trainingPartnersSubtitle: 'Участники с твоим поясом, по активности (последние 30 дней):',
   },
   nextClassCard: {
     heading: 'Следующая тренировка',
     noBooking: 'Нет предстоящих броней',
     bookCta: 'Забронировать →',
+    bookMoreCta: 'Забронировать ещё →',
   },
   buchen: { title: 'Бронирование' },
   classSlot: {
@@ -53,6 +61,13 @@ export const ru = {
     signedAt: 'Подписано',
     noDocuments: 'Документов нет.',
     download: 'Скачать',
+    passwordSection: 'Пароль',
+    currentPassword: 'Текущий пароль',
+    newPassword: 'Новый пароль',
+    confirmPassword: 'Подтвердите новый пароль',
+    changePasswordBtn: 'Сменить пароль',
+    passwordChanged: 'Пароль изменён ✓',
+    passwordHint: 'Минимум 8 символов.',
   },
   admin: {
     nav: {
@@ -580,5 +595,7 @@ export const ru = {
     bookingNotFound: 'Бронирование не найдено.',
     memberNotFound: 'Участник не найден.',
     invalidStatus: 'Неверный статус.',
+    wrongCurrentPassword: 'Текущий пароль неверен.',
+    passwordChangeFailed: 'Не удалось изменить пароль.',
   },
 }

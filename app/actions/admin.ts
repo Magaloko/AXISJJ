@@ -127,6 +127,20 @@ export interface PromotionReady {
   months: number
 }
 
+export interface MissingCheckin {
+  profileId: string
+  memberName: string
+  sessionId: string
+  className: string
+  sessionStartsAt: string
+}
+
+export interface TodayAttendanceSummary {
+  booked: number
+  checkedIn: number
+  missing: MissingCheckin[]
+}
+
 export interface LeadCard {
   id: string
   full_name: string
@@ -152,6 +166,7 @@ export async function getAdminDashboard(): Promise<{
   newLeads?: number
   promotionsReady?: PromotionReady[]
   leadsByStatus?: LeadsByStatus
+  todayAttendance?: TodayAttendanceSummary
   error?: string
 }> {
   const supabase = await createClient()
@@ -263,6 +278,21 @@ export async function getAdminDashboard(): Promise<{
     }
   }
 
+  // Batch-load attendance counts for every candidate in a single query,
+  // replacing the previous N+1 pattern that issued one count per profile.
+  const candidateIds = Array.from(latestRankByProfile.keys())
+  const sessionsByProfile = new Map<string, number>()
+  if (candidateIds.length > 0) {
+    const { data: atts, error: attsError } = await supabase
+      .from('attendances')
+      .select('profile_id')
+      .in('profile_id', candidateIds)
+    if (attsError) console.error('[admin] promotions attendances error:', attsError)
+    for (const a of atts ?? []) {
+      sessionsByProfile.set(a.profile_id, (sessionsByProfile.get(a.profile_id) ?? 0) + 1)
+    }
+  }
+
   const promotionsReady: PromotionReady[] = []
   for (const [profileId, latest] of latestRankByProfile) {
     const currentBelt = beltById.get(latest.belt_rank_id)
@@ -270,15 +300,12 @@ export async function getAdminDashboard(): Promise<{
     const nextBelt = beltByOrder.get(currentBelt.order + 1)
     if (!nextBelt) continue
 
-    const { count: sessions } = await supabase
-      .from('attendances')
-      .select('*', { count: 'exact', head: true })
-      .eq('profile_id', profileId)
+    const sessions = sessionsByProfile.get(profileId) ?? 0
 
     const monthsElapsed = Math.floor(
       (now.getTime() - new Date(latest.promoted_at).getTime()) / (1000 * 60 * 60 * 24 * 30)
     )
-    const sessionsOk = !nextBelt.min_sessions || (sessions ?? 0) >= nextBelt.min_sessions
+    const sessionsOk = !nextBelt.min_sessions || sessions >= nextBelt.min_sessions
     const monthsOk = !nextBelt.min_time_months || monthsElapsed >= nextBelt.min_time_months
     if (!sessionsOk || !monthsOk) continue
 
@@ -289,7 +316,7 @@ export async function getAdminDashboard(): Promise<{
       currentBeltColor: currentBelt.color_hex,
       nextBelt: nextBelt.name,
       nextBeltColor: nextBelt.color_hex,
-      sessions: sessions ?? 0,
+      sessions,
       months: monthsElapsed,
     })
   }
@@ -307,11 +334,59 @@ export async function getAdminDashboard(): Promise<{
     if (leadsByStatus[bucket].length < 2) leadsByStatus[bucket].push(row)
   }
 
+  // Today's attendance summary: which booked members for already-started
+  // sessions haven't checked in yet. Gives the owner a live "who's missing"
+  // view without having to drill into each session.
+  const startedSessionIds = todaySessions
+    .filter((s) => new Date(s.starts_at) <= now)
+    .map((s) => s.id)
+  let todayAttendance: TodayAttendanceSummary | undefined
+  if (startedSessionIds.length > 0) {
+    const [confirmedBookings, todayAttendances] = await Promise.all([
+      supabase
+        .from('bookings')
+        .select('profile_id, session_id, profiles(full_name)')
+        .eq('status', 'confirmed')
+        .in('session_id', startedSessionIds),
+      supabase
+        .from('attendances')
+        .select('profile_id, session_id')
+        .in('session_id', startedSessionIds),
+    ])
+    const checkedInSet = new Set(
+      (todayAttendances.data ?? []).map((a) => `${a.profile_id}:${a.session_id}`),
+    )
+    const sessionMetaById = new Map(
+      todaySessions.map((s) => [s.id, { name: s.class_types?.name ?? 'Session', starts_at: s.starts_at }]),
+    )
+    const missing: MissingCheckin[] = []
+    for (const row of confirmedBookings.data ?? []) {
+      const key = `${row.profile_id}:${row.session_id}`
+      if (checkedInSet.has(key)) continue
+      const p = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
+      const meta = sessionMetaById.get(row.session_id)
+      missing.push({
+        profileId: row.profile_id,
+        memberName: p?.full_name ?? 'Unbekannt',
+        sessionId: row.session_id,
+        className: meta?.name ?? 'Session',
+        sessionStartsAt: meta?.starts_at ?? '',
+      })
+    }
+    missing.sort((a, b) => a.sessionStartsAt.localeCompare(b.sessionStartsAt) || a.memberName.localeCompare(b.memberName))
+    todayAttendance = {
+      booked: confirmedBookings.data?.length ?? 0,
+      checkedIn: (confirmedBookings.data?.length ?? 0) - missing.length,
+      missing,
+    }
+  }
+
   return {
     ...base,
     activeMembers: membersResult.count ?? 0,
     newLeads: leadsResult.count ?? 0,
     promotionsReady: promotionsTop3,
     leadsByStatus,
+    todayAttendance,
   }
 }

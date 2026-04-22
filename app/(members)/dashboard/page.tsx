@@ -21,6 +21,9 @@ import { translations } from '@/lib/i18n'
 import { resolveLang } from '@/lib/i18n/resolve-lang'
 import { getGymSettings } from '@/lib/gym-settings'
 import { getTrainingStats } from '@/app/actions/training-log'
+import { getLeaderboard } from '@/app/actions/leaderboard'
+import { getTrainingPartners } from '@/app/actions/training-partners'
+import { getMyCompetitions } from '@/app/actions/competitions'
 import { Card, CardContent } from '@/components/ui/card'
 import { Flame } from 'lucide-react'
 import type { Metadata } from 'next'
@@ -55,6 +58,9 @@ export default async function DashboardPage() {
     { data: latestAttendance },
     { data: latestLog },
     trainingStats,
+    leaderboardEntries,
+    trainingPartners,
+    competitions,
   ] = await Promise.all([
     supabase
       .from('class_sessions')
@@ -93,6 +99,9 @@ export default async function DashboardPage() {
       .order('logged_at', { ascending: false })
       .limit(1),
     getTrainingStats(),
+    getLeaderboard(),
+    getTrainingPartners(),
+    getMyCompetitions(),
   ])
 
   const latestAtt = latestAttendance?.[0] ?? null
@@ -208,13 +217,13 @@ export default async function DashboardPage() {
           <MySubscriptionCard />
         </div>
         <div className="lg:col-span-2">
-          <LeaderboardWidget />
+          <LeaderboardWidget entries={leaderboardEntries} lang={lang} />
         </div>
         <div>
-          <TrainingPartnersWidget />
+          <TrainingPartnersWidget partners={trainingPartners} lang={lang} />
         </div>
         <div className="sm:col-span-2 lg:col-span-3">
-          <CompetitionsWidget />
+          <CompetitionsWidget initial={competitions} />
         </div>
         <div className="sm:col-span-2 lg:col-span-3">
           <MemberQRCode profileId={userId} />

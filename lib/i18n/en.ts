@@ -11,11 +11,19 @@ export const en = {
     title: 'Dashboard',
     trainingsTotal: 'Total Trainings',
     activeBookings: 'Active Bookings',
+    leaderboardLabel: 'Leaderboard',
+    leaderboardTop10: 'Top 10',
+    leaderboardEmpty: 'No trainings this month yet. Be the first!',
+    leaderboardYou: 'You',
+    trainingPartnersLabel: 'Your training level',
+    trainingPartnersEmpty: 'Other members with your belt will appear here once they log attendance.',
+    trainingPartnersSubtitle: 'Members at your belt, sorted by recent activity (last 30 days):',
   },
   nextClassCard: {
     heading: 'Next Class',
     noBooking: 'No upcoming booking',
     bookCta: 'Book a class →',
+    bookMoreCta: 'Book another class →',
   },
   buchen: { title: 'Book a Class' },
   classSlot: {
@@ -53,6 +61,13 @@ export const en = {
     signedAt: 'Signed on',
     noDocuments: 'No documents on file.',
     download: 'Download',
+    passwordSection: 'Password',
+    currentPassword: 'Current password',
+    newPassword: 'New password',
+    confirmPassword: 'Confirm new password',
+    changePasswordBtn: 'Change password',
+    passwordChanged: 'Password changed ✓',
+    passwordHint: 'At least 8 characters.',
   },
   admin: {
     nav: {
@@ -580,5 +595,7 @@ export const en = {
     bookingNotFound: 'Booking not found.',
     memberNotFound: 'Member not found.',
     invalidStatus: 'Invalid status.',
+    wrongCurrentPassword: 'Current password is incorrect.',
+    passwordChangeFailed: 'Password change failed.',
   },
 }

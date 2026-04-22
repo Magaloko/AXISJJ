@@ -47,10 +47,13 @@ export async function bookClass(sessionId: string): Promise<{ success?: boolean;
     const className = ct?.name ?? 'Unbekannt'
     const startsAt = sessionInfo?.starts_at ?? ''
     const memberName = memberProfile?.full_name ?? 'Unbekannt'
-    waitUntil(notify({
-      type: 'booking.created',
-      data: { memberName, className, startsAt, status },
-    }))
+    waitUntil(notify(
+      {
+        type: 'booking.created',
+        data: { memberName, className, startsAt, status },
+      },
+      { targetProfileId: user.id },
+    ))
   } catch {
     // best-effort
   }
@@ -112,10 +115,13 @@ export async function cancelBooking(bookingId: string): Promise<{ success?: bool
       const className = ct?.name ?? 'Unbekannt'
       const startsAt = sessionInfo?.starts_at ?? ''
       const memberName = memberProfile?.full_name ?? 'Unbekannt'
-      waitUntil(notify({
-        type: 'booking.cancelled',
-        data: { memberName, className, startsAt },
-      }))
+      waitUntil(notify(
+        {
+          type: 'booking.cancelled',
+          data: { memberName, className, startsAt },
+        },
+        { targetProfileId: user.id },
+      ))
 
       // Notify auto-promoted waitlist member (if any)
       if (promotedProfileId) {
@@ -125,15 +131,18 @@ export async function cancelBooking(bookingId: string): Promise<{ success?: bool
           .eq('id', promotedProfileId)
           .single()
         if (promotedProfile) {
-          waitUntil(notify({
-            type: 'waitlist.promoted',
-            data: {
-              memberName: promotedProfile.full_name ?? 'Unbekannt',
-              memberEmail: promotedProfile.email,
-              className,
-              startsAt,
+          waitUntil(notify(
+            {
+              type: 'waitlist.promoted',
+              data: {
+                memberName: promotedProfile.full_name ?? 'Unbekannt',
+                memberEmail: promotedProfile.email,
+                className,
+                startsAt,
+              },
             },
-          }))
+            { targetProfileId: promotedProfileId },
+          ))
         }
       }
     }

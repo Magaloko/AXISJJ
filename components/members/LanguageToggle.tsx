@@ -24,7 +24,7 @@ export function LanguageToggle({ current }: Props) {
 
   return (
     <div className="flex gap-2">
-      {(['de', 'en'] as Lang[]).map(lang => (
+      {(['de', 'en', 'ru'] as Lang[]).map(lang => (
         <button
           key={lang}
           onClick={() => handleChange(lang)}

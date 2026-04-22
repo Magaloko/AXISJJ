@@ -81,15 +81,18 @@ export async function promoteToNextBelt(profileId: string): Promise<{
     }))
     // Member notification
     if (memberProfile?.email) {
-      waitUntil(notify({
-        type: 'member.belt_promoted',
-        data: {
-          memberName,
-          memberEmail: memberProfile.email,
-          fromBelt: currentBelt.name,
-          toBelt: nextBelt.name,
+      waitUntil(notify(
+        {
+          type: 'member.belt_promoted',
+          data: {
+            memberName,
+            memberEmail: memberProfile.email,
+            fromBelt: currentBelt.name,
+            toBelt: nextBelt.name,
+          },
         },
-      }))
+        { targetProfileId: profileId },
+      ))
     }
   } catch {
     // best-effort

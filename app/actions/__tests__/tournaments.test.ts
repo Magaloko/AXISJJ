@@ -75,6 +75,24 @@ describe('createTournament', () => {
     const result = await createTournament({ ...validInput, name: '' })
     expect(result.error).toBeTruthy()
   })
+
+  it('propagates DB error message so admins can diagnose', async () => {
+    mockSupabase.from.mockReturnValueOnce(roleChain('owner'))
+    const insertChain = {
+      insert: vi.fn().mockReturnThis(),
+      select: vi.fn().mockReturnThis(),
+      single: vi.fn().mockResolvedValue({
+        data: null,
+        error: { message: 'new row violates row-level security policy' },
+      }),
+    }
+    mockSupabase.from.mockReturnValueOnce(insertChain)
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const result = await createTournament(validInput)
+    expect(result.error).toContain('row-level security')
+    expect(errSpy).toHaveBeenCalled()
+    errSpy.mockRestore()
+  })
 })
 
 describe('approveTournament', () => {

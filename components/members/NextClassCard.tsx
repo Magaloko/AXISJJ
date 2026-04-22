@@ -45,7 +45,7 @@ export function NextClassCard({ session, bookingId, lang = 'de' }: Props) {
         <div>
           <h3 className="text-xl font-black text-foreground">{typeName}</h3>
           <p className="mt-1 text-sm text-muted-foreground">{formatDate(session.starts_at)}</p>
-          <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-mono)' }}>
+          <p className="text-sm text-muted-foreground font-mono">
             {formatTime(session.starts_at)} – {formatTime(session.ends_at)}
           </p>
           <p className="mt-2 text-xs text-muted-foreground">{session.location}</p>
@@ -58,6 +58,12 @@ export function NextClassCard({ session, bookingId, lang = 'de' }: Props) {
           {isGi ? 'GI' : 'NO-GI'}
         </span>
       </div>
+      <Link
+        href="/buchen"
+        className="mt-5 inline-block text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80"
+      >
+        {t.bookMoreCta}
+      </Link>
     </div>
   )
 }

@@ -9,6 +9,7 @@ interface Belt { id: string; name: string; color_hex: string | null }
 interface Member {
   id: string
   full_name: string | null
+  email: string | null
   created_at: string
   lastAttendance: string | null
   phone: string | null
@@ -31,7 +32,12 @@ export function MemberTable({ members, belts, viewerRole, lang }: Props) {
   const [selected, setSelected] = useState<MemberDetail | null>(null)
 
   const filtered = members.filter(m => {
-    const matchesSearch = !search || (m.full_name ?? '').toLowerCase().includes(search.toLowerCase())
+    const q = search.trim().toLowerCase()
+    const matchesSearch =
+      !q ||
+      (m.full_name ?? '').toLowerCase().includes(q) ||
+      (m.email ?? '').toLowerCase().includes(q) ||
+      (m.phone ?? '').replace(/\s+/g, '').includes(q.replace(/\s+/g, ''))
     const matchesBelt = !beltFilter || m.belt?.name === beltFilter
     const matchesRole = roleFilter === 'all' || m.role === roleFilter
     return matchesSearch && matchesBelt && matchesRole
@@ -75,14 +81,22 @@ export function MemberTable({ members, belts, viewerRole, lang }: Props) {
 
       {/* Filters */}
       <div className="mb-4 flex flex-col gap-2 sm:flex-row">
+        <label htmlFor="member-search" className="sr-only">
+          Mitglieder suchen (Name, E-Mail, Telefon)
+        </label>
         <input
+          id="member-search"
           type="text"
-          placeholder="Name suchen ..."
+          placeholder="Name, E-Mail oder Telefon suchen ..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="flex-1 border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
         />
+        <label htmlFor="member-belt-filter" className="sr-only">
+          Nach Gürtel filtern
+        </label>
         <select
+          id="member-belt-filter"
           value={beltFilter}
           onChange={e => setBeltFilter(e.target.value)}
           className="border border-border bg-background px-3 py-2 text-sm text-foreground"
