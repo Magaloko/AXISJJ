@@ -34,21 +34,36 @@ export default async function CheckInPage({ searchParams }: Props) {
 
   const params = await searchParams
 
-  const sessionsResult = await getTodaySessions()
-  const sessions = sessionsResult.sessions ?? []
-  const sessionsError = sessionsResult.error ?? null
+  // Wrap all data fetching in try/catch so any unexpected exception
+  // shows an inline banner instead of a Next.js digest page.
+  let sessions: Awaited<ReturnType<typeof getTodaySessions>>['sessions'] = []
+  let sessionsError: string | null = null
+  let bookings: Awaited<ReturnType<typeof getSessionBookings>>['bookings'] = []
+  let bookingsError: string | null = null
+  let selectedId: string | null = null
 
-  // Default to first session after now, or last session of the day
-  const now = new Date()
-  const upcoming = sessions.find(s => new Date(s.starts_at) > now)
-  const defaultSession = upcoming ?? sessions[sessions.length - 1] ?? null
-  const selectedId = params.session ?? defaultSession?.id ?? null
+  try {
+    const sessionsResult = await getTodaySessions()
+    sessions = sessionsResult.sessions ?? []
+    sessionsError = sessionsResult.error ?? null
 
-  const bookingsResult = selectedId ? await getSessionBookings(selectedId) : null
-  const bookings = bookingsResult?.bookings ?? []
-  const bookingsError = bookingsResult?.error ?? null
+    const now = new Date()
+    const upcoming = sessions.find(s => new Date(s.starts_at) > now)
+    const defaultSession = upcoming ?? sessions[sessions.length - 1] ?? null
+    selectedId = params.session ?? defaultSession?.id ?? null
 
-  const selectedSession = sessions.find(s => s.id === selectedId) ?? null
+    if (selectedId) {
+      const bookingsResult = await getSessionBookings(selectedId)
+      bookings = bookingsResult.bookings ?? []
+      bookingsError = bookingsResult.error ?? null
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? `${err.message}\n${err.stack}` : String(err)
+    console.error('[checkin-page] exception:', err)
+    sessionsError = `Unerwarteter Fehler: ${msg}`
+  }
+
+  const selectedSession = sessions?.find(s => s.id === selectedId) ?? null
 
   function formatTime(iso: string) {
     return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
@@ -75,7 +90,7 @@ export default async function CheckInPage({ searchParams }: Props) {
         <label className="mb-1.5 block text-xs font-bold uppercase tracking-widest text-muted-foreground">
           {t.checkin.selectSession}
         </label>
-        {sessions.length === 0 ? (
+        {!sessions || sessions.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t.checkin.noSessions}</p>
         ) : (
           <div className="flex flex-wrap gap-2">
@@ -126,7 +141,7 @@ export default async function CheckInPage({ searchParams }: Props) {
               </p>
               <CheckInList
                 sessionId={selectedSession.id}
-                initialBookings={bookings}
+                initialBookings={bookings ?? []}
                 lang={lang}
               />
             </div>
