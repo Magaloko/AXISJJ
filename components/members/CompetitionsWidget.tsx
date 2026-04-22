@@ -1,14 +1,18 @@
 'use client'
 
-import { useState, useTransition, useEffect } from 'react'
-import { upsertCompetition, deleteCompetition, getMyCompetitions, type Competition } from '@/app/actions/competitions'
+import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
+import { upsertCompetition, deleteCompetition, type Competition } from '@/app/actions/competitions'
 import { ShareButton } from './ShareButton'
 
 const PLACEMENTS = ['1st', '2nd', '3rd', 'Top 4', 'DNP', 'Gold', 'Silber', 'Bronze']
 
-export function CompetitionsWidget() {
-  const [competitions, setCompetitions] = useState<Competition[]>([])
-  const [loading, setLoading] = useState(true)
+interface Props {
+  initial: Competition[]
+}
+
+export function CompetitionsWidget({ initial }: Props) {
+  const router = useRouter()
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [form, setForm] = useState({
@@ -18,13 +22,7 @@ export function CompetitionsWidget() {
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
-  async function refresh() {
-    const data = await getMyCompetitions()
-    setCompetitions(data)
-    setLoading(false)
-  }
-
-  useEffect(() => { refresh() }, [])
+  const competitions = initial
 
   function resetForm() {
     setForm({ name: '', date: new Date().toISOString().slice(0, 10), location: '', category: '', placement: '', notes: '' })
@@ -60,7 +58,7 @@ export function CompetitionsWidget() {
       })
       if (result.error) { setError(result.error); return }
       resetForm()
-      refresh()
+      router.refresh()
     })
   }
 
@@ -68,7 +66,7 @@ export function CompetitionsWidget() {
     if (!confirm('Eintrag löschen?')) return
     startTransition(async () => {
       await deleteCompetition(id)
-      refresh()
+      router.refresh()
     })
   }
 
@@ -81,7 +79,7 @@ export function CompetitionsWidget() {
         <div>
           <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Wettkämpfe</p>
           <p className="text-sm font-semibold text-foreground">
-            {loading ? '...' : `${competitions.length} Teilnahme${competitions.length !== 1 ? 'n' : ''}`}
+            {`${competitions.length} Teilnahme${competitions.length !== 1 ? 'n' : ''}`}
           </p>
         </div>
         {!showForm && (
@@ -145,7 +143,7 @@ export function CompetitionsWidget() {
         </form>
       )}
 
-      {!loading && competitions.length === 0 && !showForm && (
+      {competitions.length === 0 && !showForm && (
         <p className="text-sm text-muted-foreground">Noch keine Wettkämpfe eingetragen.</p>
       )}
 
