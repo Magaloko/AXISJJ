@@ -3,7 +3,7 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Calendar, Award, BookOpen, Settings, LogOut, GraduationCap, Scale, Trophy } from 'lucide-react'
+import { LayoutDashboard, CalendarPlus, Award, BookOpen, Settings, LogOut, GraduationCap, Scale, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { translations, type Lang } from '@/lib/i18n'
 import { createClient } from '@/lib/supabase/client'
@@ -18,15 +18,15 @@ interface NavItem {
 function navItems(lang: Lang): NavItem[] {
   const t = translations[lang].nav
   return [
-    { href: '/dashboard',     label: t.dashboard, Icon: LayoutDashboard },
-    { href: '/buchen',        label: t.buchen,    Icon: Calendar },
-    { href: '/mein-training',      label: 'Training',   Icon: GraduationCap },
-    { href: '/dashboard/turniere', label: 'Turniere',   Icon: Trophy },
-    { href: '/bjj-rules',          label: 'BJJ Regeln', Icon: Scale },
-    { href: '/leaderboard',   label: 'Leaderboard', Icon: Trophy },
-    { href: '/gurtel',        label: t.gurtel,    Icon: Award },
-    { href: '/skills',        label: t.skills,    Icon: BookOpen },
-    { href: '/konto',         label: t.konto,     Icon: Settings },
+    { href: '/dashboard',          label: t.dashboard,              Icon: LayoutDashboard },
+    { href: '/buchen',             label: 'Zum Training anmelden',  Icon: CalendarPlus },
+    { href: '/mein-training',      label: 'Training',               Icon: GraduationCap },
+    { href: '/dashboard/turniere', label: 'Turniere',               Icon: Trophy },
+    { href: '/bjj-rules',          label: 'BJJ Regeln',             Icon: Scale },
+    { href: '/leaderboard',        label: 'Leaderboard',            Icon: Trophy },
+    { href: '/gurtel',             label: t.gurtel,                 Icon: Award },
+    { href: '/skills',             label: t.skills,                 Icon: BookOpen },
+    { href: '/konto',              label: t.konto,                  Icon: Settings },
   ]
 }
 
@@ -64,15 +64,23 @@ export function MemberNav({ userName, lang = 'de' }: Props) {
         <nav className="flex-1 space-y-1 p-4">
           {items.map(({ href, label, Icon }) => {
             const active = isActive(href)
+            const isCta = href === '/buchen'
             return (
               <Link
                 key={href}
                 href={href}
                 className={cn(
                   'flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors',
-                  active
-                    ? 'bg-primary/10 text-primary'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                  isCta
+                    ? cn(
+                        'mt-1 mb-2 rounded-none font-black tracking-wide',
+                        active
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-primary/90 text-primary-foreground hover:bg-primary',
+                      )
+                    : active
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                 )}
               >
                 <Icon size={16} />
@@ -99,19 +107,30 @@ export function MemberNav({ userName, lang = 'de' }: Props) {
         className="fixed bottom-0 left-0 right-0 z-50 flex border-t border-border bg-card lg:hidden"
         aria-label="Mobile Navigation"
       >
-        {items.slice(0, 4).map(({ href, label, Icon }) => {
+        {/* Always show: Dashboard, Buchen (CTA), Training, Konto */}
+        {[items[0], items[1], items[2], items[8]].map(({ href, label, Icon }) => {
           const active = isActive(href)
+          const isCta = href === '/buchen'
           return (
             <Link
               key={href}
               href={href}
               className={cn(
                 'flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-bold uppercase tracking-wide transition-colors',
-                active ? 'text-primary' : 'text-muted-foreground'
+                isCta
+                  ? cn(
+                      'bg-primary text-primary-foreground',
+                      active && 'opacity-90',
+                    )
+                  : active
+                    ? 'text-primary'
+                    : 'text-muted-foreground',
               )}
             >
               <Icon size={18} />
-              {label}
+              <span className="leading-none">
+                {isCta ? 'Anmelden' : label}
+              </span>
             </Link>
           )
         })}

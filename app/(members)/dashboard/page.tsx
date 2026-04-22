@@ -15,6 +15,7 @@ import { LeaderboardWidget } from '@/components/members/LeaderboardWidget'
 import { TrainingPartnersWidget } from '@/components/members/TrainingPartnersWidget'
 import { MySubscriptionCard } from '@/components/members/MySubscriptionCard'
 import { XpWidget } from '@/components/members/XpWidget'
+import { BentoGrid, BentoTile } from '@/components/ui/MagicBento'
 import { calcReadiness } from '@/lib/utils/belt'
 import { differenceInMonths } from 'date-fns'
 import { translations } from '@/lib/i18n'
@@ -24,8 +25,8 @@ import { getTrainingStats } from '@/app/actions/training-log'
 import { getLeaderboard } from '@/app/actions/leaderboard'
 import { getTrainingPartners } from '@/app/actions/training-partners'
 import { getMyCompetitions } from '@/app/actions/competitions'
-import { Card, CardContent } from '@/components/ui/card'
-import { Flame } from 'lucide-react'
+import { Flame, Target, QrCode, Clock } from 'lucide-react'
+import Link from 'next/link'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard' }
@@ -114,16 +115,36 @@ export default async function DashboardPage() {
   const bookingId = (Array.isArray(rawBookings) ? rawBookings[0] : rawBookings)?.id ?? null
   const rawCT = raw?.class_types as ClassType[] | ClassType | null | undefined
   const classType: ClassType | null = Array.isArray(rawCT) ? (rawCT[0] ?? null) : (rawCT ?? null)
-  const nextSession = raw ? { id: raw.id, starts_at: raw.starts_at, ends_at: raw.ends_at, location: raw.location, class_types: classType } : null
+  const nextSession = raw
+    ? { id: raw.id, starts_at: raw.starts_at, ends_at: raw.ends_at, location: raw.location, class_types: classType }
+    : null
 
   const latestRankRow = rankHistory?.[0] ?? null
   const rawBeltRank = latestRankRow?.belt_ranks
-  const beltRank: BeltRankRow | null = Array.isArray(rawBeltRank) ? (rawBeltRank[0] ?? null) : (rawBeltRank as BeltRankRow | null) ?? null
-  const monthsInGrade = latestRankRow?.promoted_at ? differenceInMonths(new Date(), new Date(latestRankRow.promoted_at)) : 0
-  const readiness = calcReadiness(attendanceCount ?? 0, beltRank?.min_sessions ?? null, monthsInGrade, beltRank?.min_time_months ?? null)
+  const beltRank: BeltRankRow | null = Array.isArray(rawBeltRank)
+    ? (rawBeltRank[0] ?? null)
+    : (rawBeltRank as BeltRankRow | null) ?? null
+  const monthsInGrade = latestRankRow?.promoted_at
+    ? differenceInMonths(new Date(), new Date(latestRankRow.promoted_at))
+    : 0
+  const readiness = calcReadiness(
+    attendanceCount ?? 0,
+    beltRank?.min_sessions ?? null,
+    monthsInGrade,
+    beltRank?.min_time_months ?? null,
+  )
+
+  /* weekly goal pace — simple heuristic: 3 sessions/week target */
+  const WEEKLY_GOAL = 3
+  const weeklyAvg = trainingStats.weeklyFrequency.length
+    ? trainingStats.weeklyFrequency.reduce((s, w) => s + w.count, 0) / trainingStats.weeklyFrequency.length
+    : 0
+  const pacePercent = Math.min(Math.round((weeklyAvg / WEEKLY_GOAL) * 100), 100)
+  const onPace = weeklyAvg >= WEEKLY_GOAL * 0.8
 
   return (
-    <div className="p-6 sm:p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
+      {/* ── Page header ── */}
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-black text-foreground">{t.dashboard.title}</h1>
         <TrainingLogButton />
@@ -131,78 +152,118 @@ export default async function DashboardPage() {
 
       {showBanner && <TrainingLogBanner sessionId={latestAtt.session_id} />}
 
-      <div className="mb-6">
+      {/* ── XP bar (full-width) ── */}
+      <div className="mb-4">
         <XpWidget profileId={userId} />
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t.dashboard.trainingsTotal}</p>
-            <p className="mt-1 font-mono text-3xl font-black text-foreground">{attendanceCount ?? 0}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Streak</p>
-            <p className="mt-1 flex items-center gap-2 font-mono text-3xl font-black text-foreground">
-              {trainingStats.currentStreak > 0 ? (
-                <>
-                  <Flame size={24} className="text-primary" strokeWidth={2.5} />
-                  {trainingStats.currentStreak}
-                </>
-              ) : '—'}
+      {/* ══════════ BENTO GRID ══════════ */}
+      <BentoGrid>
+
+        {/* 1 — Next class (hero action, 2×2) */}
+        <BentoTile colSpan={2} rowSpan={2} glowColor="220 38 38" enableStars>
+          <NextClassCard session={nextSession} bookingId={bookingId} lang={lang} />
+        </BentoTile>
+
+        {/* 2 — Hero KPI: total trainings */}
+        <BentoTile colSpan={1} glowColor="220 38 38">
+          <div className="flex h-full flex-col justify-between p-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              {t.dashboard.trainingsTotal}
             </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
+            <p className="font-mono text-5xl font-black tabular-nums text-foreground">
+              {attendanceCount ?? 0}
+            </p>
+            {/* pace bar vs weekly goal */}
+            <div className="mt-3 space-y-1">
+              <div className="flex items-center justify-between text-[11px] font-semibold">
+                <span className="flex items-center gap-1 text-muted-foreground">
+                  <Target size={11} />
+                  Ø {weeklyAvg.toFixed(1)}&thinsp;/&thinsp;Woche
+                </span>
+                <span className={onPace ? 'text-emerald-500' : 'text-amber-500'}>
+                  {pacePercent}% Ziel
+                </span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className={`h-full rounded-full transition-all duration-700 ${onPace ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                  style={{ width: `${pacePercent}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </BentoTile>
+
+        {/* 3 — Streak */}
+        <BentoTile colSpan={1}>
+          <div className="flex h-full flex-col justify-between p-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Streak</p>
+            <div className="flex items-end gap-2">
+              {trainingStats.currentStreak > 0 && (
+                <Flame size={32} className="mb-0.5 text-primary" strokeWidth={2.5} />
+              )}
+              <p className="font-mono text-5xl font-black tabular-nums text-foreground">
+                {trainingStats.currentStreak > 0 ? trainingStats.currentStreak : '—'}
+              </p>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              {trainingStats.currentStreak > 0 ? 'Wochen in Folge' : 'Noch kein Streak'}
+            </p>
+          </div>
+        </BentoTile>
+
+        {/* 4 — Ø Mood */}
+        <BentoTile colSpan={1}>
+          <div className="flex h-full flex-col justify-between p-5">
             <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Ø Stimmung</p>
-            <p className="mt-1 font-mono text-3xl font-black text-foreground">
+            <p className="font-mono text-5xl font-black tabular-nums text-foreground">
               {trainingStats.avgMoodLift !== null
                 ? `${trainingStats.avgMoodLift > 0 ? '+' : ''}${trainingStats.avgMoodLift}`
                 : '—'}
             </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t.dashboard.activeBookings}</p>
-            <p className="mt-1 font-mono text-3xl font-black text-foreground">{bookingCount ?? 0}</p>
-          </CardContent>
-        </Card>
-      </div>
+            <p className="text-xs text-muted-foreground">nach dem Training</p>
+          </div>
+        </BentoTile>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="sm:col-span-2">
-          <NextClassCard session={nextSession} bookingId={bookingId} lang={lang} />
-        </div>
-        <div>
-          <MotivationWidget
-            streak={trainingStats.currentStreak}
-            totalSessions={trainingStats.totalSessions}
-            lastSessionDate={trainingStats.lastSessionDate}
-            lastGoal={trainingStats.lastGoal}
-          />
-        </div>
+        {/* 5 — Active bookings */}
+        <BentoTile colSpan={1}>
+          <div className="flex h-full flex-col justify-between p-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
+              {t.dashboard.activeBookings}
+            </p>
+            <p className="font-mono text-5xl font-black tabular-nums text-foreground">
+              {bookingCount ?? 0}
+            </p>
+            <Link href="/buchen" className="text-xs font-semibold text-primary hover:underline">
+              Mehr buchen →
+            </Link>
+          </div>
+        </BentoTile>
 
+        {/* 6 — Training frequency chart (full width) */}
         {trainingStats.weeklyFrequency.length > 0 && (
-          <div className="sm:col-span-2">
+          <BentoTile colSpan={4}>
             <TrainingFrequencyChart data={trainingStats.weeklyFrequency} />
-          </div>
-        )}
-        {trainingStats.moodTrend.length > 1 && (
-          <div>
-            <MoodTrendChart data={trainingStats.moodTrend} />
-          </div>
-        )}
-        {trainingStats.radarAvg && (
-          <div>
-            <SkillRadarChart data={trainingStats.radarAvg} />
-          </div>
+          </BentoTile>
         )}
 
-        <div className="sm:col-span-2 lg:col-span-3">
+        {/* 7 — Mood trend */}
+        {trainingStats.moodTrend.length > 1 && (
+          <BentoTile colSpan={2}>
+            <MoodTrendChart data={trainingStats.moodTrend} />
+          </BentoTile>
+        )}
+
+        {/* 8 — Skill radar */}
+        {trainingStats.radarAvg && (
+          <BentoTile colSpan={2}>
+            <SkillRadarChart data={trainingStats.radarAvg} />
+          </BentoTile>
+        )}
+
+        {/* 9 — Belt progress (full width) */}
+        <BentoTile colSpan={4}>
           <BeltProgress
             beltName={beltRank?.name ?? null}
             stripes={beltRank?.stripes ?? 0}
@@ -212,26 +273,59 @@ export default async function DashboardPage() {
             monthsInGrade={monthsInGrade}
             lang={lang}
           />
-        </div>
-        <div>
+        </BentoTile>
+
+        {/* 10 — Motivation + Subscription side-by-side */}
+        <BentoTile colSpan={2}>
+          <MotivationWidget
+            streak={trainingStats.currentStreak}
+            totalSessions={trainingStats.totalSessions}
+            lastSessionDate={trainingStats.lastSessionDate}
+            lastGoal={trainingStats.lastGoal}
+          />
+        </BentoTile>
+        <BentoTile colSpan={2}>
           <MySubscriptionCard />
-        </div>
-        <div className="lg:col-span-2">
+        </BentoTile>
+
+        {/* 11 — Leaderboard (2 cols) + Training partners (2 cols) */}
+        <BentoTile colSpan={2}>
           <LeaderboardWidget entries={leaderboardEntries} lang={lang} />
-        </div>
-        <div>
+        </BentoTile>
+        <BentoTile colSpan={2}>
           <TrainingPartnersWidget partners={trainingPartners} lang={lang} />
-        </div>
-        <div className="sm:col-span-2 lg:col-span-3">
+        </BentoTile>
+
+        {/* 12 — Competitions (full width) */}
+        <BentoTile colSpan={4}>
           <CompetitionsWidget initial={competitions} />
-        </div>
-        <div className="sm:col-span-2 lg:col-span-3">
-          <MemberQRCode profileId={userId} />
-        </div>
-        <div className="sm:col-span-2 lg:col-span-3">
-          <OpeningHoursWidget hours={gym.opening_hours} />
-        </div>
-      </div>
+        </BentoTile>
+
+        {/* 13 — QR code + Opening hours */}
+        <BentoTile colSpan={2} glowColor="120 120 220">
+          <div className="flex h-full flex-col">
+            <div className="flex items-center gap-2 border-b border-border px-5 py-4">
+              <QrCode size={14} className="text-primary" />
+              <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Check-In QR</span>
+            </div>
+            <div className="flex flex-1 items-center justify-center p-4">
+              <MemberQRCode profileId={userId} />
+            </div>
+          </div>
+        </BentoTile>
+        <BentoTile colSpan={2} glowColor="80 180 120">
+          <div className="flex h-full flex-col">
+            <div className="flex items-center gap-2 border-b border-border px-5 py-4">
+              <Clock size={14} className="text-primary" />
+              <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Öffnungszeiten</span>
+            </div>
+            <div className="p-4">
+              <OpeningHoursWidget hours={gym.opening_hours} />
+            </div>
+          </div>
+        </BentoTile>
+
+      </BentoGrid>
     </div>
   )
 }

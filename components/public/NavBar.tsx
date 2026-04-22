@@ -87,14 +87,14 @@ export function NavBar({ currentLang }: NavBarProps) {
             })}
           </div>
 
-          <div className="hidden items-center gap-4 md:flex">
+          <div className="hidden items-center gap-3 md:flex">
             <LanguageSwitcher currentLang={currentLang} />
             <Link
               href="/login"
-              aria-label={t.login}
-              className="text-muted-foreground transition-colors hover:text-foreground"
+              className="flex items-center gap-1.5 border border-border px-4 py-2 text-sm font-bold tracking-wide text-foreground transition-colors hover:bg-muted"
             >
-              <LogIn size={20} />
+              <LogIn size={15} />
+              {t.login}
             </Link>
             <Link
               href="/trial"
@@ -172,9 +172,9 @@ export function NavBar({ currentLang }: NavBarProps) {
           <Link
             href="/login"
             onClick={() => setOpen(false)}
-            className="flex items-center gap-2 py-4 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            className="mt-4 flex items-center justify-center gap-2 border border-border py-3 text-sm font-bold text-foreground transition-colors hover:bg-muted"
           >
-            <LogIn size={18} />
+            <LogIn size={16} />
             {t.login}
           </Link>
 
