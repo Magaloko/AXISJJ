@@ -4,7 +4,9 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
+import { CheckCircle2 } from 'lucide-react'
 import { submitMembership } from '@/app/actions/membership'
+import { validateDiscountCode } from '@/app/actions/discount-codes'
 import { membershipFormSchema, type MembershipFormData } from '@/app/actions/membership.schema'
 import { translations, type Lang } from '@/lib/i18n'
 
@@ -22,6 +24,26 @@ export default function MembershipForm({ lang }: MembershipFormProps) {
   const t = translations[lang].public.membershipForm
   const [submitted, setSubmitted] = useState(false)
   const [serverError, setServerError] = useState('')
+
+  // Discount code state
+  const [discountInput, setDiscountInput] = useState('')
+  const [discountValidating, setDiscountValidating] = useState(false)
+  const [discountLabel, setDiscountLabel] = useState<string | null>(null)
+  const [discountError, setDiscountError] = useState('')
+
+  async function handleDiscountCheck() {
+    if (!discountInput.trim()) return
+    setDiscountValidating(true)
+    setDiscountError('')
+    setDiscountLabel(null)
+    const res = await validateDiscountCode(discountInput)
+    setDiscountValidating(false)
+    if (res.valid && res.discount_label) {
+      setDiscountLabel(res.discount_label)
+    } else {
+      setDiscountError(res.error ?? 'Ungültiger Code.')
+    }
+  }
 
   const {
     register,
@@ -222,6 +244,34 @@ export default function MembershipForm({ lang }: MembershipFormProps) {
             placeholder={t.notesPlaceholder}
             className={`${inputClass} resize-none`}
           />
+        </div>
+
+        {/* Discount Code */}
+        <div>
+          <label className={labelClass}>Rabatt-Code (optional)</label>
+          <div className="flex gap-0">
+            <input
+              value={discountInput}
+              onChange={e => { setDiscountInput(e.target.value.toUpperCase()); setDiscountLabel(null); setDiscountError('') }}
+              placeholder="AXIS-XXXXXX"
+              className="flex-1 border border-border bg-card px-4 py-3 text-sm font-mono text-foreground placeholder:text-muted-foreground outline-none focus:border-primary"
+            />
+            <button
+              type="button"
+              onClick={handleDiscountCheck}
+              disabled={discountValidating || !discountInput.trim()}
+              className="border border-l-0 border-border px-4 text-xs font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground disabled:opacity-40"
+            >
+              {discountValidating ? '…' : 'Prüfen'}
+            </button>
+          </div>
+          {discountLabel && (
+            <div className="mt-2 flex items-center gap-2 text-sm text-green-600">
+              <CheckCircle2 size={14} />
+              <span className="font-bold">{discountLabel} wird angewendet!</span>
+            </div>
+          )}
+          {discountError && <p className="mt-1 text-xs text-destructive">{discountError}</p>}
         </div>
 
         {/* Terms */}
