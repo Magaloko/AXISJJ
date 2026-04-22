@@ -1,3 +1,4 @@
+import { isOwnerLevel } from '@/lib/auth/roles'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { BeltEligibilityList } from '@/components/admin/BeltEligibilityList'
@@ -14,7 +15,7 @@ export default async function GuertelPage() {
 
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'owner') redirect('/admin/dashboard')
+  if (!isOwnerLevel(profile?.role)) redirect('/admin/dashboard')
 
   // Fetch belts and all profile_ranks
   const [beltsResult, ranksResult] = await Promise.all([

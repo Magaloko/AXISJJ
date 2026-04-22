@@ -1,4 +1,5 @@
 'use server'
+import { isOwnerLevel } from '@/lib/auth/roles'
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
@@ -67,7 +68,7 @@ export async function updateRegistrationStatus(
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
   const role = profile?.role
-  if (role !== 'coach' && role !== 'owner') return { error: e.notAuthorized }
+  if (role !== 'coach' && !isOwnerLevel(role)) return { error: e.notAuthorized }
 
   const { error } = await supabase
     .from('tournament_registrations')
@@ -94,7 +95,7 @@ export async function getRegistrationsForTournament(
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
   const role = profile?.role
-  if (role !== 'coach' && role !== 'owner') return []
+  if (role !== 'coach' && !isOwnerLevel(role)) return []
 
   const { data } = await supabase
     .from('tournament_registrations')

@@ -72,7 +72,7 @@ export async function updateMember(
 
 export async function updateMemberRole(
   profileId: string,
-  role: 'member' | 'coach',
+  role: 'member' | 'coach' | 'owner' | 'developer',
 ): Promise<{ success?: true; error?: string }> {
   const e = await getActionErrors()
 
@@ -92,7 +92,7 @@ export async function updateMemberRole(
     .single()
 
   const { error } = await supabase.from('profiles')
-    .update({ role })
+    .update({ role: role as 'member' | 'coach' | 'owner' })
     .eq('id', profileId)
   if (error) return { error: e.memberRoleUpdateFailed }
 

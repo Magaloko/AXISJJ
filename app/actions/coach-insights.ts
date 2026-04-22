@@ -42,7 +42,7 @@ export async function getCoachInsights(): Promise<CoachInsights> {
 
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
-  if (!profile || (profile.role !== 'coach' && profile.role !== 'owner')) {
+  if (!profile || (profile.role !== 'coach' && !['owner', 'developer'].includes(profile.role))) {
     return { ...empty, error: 'Keine Berechtigung.' }
   }
 

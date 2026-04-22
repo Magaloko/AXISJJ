@@ -1,3 +1,4 @@
+import { isOwnerLevel } from '@/lib/auth/roles'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { formatDistanceToNow, parseISO } from 'date-fns'
@@ -59,7 +60,7 @@ export default async function AuditPage() {
 
   const { data: profile } = await supabase
     .from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'owner') redirect('/admin/dashboard')
+  if (!isOwnerLevel(profile?.role)) redirect('/admin/dashboard')
 
   const { data: entries } = await supabase
     .from('audit_log')

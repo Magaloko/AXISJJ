@@ -1,3 +1,4 @@
+import { isOwnerLevel } from '@/lib/auth/roles'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getTournamentsForAdmin } from '@/app/actions/tournaments'
@@ -16,7 +17,7 @@ export default async function AdminTournamentsPage() {
   const { data: profile } = await supabase
     .from('profiles').select('role, language').eq('id', user.id).single()
   const role = profile?.role
-  if (role !== 'coach' && role !== 'owner') redirect('/dashboard')
+  if (role !== 'coach' && !isOwnerLevel(role)) redirect('/dashboard')
 
   const rawLang = (await cookies()).get('lang')?.value
   const lang = resolveLang(rawLang, profile?.language)
