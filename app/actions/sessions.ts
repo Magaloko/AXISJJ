@@ -133,6 +133,23 @@ export async function cancelSession(
       targetName: className,
       meta: { startsAt },
     }))
+
+    // Fan-out session cancellation to every affected member's Telegram.
+    // Email already covered by admin-side notification; these per-member
+    // pushes are best-effort and must not block the cancel.
+    waitUntil((async () => {
+      const { data: affectedBookings } = await supabase
+        .from('bookings')
+        .select('profile_id')
+        .eq('session_id', sessionId)
+        .eq('status', 'confirmed')
+      for (const b of affectedBookings ?? []) {
+        await notify(
+          { type: 'session.cancelled', data: { className, startsAt } },
+          { targetProfileId: b.profile_id },
+        )
+      }
+    })())
   }
 
   return { success: true }

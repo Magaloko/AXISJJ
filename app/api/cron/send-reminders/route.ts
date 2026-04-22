@@ -58,16 +58,19 @@ export async function GET(request: Request) {
     for (const profile of profiles ?? []) {
       if (!profile.email) continue
       try {
-        await notify({
-          type: 'training.reminder',
-          data: {
-            memberName: profile.full_name ?? 'Mitglied',
-            memberEmail: profile.email,
-            className,
-            startsAt: session.starts_at,
-            location: session.location,
+        await notify(
+          {
+            type: 'training.reminder',
+            data: {
+              memberName: profile.full_name ?? 'Mitglied',
+              memberEmail: profile.email,
+              className,
+              startsAt: session.starts_at,
+              location: session.location,
+            },
           },
-        })
+          { targetProfileId: profile.id },
+        )
         remindersSent++
       } catch (err) {
         console.error('[cron/send-reminders] failed for profile', profile.id, err)
