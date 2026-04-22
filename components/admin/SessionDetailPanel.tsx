@@ -2,7 +2,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { X } from 'lucide-react'
+import Link from 'next/link'
+import { X, ExternalLink } from 'lucide-react'
 import { cancelSession } from '@/app/actions/sessions'
 import { SessionForm } from './SessionForm'
 import { SessionAttendeesList } from './SessionAttendeesList'
@@ -98,6 +99,15 @@ export function SessionDetailPanel({
                 </div>
               )}
             </dl>
+
+            <div className="mt-4">
+              <Link
+                href={`/admin/klassen/${session.id}`}
+                className="flex items-center gap-2 border border-border px-3 py-2 text-xs font-bold uppercase tracking-wider text-foreground hover:border-primary hover:text-primary"
+              >
+                <ExternalLink size={12} /> Bewertungen &amp; Sparring →
+              </Link>
+            </div>
 
             <div className="mt-6 border-t border-border pt-6">
               <SessionAttendeesList sessionId={session.id} />

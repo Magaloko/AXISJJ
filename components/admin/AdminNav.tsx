@@ -5,7 +5,8 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, CheckSquare, CalendarDays, Users, Award,
   ClipboardList, Settings, LogOut, Building2, ScrollText,
-  BookOpen, MonitorPlay, FileText, GraduationCap, MoreHorizontal, X, Trophy, Code2,
+  BookOpen, MonitorPlay, FileText, GraduationCap, MoreHorizontal, X, Trophy,
+  UsersRound, FileUp,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils/cn'
@@ -36,9 +37,11 @@ function getOpsItems(lang: Lang): NavItem[] {
 function getMitgliederItems(lang: Lang): NavItem[] {
   const n = translations[lang].admin.nav
   return [
-    { href: '/admin/mitglieder', label: n.mitglieder, Icon: Users },
-    { href: '/admin/guertel',    label: n.guertel,    Icon: Award },
-    { href: '/admin/leads',      label: n.leads,      Icon: ClipboardList },
+    { href: '/admin/mitglieder',    label: n.mitglieder,    Icon: Users },
+    { href: '/admin/gruppen',       label: 'Gruppen',       Icon: UsersRound },
+    { href: '/admin/guertel',       label: n.guertel,       Icon: Award },
+    { href: '/admin/leads',         label: n.leads,         Icon: ClipboardList },
+    { href: '/admin/vertrag-upload', label: 'Vertrag-Upload', Icon: FileUp },
   ]
 }
 
