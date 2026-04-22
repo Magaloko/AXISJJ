@@ -60,7 +60,10 @@ export async function createTournament(
     .select('id')
     .single()
 
-  if (error) return { error: e.saveFailed }
+  if (error) {
+    console.error('[tournaments] create error:', error)
+    return { error: `${e.saveFailed}: ${error.message}` }
+  }
 
   revalidatePath('/admin/turniere')
   revalidatePath('/')
@@ -93,7 +96,10 @@ export async function updateTournament(
     })
     .eq('id', id)
 
-  if (error) return { error: e.updateFailed }
+  if (error) {
+    console.error('[tournaments] update error:', error)
+    return { error: `${e.updateFailed}: ${error.message}` }
+  }
 
   revalidatePath('/admin/turniere')
   revalidatePath('/')
@@ -112,7 +118,10 @@ export async function approveTournament(id: string): Promise<{ success?: true; e
     .update({ status: 'approved' })
     .eq('id', id)
 
-  if (error) return { error: e.tournamentApproveFailed }
+  if (error) {
+    console.error('[tournaments] approve error:', error)
+    return { error: `${e.tournamentApproveFailed}: ${error.message}` }
+  }
 
   revalidatePath('/admin/turniere')
   revalidatePath('/')
@@ -131,7 +140,10 @@ export async function cancelTournament(id: string): Promise<{ success?: true; er
     .update({ status: 'cancelled' })
     .eq('id', id)
 
-  if (error) return { error: e.tournamentCancelFailed }
+  if (error) {
+    console.error('[tournaments] cancel error:', error)
+    return { error: `${e.tournamentCancelFailed}: ${error.message}` }
+  }
 
   revalidatePath('/admin/turniere')
   revalidatePath('/')
