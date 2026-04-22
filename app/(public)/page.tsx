@@ -1,5 +1,4 @@
 import { cookies } from 'next/headers'
-import { ParallaxComponent } from '@/components/ui/parallax-scrolling'
 import { Hero } from '@/components/public/Hero'
 import { StatsBar } from '@/components/public/StatsBar'
 import { ScheduleWidget } from '@/components/public/ScheduleWidget'
@@ -40,7 +39,6 @@ export default async function HomePage() {
 
   return (
     <>
-      <ParallaxComponent />
       <TrialCTA lang={lang} />
       <StatsBar lang={lang} />
       <CoachSection lang={lang} />
