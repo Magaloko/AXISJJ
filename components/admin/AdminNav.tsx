@@ -6,7 +6,7 @@ import {
   LayoutDashboard, CheckSquare, CalendarDays, Users, Award,
   ClipboardList, Settings, LogOut, Building2, ScrollText,
   BookOpen, MonitorPlay, FileText, GraduationCap, MoreHorizontal, X, Trophy,
-  UsersRound, FileUp,
+  UsersRound, FileUp, Megaphone,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils/cn'
@@ -48,7 +48,8 @@ function getMitgliederItems(lang: Lang): NavItem[] {
 function getBusinessItems(lang: Lang): NavItem[] {
   const n = translations[lang].admin.nav
   return [
-    { href: '/admin/berichte', label: n.berichte, Icon: FileText },
+    { href: '/admin/berichte',   label: n.berichte,    Icon: FileText },
+    { href: '/admin/broadcast',  label: 'Broadcast',   Icon: Megaphone },
   ]
 }
 
