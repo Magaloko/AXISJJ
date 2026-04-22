@@ -10,6 +10,7 @@ export interface CoachPublicProfile {
   beltName: string | null
   beltColorHex: string | null
   displayOrder: number
+  isPinned: boolean
 }
 
 export async function getPublicCoaches(): Promise<CoachPublicProfile[]> {
@@ -66,6 +67,7 @@ export async function getPublicCoaches(): Promise<CoachPublicProfile[]> {
       beltName: profileBelt?.name ?? row.belt_name ?? null,
       beltColorHex: profileBelt?.color_hex ?? row.belt_color_hex ?? null,
       displayOrder: row.display_order,
+      isPinned: Boolean(row.is_pinned),
     }
   })
 }
