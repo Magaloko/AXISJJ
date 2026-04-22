@@ -53,6 +53,13 @@ export const de = {
     signedAt: 'Unterzeichnet am',
     noDocuments: 'Keine Dokumente vorhanden.',
     download: 'Download',
+    passwordSection: 'Passwort',
+    currentPassword: 'Aktuelles Passwort',
+    newPassword: 'Neues Passwort',
+    confirmPassword: 'Neues Passwort bestätigen',
+    changePasswordBtn: 'Passwort ändern',
+    passwordChanged: 'Passwort geändert ✓',
+    passwordHint: 'Mindestens 8 Zeichen.',
   },
   admin: {
     nav: {
@@ -580,5 +587,7 @@ export const de = {
     bookingNotFound: 'Buchung nicht gefunden.',
     memberNotFound: 'Mitglied nicht gefunden.',
     invalidStatus: 'Ungültiger Status.',
+    wrongCurrentPassword: 'Aktuelles Passwort ist falsch.',
+    passwordChangeFailed: 'Passwort ändern fehlgeschlagen.',
   },
 }

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { translations } from '@/lib/i18n'
 import { resolveLang } from '@/lib/i18n/resolve-lang'
 import { ProfileForm } from '@/components/members/ProfileForm'
+import { PasswordChangeCard } from '@/components/members/PasswordChangeCard'
 import { LanguageToggle } from '@/components/members/LanguageToggle'
 import { formatDate } from '@/lib/utils/dates'
 import { PoliciesSection } from '@/components/members/PoliciesSection'
@@ -56,6 +57,14 @@ export default async function KontoPage() {
             {t.profileSection}
           </p>
           <ProfileForm profile={profile} lang={lang} />
+        </section>
+
+        {/* Password */}
+        <section>
+          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">
+            {t.passwordSection}
+          </p>
+          <PasswordChangeCard lang={lang} />
         </section>
 
         {/* Language */}

@@ -53,6 +53,13 @@ export const ru = {
     signedAt: 'Подписано',
     noDocuments: 'Документов нет.',
     download: 'Скачать',
+    passwordSection: 'Пароль',
+    currentPassword: 'Текущий пароль',
+    newPassword: 'Новый пароль',
+    confirmPassword: 'Подтвердите новый пароль',
+    changePasswordBtn: 'Сменить пароль',
+    passwordChanged: 'Пароль изменён ✓',
+    passwordHint: 'Минимум 8 символов.',
   },
   admin: {
     nav: {
@@ -580,5 +587,7 @@ export const ru = {
     bookingNotFound: 'Бронирование не найдено.',
     memberNotFound: 'Участник не найден.',
     invalidStatus: 'Неверный статус.',
+    wrongCurrentPassword: 'Текущий пароль неверен.',
+    passwordChangeFailed: 'Не удалось изменить пароль.',
   },
 }
