@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { Hero } from '@/components/public/Hero'
 import { StatsBar } from '@/components/public/StatsBar'
 import { ScheduleWidget } from '@/components/public/ScheduleWidget'
@@ -23,13 +24,12 @@ export const metadata: Metadata = {
 export default async function HomePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
-  let dbLang: string | null = null
-  if (user) {
-    const { data } = await supabase.from('profiles').select('language').eq('id', user.id).single()
-    dbLang = data?.language ?? null
-  }
+
+  // Logged-in members go straight to their dashboard
+  if (user) redirect('/dashboard')
+
   const rawLang = (await cookies()).get('lang')?.value
-  const lang = resolveLang(rawLang, dbLang)
+  const lang = resolveLang(rawLang)
 
   const [schedule, pricingPlans, slides] = await Promise.all([
     getWeekSchedule(),
