@@ -24,10 +24,10 @@ export function ParallaxComponent() {
       });
 
       const layers = [
-        { layer: '1', yPercent: 70 },
-        { layer: '2', yPercent: 55 },
-        { layer: '3', yPercent: 40 },
-        { layer: '4', yPercent: 10 },
+        { layer: '1', yPercent: 25 },
+        { layer: '2', yPercent: 18 },
+        { layer: '3', yPercent: 5 },
+        { layer: '4', yPercent: 2 },
       ];
 
       layers.forEach((layerObj, idx) => {
