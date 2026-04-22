@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import Link from 'next/link'
 import { submitMembership } from '@/app/actions/membership'
 import { membershipFormSchema, type MembershipFormData } from '@/app/actions/membership.schema'
 import { translations, type Lang } from '@/lib/i18n'
@@ -70,6 +71,16 @@ export default function MembershipForm({ lang }: MembershipFormProps) {
       <h1 className="mb-2 text-4xl font-black text-foreground">{t.heading}</h1>
       <p className="mb-2 text-sm text-muted-foreground">
         {t.intro}
+      </p>
+      <p className="mb-6 text-xs text-muted-foreground">
+        Bereits Mitglied?{' '}
+        <Link href="/login" className="font-bold text-primary underline hover:text-primary/80">
+          Hier einloggen →
+        </Link>
+        {' '}· Probetraining?{' '}
+        <Link href="/trial" className="font-bold text-primary underline hover:text-primary/80">
+          1 Woche gratis →
+        </Link>
       </p>
 
       {/* PDF Download */}

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import Link from 'next/link'
 import { submitTrialLead } from '@/app/actions/leads'
 import { LeadSchema, type LeadFormData } from '@/app/actions/leads.schema'
 import { translations, type Lang } from '@/lib/i18n'
@@ -55,8 +56,14 @@ export default function TrialForm({ lang }: TrialFormProps) {
           {t.eyebrow}
         </p>
         <h1 className="mb-2 text-4xl font-black text-foreground">{t.heading}</h1>
-        <p className="mb-8 text-sm text-muted-foreground">
+        <p className="mb-6 text-sm text-muted-foreground">
           {t.subtitle}
+        </p>
+        <p className="mb-8 text-xs text-muted-foreground">
+          Bereits Mitglied?{' '}
+          <Link href="/login" className="font-bold text-primary underline hover:text-primary/80">
+            Hier einloggen →
+          </Link>
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
