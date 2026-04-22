@@ -1,4 +1,5 @@
 'use server'
+import { isOwnerLevel } from '@/lib/auth/roles'
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
@@ -40,9 +41,9 @@ export async function createTournament(
   if (!user) return { error: e.notAuthenticated }
 
   const role = await getCallerRole()
-  if (role !== 'coach' && role !== 'owner') return { error: e.notAuthorized }
+  if (role !== 'coach' && !isOwnerLevel(role)) return { error: e.notAuthorized }
 
-  const status = role === 'owner' ? 'approved' : 'pending_approval'
+  const status = ['owner','developer'].includes(role ?? '') ? 'approved' : 'pending_approval'
 
   const { data, error } = await supabase
     .from('tournaments')
@@ -80,7 +81,7 @@ export async function updateTournament(
   const e = await getActionErrors()
 
   const role = await getCallerRole()
-  if (role !== 'coach' && role !== 'owner') return { error: e.notAuthorized }
+  if (role !== 'coach' && !isOwnerLevel(role)) return { error: e.notAuthorized }
 
   const supabase = await createClient()
   const { error } = await supabase
@@ -110,7 +111,7 @@ export async function approveTournament(id: string): Promise<{ success?: true; e
   const e = await getActionErrors()
 
   const role = await getCallerRole()
-  if (role !== 'owner') return { error: e.ownerOnly }
+  if (!isOwnerLevel(role)) return { error: e.ownerOnly }
 
   const supabase = await createClient()
   const { error } = await supabase
@@ -132,7 +133,7 @@ export async function cancelTournament(id: string): Promise<{ success?: true; er
   const e = await getActionErrors()
 
   const role = await getCallerRole()
-  if (role !== 'coach' && role !== 'owner') return { error: e.notAuthorized }
+  if (role !== 'coach' && !isOwnerLevel(role)) return { error: e.notAuthorized }
 
   const supabase = await createClient()
   const { error } = await supabase
@@ -152,7 +153,7 @@ export async function cancelTournament(id: string): Promise<{ success?: true; er
 
 export async function getTournamentsForAdmin(): Promise<Tournament[]> {
   const role = await getCallerRole()
-  if (role !== 'coach' && role !== 'owner') return []
+  if (role !== 'coach' && !isOwnerLevel(role)) return []
 
   const supabase = await createClient()
   const { data } = await supabase

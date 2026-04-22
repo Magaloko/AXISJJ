@@ -25,8 +25,9 @@ import { getTrainingStats } from '@/app/actions/training-log'
 import { getLeaderboard } from '@/app/actions/leaderboard'
 import { getTrainingPartners } from '@/app/actions/training-partners'
 import { getMyCompetitions } from '@/app/actions/competitions'
-import { Flame, Target, QrCode, Clock } from 'lucide-react'
-import Link from 'next/link'
+import { getEnabledModules } from '@/lib/dashboard-modules'
+import { Card, CardContent } from '@/components/ui/card'
+import { Flame } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Dashboard' }
@@ -49,7 +50,7 @@ export default async function DashboardPage() {
   const userId = user.id
 
   const now = new Date().toISOString()
-  const gym = await getGymSettings()
+  const [gym, modules] = await Promise.all([getGymSettings(), getEnabledModules()])
 
   const [
     { data: nextSessions },
@@ -142,6 +143,8 @@ export default async function DashboardPage() {
   const pacePercent = Math.min(Math.round((weeklyAvg / WEEKLY_GOAL) * 100), 100)
   const onPace = weeklyAvg >= WEEKLY_GOAL * 0.8
 
+  const m = modules // shorthand: m.has('key') controls visibility
+
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       {/* ── Page header ── */}
@@ -152,180 +155,129 @@ export default async function DashboardPage() {
 
       {showBanner && <TrainingLogBanner sessionId={latestAtt.session_id} />}
 
-      {/* ── XP bar (full-width) ── */}
-      <div className="mb-4">
-        <XpWidget profileId={userId} />
-      </div>
+      {m.has('xp') && (
+        <div className="mb-6">
+          <XpWidget profileId={userId} />
+        </div>
+      )}
 
-      {/* ══════════ BENTO GRID ══════════ */}
-      <BentoGrid>
-
-        {/* 1 — Next class (hero action, 2×2) */}
-        <BentoTile colSpan={2} rowSpan={2} glowColor="220 38 38" enableStars>
-          <NextClassCard session={nextSession} bookingId={bookingId} lang={lang} />
-        </BentoTile>
-
-        {/* 2 — Hero KPI: total trainings */}
-        <BentoTile colSpan={1} glowColor="220 38 38">
-          <div className="flex h-full flex-col justify-between p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              {t.dashboard.trainingsTotal}
-            </p>
-            <p className="font-mono text-5xl font-black tabular-nums text-foreground">
-              {attendanceCount ?? 0}
-            </p>
-            {/* pace bar vs weekly goal */}
-            <div className="mt-3 space-y-1">
-              <div className="flex items-center justify-between text-[11px] font-semibold">
-                <span className="flex items-center gap-1 text-muted-foreground">
-                  <Target size={11} />
-                  Ø {weeklyAvg.toFixed(1)}&thinsp;/&thinsp;Woche
-                </span>
-                <span className={onPace ? 'text-emerald-500' : 'text-amber-500'}>
-                  {pacePercent}% Ziel
-                </span>
-              </div>
-              <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
-                <div
-                  className={`h-full rounded-full transition-all duration-700 ${onPace ? 'bg-emerald-500' : 'bg-amber-500'}`}
-                  style={{ width: `${pacePercent}%` }}
-                />
-              </div>
-            </div>
-          </div>
-        </BentoTile>
-
-        {/* 3 — Streak */}
-        <BentoTile colSpan={1}>
-          <div className="flex h-full flex-col justify-between p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Streak</p>
-            <div className="flex items-end gap-2">
-              {trainingStats.currentStreak > 0 && (
-                <Flame size={32} className="mb-0.5 text-primary" strokeWidth={2.5} />
-              )}
-              <p className="font-mono text-5xl font-black tabular-nums text-foreground">
-                {trainingStats.currentStreak > 0 ? trainingStats.currentStreak : '—'}
+      {m.has('training_stats') && (
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t.dashboard.trainingsTotal}</p>
+              <p className="mt-1 font-mono text-3xl font-black text-foreground">{attendanceCount ?? 0}</p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Streak</p>
+              <p className="mt-1 flex items-center gap-2 font-mono text-3xl font-black text-foreground">
+                {trainingStats.currentStreak > 0 ? (
+                  <>
+                    <Flame size={24} className="text-primary" strokeWidth={2.5} />
+                    {trainingStats.currentStreak}
+                  </>
+                ) : '—'}
               </p>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              {trainingStats.currentStreak > 0 ? 'Wochen in Folge' : 'Noch kein Streak'}
-            </p>
-          </div>
-        </BentoTile>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Ø Stimmung</p>
+              <p className="mt-1 font-mono text-3xl font-black text-foreground">
+                {trainingStats.avgMoodLift !== null
+                  ? `${trainingStats.avgMoodLift > 0 ? '+' : ''}${trainingStats.avgMoodLift}`
+                  : '—'}
+              </p>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t.dashboard.activeBookings}</p>
+              <p className="mt-1 font-mono text-3xl font-black text-foreground">{bookingCount ?? 0}</p>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-        {/* 4 — Ø Mood */}
-        <BentoTile colSpan={1}>
-          <div className="flex h-full flex-col justify-between p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Ø Stimmung</p>
-            <p className="font-mono text-5xl font-black tabular-nums text-foreground">
-              {trainingStats.avgMoodLift !== null
-                ? `${trainingStats.avgMoodLift > 0 ? '+' : ''}${trainingStats.avgMoodLift}`
-                : '—'}
-            </p>
-            <p className="text-xs text-muted-foreground">nach dem Training</p>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {m.has('next_class') && (
+          <div className="sm:col-span-2">
+            <NextClassCard session={nextSession} bookingId={bookingId} lang={lang} />
           </div>
-        </BentoTile>
-
-        {/* 5 — Active bookings */}
-        <BentoTile colSpan={1}>
-          <div className="flex h-full flex-col justify-between p-5">
-            <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground">
-              {t.dashboard.activeBookings}
-            </p>
-            <p className="font-mono text-5xl font-black tabular-nums text-foreground">
-              {bookingCount ?? 0}
-            </p>
-            <Link href="/buchen" className="text-xs font-semibold text-primary hover:underline">
-              Mehr buchen →
-            </Link>
+        )}
+        {m.has('motivation') && (
+          <div>
+            <MotivationWidget
+              streak={trainingStats.currentStreak}
+              totalSessions={trainingStats.totalSessions}
+              lastSessionDate={trainingStats.lastSessionDate}
+              lastGoal={trainingStats.lastGoal}
+            />
           </div>
-        </BentoTile>
+        )}
 
-        {/* 6 — Training frequency chart (full width) */}
-        {trainingStats.weeklyFrequency.length > 0 && (
-          <BentoTile colSpan={4}>
+        {m.has('frequency_chart') && trainingStats.weeklyFrequency.length > 0 && (
+          <div className="sm:col-span-2">
             <TrainingFrequencyChart data={trainingStats.weeklyFrequency} />
-          </BentoTile>
+          </div>
         )}
-
-        {/* 7 — Mood trend */}
-        {trainingStats.moodTrend.length > 1 && (
-          <BentoTile colSpan={2}>
+        {m.has('mood_chart') && trainingStats.moodTrend.length > 1 && (
+          <div>
             <MoodTrendChart data={trainingStats.moodTrend} />
-          </BentoTile>
+          </div>
         )}
-
-        {/* 8 — Skill radar */}
-        {trainingStats.radarAvg && (
-          <BentoTile colSpan={2}>
+        {m.has('skill_radar') && trainingStats.radarAvg && (
+          <div>
             <SkillRadarChart data={trainingStats.radarAvg} />
-          </BentoTile>
+          </div>
         )}
 
-        {/* 9 — Belt progress (full width) */}
-        <BentoTile colSpan={4}>
-          <BeltProgress
-            beltName={beltRank?.name ?? null}
-            stripes={beltRank?.stripes ?? 0}
-            colorHex={beltRank?.color_hex ?? null}
-            readiness={readiness}
-            sessionsAttended={attendanceCount ?? 0}
-            monthsInGrade={monthsInGrade}
-            lang={lang}
-          />
-        </BentoTile>
-
-        {/* 10 — Motivation + Subscription side-by-side */}
-        <BentoTile colSpan={2}>
-          <MotivationWidget
-            streak={trainingStats.currentStreak}
-            totalSessions={trainingStats.totalSessions}
-            lastSessionDate={trainingStats.lastSessionDate}
-            lastGoal={trainingStats.lastGoal}
-          />
-        </BentoTile>
-        <BentoTile colSpan={2}>
-          <MySubscriptionCard />
-        </BentoTile>
-
-        {/* 11 — Leaderboard (2 cols) + Training partners (2 cols) */}
-        <BentoTile colSpan={2}>
-          <LeaderboardWidget entries={leaderboardEntries} lang={lang} />
-        </BentoTile>
-        <BentoTile colSpan={2}>
-          <TrainingPartnersWidget partners={trainingPartners} lang={lang} />
-        </BentoTile>
-
-        {/* 12 — Competitions (full width) */}
-        <BentoTile colSpan={4}>
-          <CompetitionsWidget initial={competitions} />
-        </BentoTile>
-
-        {/* 13 — QR code + Opening hours */}
-        <BentoTile colSpan={2} glowColor="120 120 220">
-          <div className="flex h-full flex-col">
-            <div className="flex items-center gap-2 border-b border-border px-5 py-4">
-              <QrCode size={14} className="text-primary" />
-              <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Check-In QR</span>
-            </div>
-            <div className="flex flex-1 items-center justify-center p-4">
-              <MemberQRCode profileId={userId} />
-            </div>
+        {m.has('belt_progress') && (
+          <div className="sm:col-span-2 lg:col-span-3">
+            <BeltProgress
+              beltName={beltRank?.name ?? null}
+              stripes={beltRank?.stripes ?? 0}
+              colorHex={beltRank?.color_hex ?? null}
+              readiness={readiness}
+              sessionsAttended={attendanceCount ?? 0}
+              monthsInGrade={monthsInGrade}
+              lang={lang}
+            />
           </div>
-        </BentoTile>
-        <BentoTile colSpan={2} glowColor="80 180 120">
-          <div className="flex h-full flex-col">
-            <div className="flex items-center gap-2 border-b border-border px-5 py-4">
-              <Clock size={14} className="text-primary" />
-              <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Öffnungszeiten</span>
-            </div>
-            <div className="p-4">
-              <OpeningHoursWidget hours={gym.opening_hours} />
-            </div>
+        )}
+        {m.has('subscription') && (
+          <div>
+            <MySubscriptionCard />
           </div>
-        </BentoTile>
-
-      </BentoGrid>
+        )}
+        {m.has('leaderboard') && (
+          <div className="lg:col-span-2">
+            <LeaderboardWidget entries={leaderboardEntries} lang={lang} />
+          </div>
+        )}
+        {m.has('training_partners') && (
+          <div>
+            <TrainingPartnersWidget partners={trainingPartners} lang={lang} />
+          </div>
+        )}
+        {m.has('competitions') && (
+          <div className="sm:col-span-2 lg:col-span-3">
+            <CompetitionsWidget initial={competitions} />
+          </div>
+        )}
+        {m.has('qr_code') && (
+          <div className="sm:col-span-2 lg:col-span-3">
+            <MemberQRCode profileId={userId} />
+          </div>
+        )}
+        {m.has('opening_hours') && (
+          <div className="sm:col-span-2 lg:col-span-3">
+            <OpeningHoursWidget hours={gym.opening_hours} />
+          </div>
+        )}
+      </div>
     </div>
   )
 }

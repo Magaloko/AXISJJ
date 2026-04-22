@@ -1,3 +1,4 @@
+import { isOwnerLevel } from '@/lib/auth/roles'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
@@ -13,7 +14,7 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'owner') redirect('/admin/dashboard')
+  if (!isOwnerLevel(profile?.role)) redirect('/admin/dashboard')
 
   const params = await searchParams
   const view = params.view === 'list' ? 'list' : 'kanban'

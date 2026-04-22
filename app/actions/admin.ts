@@ -1,4 +1,5 @@
 'use server'
+import { isOwnerLevel, toAdminRole } from '@/lib/auth/roles'
 
 import { createClient } from '@/lib/supabase/server'
 
@@ -158,7 +159,7 @@ export interface LeadsByStatus {
 }
 
 export async function getAdminDashboard(): Promise<{
-  role: 'coach' | 'owner'
+  role: 'coach' | 'owner' | 'developer'
   checkinsToday: number
   bookingsToday: number
   todaySessions: TodaySession[]
@@ -180,7 +181,7 @@ export async function getAdminDashboard(): Promise<{
     .single()
 
   const role = profile?.role
-  if (role !== 'coach' && role !== 'owner') {
+  if (role !== 'coach' && !isOwnerLevel(role)) {
     return { error: 'Keine Berechtigung.', role: 'coach', checkinsToday: 0, bookingsToday: 0, todaySessions: [] }
   }
 
@@ -225,13 +226,13 @@ export async function getAdminDashboard(): Promise<{
   })
 
   const base = {
-    role,
+    role: toAdminRole(role),
     checkinsToday: checkinsResult.count ?? 0,
     bookingsToday: bookingsResult.count ?? 0,
     todaySessions,
   }
 
-  if (role !== 'owner') return base
+  if (!isOwnerLevel(role)) return base
 
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
   const [membersResult, leadsResult, promotionsResult, beltsResult, allLeadsResult] = await Promise.all([

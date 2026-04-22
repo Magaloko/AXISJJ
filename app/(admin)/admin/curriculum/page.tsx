@@ -1,3 +1,4 @@
+import { isOwnerLevel } from '@/lib/auth/roles'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
@@ -11,7 +12,7 @@ export default async function CurriculumListPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (profile?.role !== 'owner') redirect('/admin/dashboard')
+  if (!isOwnerLevel(profile?.role)) redirect('/admin/dashboard')
 
   const { data: curricula } = await supabase
     .from('curricula')

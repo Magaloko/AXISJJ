@@ -1,4 +1,5 @@
 'use server'
+import { isOwnerLevel } from '@/lib/auth/roles'
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
@@ -21,7 +22,7 @@ async function assertOwner(): Promise<{ userId: string } | { error: string }> {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return { error: 'Nicht eingeloggt.' }
   const { data: caller } = await supabase.from('profiles').select('role').eq('id', user.id).single()
-  if (caller?.role !== 'owner') return { error: 'Keine Berechtigung.' }
+  if (!isOwnerLevel(caller?.role)) return { error: 'Keine Berechtigung.' }
   return { userId: user.id }
 }
 

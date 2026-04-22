@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, CheckSquare, CalendarDays, Users, Award,
   ClipboardList, Settings, LogOut, Building2, ScrollText,
-  BookOpen, MonitorPlay, FileText, GraduationCap, MoreHorizontal, X, Trophy,
+  BookOpen, MonitorPlay, FileText, GraduationCap, MoreHorizontal, X, Trophy, Code2,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils/cn'
@@ -13,7 +13,7 @@ import { createClient } from '@/lib/supabase/client'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { translations, type Lang } from '@/lib/i18n'
 
-type Role = 'coach' | 'owner'
+type Role = 'coach' | 'owner' | 'developer'
 
 interface NavItem {
   href: string
@@ -64,6 +64,12 @@ function getSystemItems(lang: Lang): NavItem[] {
     { href: '/admin/gym',           label: n.gym,           Icon: Building2 },
     { href: '/admin/einstellungen', label: n.einstellungen, Icon: Settings },
     { href: '/admin/audit',         label: n.audit,         Icon: ScrollText },
+  ]
+}
+
+function getDeveloperItems(): NavItem[] {
+  return [
+    { href: '/admin/developer', label: 'Developer Panel', Icon: Code2 },
   ]
 }
 
@@ -147,21 +153,25 @@ function SidebarContent({ role, roleBadge, userName, pathname, onLogout, current
   const businessItems = getBusinessItems(currentLang)
   const contentItems = getContentItems(currentLang)
   const systemItems = getSystemItems(currentLang)
+  const devItems = getDeveloperItems()
+  const isOwnerLevel = role === 'owner' || role === 'developer'
 
   return (
     <>
       <div className="border-b border-border p-6">
-        <p className="text-xs font-bold uppercase tracking-widest text-primary">{roleBadge}</p>
+        <p className={`text-xs font-bold uppercase tracking-widest ${role === 'developer' ? 'text-violet-500' : 'text-primary'}`}>
+          {roleBadge}
+        </p>
         <p className="mt-1 truncate text-sm font-semibold text-foreground">{userName}</p>
       </div>
 
       <nav className="flex-1 overflow-y-auto p-3">
-        {role === 'owner' && <SectionLabel label={s.ops} />}
+        {isOwnerLevel && <SectionLabel label={s.ops} />}
         {opsItems.map(item => (
           <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
         ))}
 
-        {role === 'owner' && (
+        {isOwnerLevel && (
           <>
             <SectionLabel label={s.mitglieder} />
             {mitgliederItems.map(item => (
@@ -181,6 +191,26 @@ function SidebarContent({ role, roleBadge, userName, pathname, onLogout, current
             <SectionLabel label={s.system} />
             {systemItems.map(item => (
               <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
+            ))}
+          </>
+        )}
+
+        {role === 'developer' && (
+          <>
+            <SectionLabel label="Developer" />
+            {devItems.map(item => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-colors ${
+                  isActive(item.href)
+                    ? 'bg-violet-500/10 text-violet-600'
+                    : 'text-violet-500 hover:bg-violet-500/10 hover:text-violet-600'
+                }`}
+              >
+                <item.Icon size={16} />
+                {item.label}
+              </Link>
             ))}
           </>
         )}
@@ -211,6 +241,7 @@ interface BottomBarProps {
 
 function BottomBar({ role, pathname, onMoreClick, currentLang }: BottomBarProps) {
   const tabs = role === 'coach' ? getCoachBottomTabs(currentLang) : getOwnerBottomTabs(currentLang)
+  const isOwnerLevel = role === 'owner' || role === 'developer'
   const more = translations[currentLang].admin.common.more
 
   function isActive(href: string) {
@@ -232,7 +263,7 @@ function BottomBar({ role, pathname, onMoreClick, currentLang }: BottomBarProps)
           {label}
         </Link>
       ))}
-      {role === 'owner' && (
+      {isOwnerLevel && (
         <button
           onClick={onMoreClick}
           className="flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-muted-foreground transition-colors"
@@ -324,7 +355,9 @@ export function AdminNav({ role, userName, currentLang }: Props) {
   const router = useRouter()
   const [moreOpen, setMoreOpen] = useState(false)
 
-  const roleBadge = role === 'owner' ? 'AXIS Owner' : 'AXIS Coach'
+  const roleBadge =
+    role === 'developer' ? 'AXIS Developer' :
+    role === 'owner'     ? 'AXIS Owner'     : 'AXIS Coach'
 
   async function handleLogout() {
     const supabase = createClient()

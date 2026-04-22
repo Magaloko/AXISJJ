@@ -6,4 +6,4 @@ export const memberUpdateSchema = z.object({
   date_of_birth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Ungültiges Datum (YYYY-MM-DD)').optional().nullable(),
 })
 
-export const memberRoleSchema = z.enum(['member', 'coach'])
+export const memberRoleSchema = z.enum(['member', 'coach', 'owner', 'developer'])

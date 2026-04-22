@@ -1,3 +1,4 @@
+import { isOwnerLevel } from '@/lib/auth/roles'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
@@ -16,7 +17,7 @@ export default async function AdminGymPage() {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
   const { data: profile } = await supabase.from('profiles').select('role, language').eq('id', user.id).single()
-  if (profile?.role !== 'owner') redirect('/admin/dashboard')
+  if (!isOwnerLevel(profile?.role)) redirect('/admin/dashboard')
 
   const rawLang = (await cookies()).get('lang')?.value
   const lang = resolveLang(rawLang, profile?.language)
