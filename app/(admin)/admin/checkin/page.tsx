@@ -36,6 +36,7 @@ export default async function CheckInPage({ searchParams }: Props) {
 
   const sessionsResult = await getTodaySessions()
   const sessions = sessionsResult.sessions ?? []
+  const sessionsError = sessionsResult.error ?? null
 
   // Default to first session after now, or last session of the day
   const now = new Date()
@@ -45,6 +46,7 @@ export default async function CheckInPage({ searchParams }: Props) {
 
   const bookingsResult = selectedId ? await getSessionBookings(selectedId) : null
   const bookings = bookingsResult?.bookings ?? []
+  const bookingsError = bookingsResult?.error ?? null
 
   const selectedSession = sessions.find(s => s.id === selectedId) ?? null
 
@@ -55,6 +57,18 @@ export default async function CheckInPage({ searchParams }: Props) {
   return (
     <div className="p-6 sm:p-8">
       <h1 className="mb-6 text-2xl font-black text-foreground">{t.checkin.title}</h1>
+
+      {/* Error banners */}
+      {sessionsError && (
+        <div className="mb-4 border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
+          <strong>Fehler beim Laden der Sessions:</strong> {sessionsError}
+        </div>
+      )}
+      {bookingsError && (
+        <div className="mb-4 border border-destructive/40 bg-destructive/5 p-3 text-sm text-destructive">
+          <strong>Fehler beim Laden der Buchungen:</strong> {bookingsError}
+        </div>
+      )}
 
       {/* Session selector */}
       <div className="mb-6">
