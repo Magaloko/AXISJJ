@@ -27,7 +27,7 @@ export default async function MitgliederPage() {
   // Step 1: plain profiles query — no joins, robust
   const { data: profilesData, error: profilesError } = await supabase
     .from('profiles')
-    .select('id, full_name, created_at, phone, date_of_birth, role')
+    .select('id, full_name, email, created_at, phone, date_of_birth, role')
     .order('full_name', { ascending: true, nullsFirst: false })
 
   if (profilesError) {
@@ -87,6 +87,7 @@ export default async function MitgliederPage() {
   const members = (profilesData ?? []).map(p => ({
     id: p.id,
     full_name: p.full_name,
+    email: p.email ?? null,
     created_at: p.created_at,
     phone: p.phone ?? null,
     date_of_birth: p.date_of_birth ?? null,
