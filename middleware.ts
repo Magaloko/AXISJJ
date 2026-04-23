@@ -2,12 +2,15 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import gymConfig from '@/gym.config'
 
-// Admin routes accessible even in public-only mode
+// Admin routes accessible in public-only mode (owner manages public content)
 const ADMIN_PUBLIC_WHITELIST = [
-  '/admin/gym',
-  '/admin/einstellungen',
-  '/admin/hero',
-  '/admin/developer',
+  '/admin/gym',          // Gym-Info + Öffnungszeiten
+  '/admin/einstellungen', // Preise + Coaches + Module
+  '/admin/hero',         // Hero-Slides
+  '/admin/klassen',      // Stundenplan
+  '/admin/turniere',     // Turniere
+  '/admin/blog',         // Blog (falls aktiviert)
+  '/admin/developer',    // Module ein/aus
 ]
 
 export async function middleware(request: NextRequest) {
@@ -15,13 +18,13 @@ export async function middleware(request: NextRequest) {
 
   // ── White-label: public-only mode guard ──────────────────────────────────
   if (gymConfig.mode === 'public-only') {
+    // Block all member-facing routes
     const memberPaths = ['/dashboard', '/buchen', '/gurtel', '/konto', '/skills', '/update-password']
     if (memberPaths.some(p => pathname.startsWith(p))) {
       return NextResponse.redirect(new URL('/', request.url))
     }
-    if (pathname === '/login') {
-      return NextResponse.redirect(new URL('/', request.url))
-    }
+
+    // Restrict admin to whitelist — /login stays accessible for owner
     if (pathname.startsWith('/admin')) {
       const allowed = ADMIN_PUBLIC_WHITELIST.some(p => pathname.startsWith(p))
       if (!allowed) {
@@ -79,8 +82,10 @@ export async function middleware(request: NextRequest) {
     }
   }
 
+  // In public-only mode: logged-in owner goes to admin instead of dashboard
   if (pathname === '/login' && user) {
-    return NextResponse.redirect(new URL('/dashboard', request.url))
+    const target = gymConfig.mode === 'public-only' ? '/admin/gym' : '/dashboard'
+    return NextResponse.redirect(new URL(target, request.url))
   }
 
   return supabaseResponse
