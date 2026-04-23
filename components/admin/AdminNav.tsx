@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils/cn'
 import { createClient } from '@/lib/supabase/client'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { translations, type Lang } from '@/lib/i18n'
+import gymConfig from '@/gym.config'
 
 type Role = 'coach' | 'owner' | 'developer'
 
@@ -170,23 +171,31 @@ function SidebarContent({ role, roleBadge, userName, pathname, onLogout, current
       </div>
 
       <nav className="flex-1 overflow-y-auto p-3">
-        {isOwnerLevel && <SectionLabel label={s.ops} />}
-        {opsItems.map(item => (
-          <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
-        ))}
+        {gymConfig.mode === 'full' && (
+          <>
+            {isOwnerLevel && <SectionLabel label={s.ops} />}
+            {opsItems.map(item => (
+              <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
+            ))}
+
+            {isOwnerLevel && (
+              <>
+                <SectionLabel label={s.mitglieder} />
+                {mitgliederItems.map(item => (
+                  <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
+                ))}
+
+                <SectionLabel label={s.business} />
+                {businessItems.map(item => (
+                  <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
+                ))}
+              </>
+            )}
+          </>
+        )}
 
         {isOwnerLevel && (
           <>
-            <SectionLabel label={s.mitglieder} />
-            {mitgliederItems.map(item => (
-              <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
-            ))}
-
-            <SectionLabel label={s.business} />
-            {businessItems.map(item => (
-              <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
-            ))}
-
             <SectionLabel label={s.content} />
             {contentItems.map(item => (
               <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
@@ -243,9 +252,20 @@ interface BottomBarProps {
   currentLang: Lang
 }
 
+function getPublicOnlyBottomTabs(lang: Lang): NavItem[] {
+  const n = translations[lang].admin.nav
+  return [
+    { href: '/admin/gym',           label: n.gym,           Icon: Building2 },
+    { href: '/admin/einstellungen', label: n.einstellungen, Icon: Settings },
+    { href: '/admin/hero',          label: n.hero,          Icon: MonitorPlay },
+  ]
+}
+
 function BottomBar({ role, pathname, onMoreClick, currentLang }: BottomBarProps) {
-  const tabs = role === 'coach' ? getCoachBottomTabs(currentLang) : getOwnerBottomTabs(currentLang)
-  const isOwnerLevel = role === 'owner' || role === 'developer'
+  const tabs = gymConfig.mode === 'public-only'
+    ? getPublicOnlyBottomTabs(currentLang)
+    : role === 'coach' ? getCoachBottomTabs(currentLang) : getOwnerBottomTabs(currentLang)
+  const isOwnerLevel = (role === 'owner' || role === 'developer') && gymConfig.mode === 'full'
   const more = translations[currentLang].admin.common.more
 
   function isActive(href: string) {
