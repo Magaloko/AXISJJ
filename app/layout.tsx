@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter_Tight, JetBrains_Mono, Instrument_Serif } from 'next/font/google'
 import './globals.css'
 import gymConfig from '@/gym.config'
+import { getSiteTheme, themeToCssVars } from '@/lib/site-theme'
 
 const interTight = Inter_Tight({
   subsets: ['latin'],
@@ -56,15 +57,13 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const theme = await getSiteTheme()
   return (
     <html lang={gymConfig.defaultLanguage}>
       <body
         className={`${interTight.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable}`}
-        style={{
-          '--gym-primary': gymConfig.colors.primary,
-          '--gym-secondary': gymConfig.colors.secondary,
-        } as React.CSSProperties}
+        style={themeToCssVars(theme) as React.CSSProperties}
       >
         {children}
       </body>

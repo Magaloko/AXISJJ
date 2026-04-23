@@ -6,7 +6,7 @@ import {
   LayoutDashboard, CheckSquare, CalendarDays, Users, Award,
   ClipboardList, Settings, LogOut, Building2, ScrollText,
   BookOpen, MonitorPlay, FileText, GraduationCap, MoreHorizontal, X, Trophy,
-  UsersRound, FileUp, Megaphone, Code2,
+  UsersRound, FileUp, Megaphone, Code2, Palette,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils/cn'
@@ -74,7 +74,8 @@ function getSystemItems(lang: Lang): NavItem[] {
 
 function getDeveloperItems(): NavItem[] {
   return [
-    { href: '/admin/developer', label: 'Developer Panel', Icon: Code2 },
+    { href: '/admin/developer',       label: 'Developer Panel', Icon: Code2 },
+    { href: '/admin/developer/theme', label: 'Website-Theme',   Icon: Palette },
   ]
 }
 
