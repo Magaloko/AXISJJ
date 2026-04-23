@@ -24,6 +24,9 @@ export interface GymSettings {
   house_rules: string | null
   cancellation_policy: string | null
   pricing_info: string | null
+  public_transport: string | null
+  parking_info: string | null
+  map_embed_url: string | null
   updated_at: string
 }
 
@@ -44,6 +47,7 @@ const FALLBACK: GymSettings = {
   phone: null, email: null, website: null,
   opening_hours: DEFAULT_OPENING_HOURS,
   house_rules: null, cancellation_policy: null, pricing_info: null,
+  public_transport: null, parking_info: null, map_embed_url: null,
   updated_at: new Date().toISOString(),
 }
 
