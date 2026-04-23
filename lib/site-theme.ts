@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+// Client-safe: types, defaults, CSS-var helper. No server-only imports.
 
 export interface SiteTheme {
   primary: string
@@ -26,11 +26,11 @@ export const DEFAULT_THEME: SiteTheme = {
   border:              '#d9d6d1',
 }
 
-function isValidHex(v: unknown): v is string {
+export function isValidHex(v: unknown): v is string {
   return typeof v === 'string' && /^#[0-9a-fA-F]{6}$/.test(v)
 }
 
-function sanitize(raw: unknown): SiteTheme {
+export function sanitizeTheme(raw: unknown): SiteTheme {
   if (!raw || typeof raw !== 'object') return DEFAULT_THEME
   const src = raw as Record<string, unknown>
   const out: SiteTheme = { ...DEFAULT_THEME }
@@ -38,22 +38,6 @@ function sanitize(raw: unknown): SiteTheme {
     if (isValidHex(src[key])) out[key] = src[key] as string
   }
   return out
-}
-
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
-export async function getSiteTheme(): Promise<SiteTheme> {
-  try {
-    const supabase = await createClient()
-    const { data } = await (supabase as any)
-      .from('gym_settings')
-      .select('theme')
-      .eq('id', 1)
-      .maybeSingle()
-    return sanitize(data?.theme)
-  } catch {
-    return DEFAULT_THEME
-  }
 }
 
 export function themeToCssVars(theme: SiteTheme): Record<string, string> {

@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getSiteTheme } from '@/lib/site-theme'
+import { getSiteTheme } from '@/lib/site-theme.server'
 import { ThemeEditor } from '@/components/admin/ThemeEditor'
 import type { Metadata } from 'next'
 

@@ -2,7 +2,8 @@ import type { Metadata } from 'next'
 import { Inter_Tight, JetBrains_Mono, Instrument_Serif } from 'next/font/google'
 import './globals.css'
 import gymConfig from '@/gym.config'
-import { getSiteTheme, themeToCssVars } from '@/lib/site-theme'
+import { themeToCssVars } from '@/lib/site-theme'
+import { getSiteTheme } from '@/lib/site-theme.server'
 
 const interTight = Inter_Tight({
   subsets: ['latin'],

@@ -109,6 +109,22 @@ function getOwnerMoreItems(lang: Lang): NavItem[] {
   ]
 }
 
+function getDeveloperMoreItems(lang: Lang, role: Role): NavItem[] {
+  // In public-only mode: only content + system + developer (no ops/mitglieder/business)
+  if (gymConfig.mode === 'public-only') {
+    return [
+      ...getContentItems(lang),
+      ...getSystemItems(lang),
+      ...getDeveloperItems(),
+    ]
+  }
+  // Full mode: everything available to role + developer section
+  return [
+    ...(role === 'owner' || role === 'developer' ? getOwnerMoreItems(lang) : []),
+    ...getDeveloperItems(),
+  ]
+}
+
 // ── Shared helpers ───────────────────────────────────────────────────────────
 
 function SectionLabel({ label }: { label: string }) {
@@ -266,7 +282,8 @@ function BottomBar({ role, pathname, onMoreClick, currentLang }: BottomBarProps)
   const tabs = gymConfig.mode === 'public-only'
     ? getPublicOnlyBottomTabs(currentLang)
     : role === 'coach' ? getCoachBottomTabs(currentLang) : getOwnerBottomTabs(currentLang)
-  const isOwnerLevel = (role === 'owner' || role === 'developer') && gymConfig.mode === 'full'
+  // Mehr button: always available for owner/developer (full + public-only mode)
+  const showMore = role === 'owner' || role === 'developer'
   const more = translations[currentLang].admin.common.more
 
   function isActive(href: string) {
@@ -288,7 +305,7 @@ function BottomBar({ role, pathname, onMoreClick, currentLang }: BottomBarProps)
           {label}
         </Link>
       ))}
-      {isOwnerLevel && (
+      {showMore && (
         <button
           onClick={onMoreClick}
           className="flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-muted-foreground transition-colors"
@@ -304,15 +321,18 @@ function BottomBar({ role, pathname, onMoreClick, currentLang }: BottomBarProps)
 // ── Owner "Mehr" bottom sheet ────────────────────────────────────────────────
 
 interface MoreSheetProps {
+  role: Role
   pathname: string
   onClose: () => void
   onLogout: () => void
   currentLang: Lang
 }
 
-function MoreSheet({ pathname, onClose, onLogout, currentLang }: MoreSheetProps) {
+function MoreSheet({ role, pathname, onClose, onLogout, currentLang }: MoreSheetProps) {
   const t = translations[currentLang].admin
-  const ownerMoreItems = getOwnerMoreItems(currentLang)
+  const moreItems = role === 'developer'
+    ? getDeveloperMoreItems(currentLang, role)
+    : getOwnerMoreItems(currentLang)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -337,20 +357,25 @@ function MoreSheet({ pathname, onClose, onLogout, currentLang }: MoreSheetProps)
           </button>
         </div>
         <nav className="grid grid-cols-2 gap-1 p-3">
-          {ownerMoreItems.map(({ href, label, Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              onClick={onClose}
-              className={cn(
-                'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                isActive(href) ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-              )}
-            >
-              <Icon size={16} />
-              {label}
-            </Link>
-          ))}
+          {moreItems.map(({ href, label, Icon }) => {
+            const isDevItem = href.startsWith('/admin/developer')
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={onClose}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                  isActive(href)
+                    ? isDevItem ? 'bg-violet-500/10 text-violet-600' : 'bg-primary/10 text-primary'
+                    : isDevItem ? 'text-violet-500 hover:bg-violet-500/10 hover:text-violet-600' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                )}
+              >
+                <Icon size={16} />
+                {label}
+              </Link>
+            )
+          })}
         </nav>
         <div className="border-t border-border p-3 space-y-2">
           <LanguageSwitcher currentLang={currentLang} variant="full" />
@@ -412,9 +437,10 @@ export function AdminNav({ role, userName, currentLang }: Props) {
         currentLang={currentLang}
       />
 
-      {/* Owner "Mehr" sheet */}
+      {/* Owner/Developer "Mehr" sheet */}
       {moreOpen && (
         <MoreSheet
+          role={role}
           pathname={pathname}
           onClose={() => setMoreOpen(false)}
           onLogout={handleLogout}
