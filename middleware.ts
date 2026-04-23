@@ -48,8 +48,8 @@ export async function middleware(request: NextRequest) {
       .eq('id', user.id)
       .single()
 
-    if (!profile || !['coach', 'owner'].includes(profile.role)) {
-      return NextResponse.redirect(new URL('/dashboard', request.url))
+    if (!profile || !['coach', 'trainer', 'owner', 'developer'].includes(profile.role)) {
+      return NextResponse.redirect(new URL('/', request.url))
     }
   }
 
