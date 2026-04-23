@@ -28,6 +28,10 @@
   --color-destructive:            oklch(52% 0.24 22);
   --color-destructive-foreground: oklch(99% 0.000 0);
 
+  /* Gym white-label brand tokens (overridden via inline style on <body>) */
+  --gym-primary:   #1a1a2e;
+  --gym-secondary: #e63946;
+
   /* Legacy brand tokens */
   --color-brand-red:        oklch(58% 0.21 28);
   --color-brand-red-dark:   oklch(44% 0.18 28);
