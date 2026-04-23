@@ -11,7 +11,25 @@ export interface SiteTheme {
   foreground: string
   card: string
   border: string
+  radius: string
+  headingFont: string
 }
+
+export const COLOR_KEYS: (keyof SiteTheme)[] = [
+  'primary', 'primaryForeground', 'secondary', 'secondaryForeground',
+  'accent', 'accentForeground', 'background', 'foreground', 'card', 'border',
+]
+
+export const RADIUS_PRESETS = [
+  { value: '0rem',    label: 'Eckig' },
+  { value: '0.25rem', label: 'Leicht' },
+  { value: '0.5rem',  label: 'Mittel' },
+  { value: '0.75rem', label: 'Rund' },
+  { value: '1rem',    label: 'Sehr rund' },
+] as const
+
+export const VALID_RADII = RADIUS_PRESETS.map(p => p.value)
+export const VALID_FONTS = ['sans', 'serif'] as const
 
 export const DARK_THEME: SiteTheme = {
   primary:             '#e8000f',
@@ -24,6 +42,8 @@ export const DARK_THEME: SiteTheme = {
   foreground:          '#f5f5f5',
   card:                '#141414',
   border:              '#2a2a2a',
+  radius:              '0rem',
+  headingFont:         'sans',
 }
 
 export const LIGHT_THEME: SiteTheme = {
@@ -37,6 +57,8 @@ export const LIGHT_THEME: SiteTheme = {
   foreground:          '#1a1a1a',
   card:                '#f4f2ef',
   border:              '#d9d6d1',
+  radius:              '0rem',
+  headingFont:         'sans',
 }
 
 // Default: dark mode
@@ -60,13 +82,19 @@ export function sanitizeTheme(raw: unknown): SiteTheme {
   if (!raw || typeof raw !== 'object') return DEFAULT_THEME
   const src = raw as Record<string, unknown>
   const out: SiteTheme = { ...DEFAULT_THEME }
-  for (const key of Object.keys(DEFAULT_THEME) as (keyof SiteTheme)[]) {
+  for (const key of COLOR_KEYS) {
     if (isValidHex(src[key])) out[key] = src[key] as string
   }
+  if ((VALID_RADII as readonly string[]).includes(src.radius as string)) out.radius = src.radius as string
+  if ((VALID_FONTS as readonly string[]).includes(src.headingFont as string)) out.headingFont = src.headingFont as string
   return out
 }
 
 export function themeToCssVars(theme: SiteTheme): Record<string, string> {
+  const fontHeading = theme.headingFont === 'serif'
+    ? 'var(--font-instrument-serif), Georgia, serif'
+    : 'var(--font-inter-tight), system-ui, sans-serif'
+
   return {
     '--color-primary':              theme.primary,
     '--color-primary-foreground':   theme.primaryForeground,
@@ -81,5 +109,7 @@ export function themeToCssVars(theme: SiteTheme): Record<string, string> {
     '--color-border':               theme.border,
     '--gym-primary':                theme.primary,
     '--gym-secondary':              theme.secondary,
+    '--radius':                     theme.radius,
+    '--font-heading':               fontHeading,
   }
 }
