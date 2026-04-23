@@ -1,7 +1,36 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import gymConfig from '@/gym.config'
+
+// Admin routes accessible even in public-only mode
+const ADMIN_PUBLIC_WHITELIST = [
+  '/admin/gym',
+  '/admin/einstellungen',
+  '/admin/hero',
+  '/admin/developer',
+]
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // ── White-label: public-only mode guard ──────────────────────────────────
+  if (gymConfig.mode === 'public-only') {
+    const memberPaths = ['/dashboard', '/buchen', '/gurtel', '/konto', '/skills', '/update-password']
+    if (memberPaths.some(p => pathname.startsWith(p))) {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+    if (pathname === '/login') {
+      return NextResponse.redirect(new URL('/', request.url))
+    }
+    if (pathname.startsWith('/admin')) {
+      const allowed = ADMIN_PUBLIC_WHITELIST.some(p => pathname.startsWith(p))
+      if (!allowed) {
+        return NextResponse.redirect(new URL('/admin/gym', request.url))
+      }
+    }
+  }
+  // ── End white-label guard ─────────────────────────────────────────────────
+
   let supabaseResponse = NextResponse.next({ request })
 
   const supabase = createServerClient(
@@ -27,10 +56,7 @@ export async function middleware(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser()
 
-  const { pathname } = request.nextUrl
-
-  // Protect member routes - (members) group = /dashboard, /buchen, /gurtel, /konto, /skills
-  // /update-password is also protected: only accessible with a valid (recovery) session.
+  // Protect member routes
   const memberPaths = ['/dashboard', '/buchen', '/gurtel', '/konto', '/skills', '/update-password']
   const isMemberPath = memberPaths.some(p => pathname.startsWith(p))
   if (isMemberPath && !user) {
@@ -48,7 +74,7 @@ export async function middleware(request: NextRequest) {
       .eq('id', user.id)
       .single()
 
-    if (!profile || !['coach', 'owner'].includes(profile.role)) {
+    if (!profile || !['coach', 'owner', 'developer'].includes(profile.role)) {
       return NextResponse.redirect(new URL('/dashboard', request.url))
     }
   }
