@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { isOwnerLevel } from '@/lib/auth/roles'
 import { setModuleEnabled, type ModuleKey } from '@/lib/dashboard-modules'
+import { setLandingSectionEnabled, type LandingSectionKey } from '@/lib/landing-sections'
 import { revalidatePath } from 'next/cache'
 
 async function assertOwnerOrDev() {
@@ -27,6 +28,19 @@ export async function toggleDashboardModule(
 
   await setModuleEnabled(key, enabled)
   revalidatePath('/dashboard')
+  revalidatePath('/admin/developer')
+  return { success: true }
+}
+
+export async function toggleLandingSection(
+  key: LandingSectionKey,
+  enabled: boolean,
+): Promise<{ success: boolean; error?: string }> {
+  const auth = await assertOwnerOrDev()
+  if (auth.error) return { success: false, error: auth.error }
+
+  await setLandingSectionEnabled(key, enabled)
+  revalidatePath('/', 'layout')
   revalidatePath('/admin/developer')
   return { success: true }
 }

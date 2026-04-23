@@ -6,6 +6,7 @@ ALTER TABLE coach_profiles ADD COLUMN IF NOT EXISTS display_name text;
 ALTER TABLE coach_profiles ADD COLUMN IF NOT EXISTS avatar_url text;
 ALTER TABLE coach_profiles ADD COLUMN IF NOT EXISTS belt_name text;
 ALTER TABLE coach_profiles ADD COLUMN IF NOT EXISTS belt_color_hex text;
+ALTER TABLE coach_profiles ADD COLUMN IF NOT EXISTS is_pinned boolean NOT NULL DEFAULT false;
 
 -- Seed Shamsudin as a standalone pinned coach (no account needed)
 INSERT INTO coach_profiles (

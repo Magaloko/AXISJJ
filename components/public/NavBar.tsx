@@ -8,17 +8,21 @@ import { Menu, X, LogIn } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { translations, type Lang } from '@/lib/i18n'
+import gymConfig from '@/gym.config'
 
 function getNavLinks(lang: Lang) {
   const t = translations[lang].public.navbar
-  return [
+  const links = [
     { href: '/trainingsplan', label: t.trainingsplan },
     { href: '/team',          label: t.team },
     { href: '/programme',     label: t.programme },
     { href: '/preise',        label: t.preise },
-    { href: '/blog',          label: t.blog },
     { href: '/kontakt',       label: t.kontakt },
   ]
+  if (gymConfig.features.blog) {
+    links.splice(4, 0, { href: '/blog', label: t.blog })
+  }
+  return links
 }
 
 function isActive(pathname: string, href: string) {
@@ -35,6 +39,7 @@ export function NavBar({ currentLang }: NavBarProps) {
   const [open, setOpen] = useState(false)
   const t = translations[currentLang].public.navbar
   const navLinks = getNavLinks(currentLang)
+  const isPublicOnly = gymConfig.mode === 'public-only'
 
   useEffect(() => {
     if (open) {
@@ -48,12 +53,12 @@ export function NavBar({ currentLang }: NavBarProps) {
 
   return (
     <>
-      <nav className="fixed top-0 z-50 w-full border-b border-border bg-white/95 backdrop-blur-md">
+      <nav className="fixed top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <Link href="/" aria-label={t.ariaHome} className="shrink-0">
             <Image
-              src="/images/logo-full.png"
-              alt="AXIS JIU JITSU"
+              src={gymConfig.logo}
+              alt={gymConfig.name}
               width={160}
               height={48}
               priority
@@ -89,13 +94,15 @@ export function NavBar({ currentLang }: NavBarProps) {
 
           <div className="hidden items-center gap-3 md:flex">
             <LanguageSwitcher currentLang={currentLang} />
-            <Link
-              href="/login"
-              className="flex items-center gap-1.5 border border-border px-4 py-2 text-sm font-bold tracking-wide text-foreground transition-colors hover:bg-muted"
-            >
-              <LogIn size={15} />
-              {t.login}
-            </Link>
+            {!isPublicOnly && (
+              <Link
+                href="/login"
+                className="flex items-center gap-1.5 border border-border px-4 py-2 text-sm font-bold tracking-wide text-foreground transition-colors hover:bg-muted"
+              >
+                <LogIn size={15} />
+                {t.login}
+              </Link>
+            )}
             <Link
               href="/trial"
               className="bg-primary px-5 py-2 text-sm font-black tracking-widest text-primary-foreground transition-colors hover:bg-primary/90"
@@ -126,7 +133,7 @@ export function NavBar({ currentLang }: NavBarProps) {
       />
       <aside
         className={cn(
-          'fixed right-0 top-0 z-50 h-full w-[82%] max-w-sm bg-white shadow-2xl transition-transform duration-300 md:hidden',
+          'fixed right-0 top-0 z-50 h-full w-[82%] max-w-sm bg-card shadow-2xl transition-transform duration-300 md:hidden',
           open ? 'translate-x-0' : 'translate-x-full'
         )}
         aria-hidden={!open}
@@ -134,8 +141,8 @@ export function NavBar({ currentLang }: NavBarProps) {
       >
         <div className="flex items-center justify-between border-b border-border px-5 py-4">
           <Image
-            src="/images/logo-full.png"
-            alt="AXIS JIU JITSU"
+            src={gymConfig.logo}
+            alt={gymConfig.name}
             width={140}
             height={40}
             className="h-9 w-auto object-contain"
@@ -169,14 +176,16 @@ export function NavBar({ currentLang }: NavBarProps) {
             )
           })}
 
-          <Link
-            href="/login"
-            onClick={() => setOpen(false)}
-            className="mt-4 flex items-center justify-center gap-2 border border-border py-3 text-sm font-bold text-foreground transition-colors hover:bg-muted"
-          >
-            <LogIn size={16} />
-            {t.login}
-          </Link>
+          {!isPublicOnly && (
+            <Link
+              href="/login"
+              onClick={() => setOpen(false)}
+              className="mt-4 flex items-center justify-center gap-2 border border-border py-3 text-sm font-bold text-foreground transition-colors hover:bg-muted"
+            >
+              <LogIn size={16} />
+              {t.login}
+            </Link>
+          )}
 
           <Link
             href="/trial"

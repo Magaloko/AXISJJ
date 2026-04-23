@@ -6,13 +6,14 @@ import {
   LayoutDashboard, CheckSquare, CalendarDays, Users, Award,
   ClipboardList, Settings, LogOut, Building2, ScrollText,
   BookOpen, MonitorPlay, FileText, GraduationCap, MoreHorizontal, X, Trophy,
-  UsersRound, FileUp, Megaphone, Code2,
+  UsersRound, FileUp, Megaphone, Code2, Palette,
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils/cn'
 import { createClient } from '@/lib/supabase/client'
 import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { translations, type Lang } from '@/lib/i18n'
+import gymConfig from '@/gym.config'
 
 type Role = 'coach' | 'owner' | 'developer'
 
@@ -73,7 +74,8 @@ function getSystemItems(lang: Lang): NavItem[] {
 
 function getDeveloperItems(): NavItem[] {
   return [
-    { href: '/admin/developer', label: 'Developer Panel', Icon: Code2 },
+    { href: '/admin/developer',       label: 'Developer Panel', Icon: Code2 },
+    { href: '/admin/developer/theme', label: 'Website-Theme',   Icon: Palette },
   ]
 }
 
@@ -104,6 +106,22 @@ function getOwnerMoreItems(lang: Lang): NavItem[] {
     ...getMitgliederItems(lang).filter(i => i.href !== '/admin/mitglieder'),
     ...getContentItems(lang),
     ...getSystemItems(lang),
+  ]
+}
+
+function getDeveloperMoreItems(lang: Lang, role: Role): NavItem[] {
+  // In public-only mode: only content + system + developer (no ops/mitglieder/business)
+  if (gymConfig.mode === 'public-only') {
+    return [
+      ...getContentItems(lang),
+      ...getSystemItems(lang),
+      ...getDeveloperItems(),
+    ]
+  }
+  // Full mode: everything available to role + developer section
+  return [
+    ...(role === 'owner' || role === 'developer' ? getOwnerMoreItems(lang) : []),
+    ...getDeveloperItems(),
   ]
 }
 
@@ -170,23 +188,31 @@ function SidebarContent({ role, roleBadge, userName, pathname, onLogout, current
       </div>
 
       <nav className="flex-1 overflow-y-auto p-3">
-        {isOwnerLevel && <SectionLabel label={s.ops} />}
-        {opsItems.map(item => (
-          <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
-        ))}
+        {gymConfig.mode === 'full' && (
+          <>
+            {isOwnerLevel && <SectionLabel label={s.ops} />}
+            {opsItems.map(item => (
+              <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
+            ))}
+
+            {isOwnerLevel && (
+              <>
+                <SectionLabel label={s.mitglieder} />
+                {mitgliederItems.map(item => (
+                  <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
+                ))}
+
+                <SectionLabel label={s.business} />
+                {businessItems.map(item => (
+                  <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
+                ))}
+              </>
+            )}
+          </>
+        )}
 
         {isOwnerLevel && (
           <>
-            <SectionLabel label={s.mitglieder} />
-            {mitgliederItems.map(item => (
-              <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
-            ))}
-
-            <SectionLabel label={s.business} />
-            {businessItems.map(item => (
-              <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
-            ))}
-
             <SectionLabel label={s.content} />
             {contentItems.map(item => (
               <SidebarLink key={item.href} {...item} active={isActive(item.href)} />
@@ -243,9 +269,21 @@ interface BottomBarProps {
   currentLang: Lang
 }
 
+function getPublicOnlyBottomTabs(lang: Lang): NavItem[] {
+  const n = translations[lang].admin.nav
+  return [
+    { href: '/admin/gym',           label: n.gym,           Icon: Building2 },
+    { href: '/admin/einstellungen', label: n.einstellungen, Icon: Settings },
+    { href: '/admin/hero',          label: n.hero,          Icon: MonitorPlay },
+  ]
+}
+
 function BottomBar({ role, pathname, onMoreClick, currentLang }: BottomBarProps) {
-  const tabs = role === 'coach' ? getCoachBottomTabs(currentLang) : getOwnerBottomTabs(currentLang)
-  const isOwnerLevel = role === 'owner' || role === 'developer'
+  const tabs = gymConfig.mode === 'public-only'
+    ? getPublicOnlyBottomTabs(currentLang)
+    : role === 'coach' ? getCoachBottomTabs(currentLang) : getOwnerBottomTabs(currentLang)
+  // Mehr button: always available for owner/developer (full + public-only mode)
+  const showMore = role === 'owner' || role === 'developer'
   const more = translations[currentLang].admin.common.more
 
   function isActive(href: string) {
@@ -267,7 +305,7 @@ function BottomBar({ role, pathname, onMoreClick, currentLang }: BottomBarProps)
           {label}
         </Link>
       ))}
-      {isOwnerLevel && (
+      {showMore && (
         <button
           onClick={onMoreClick}
           className="flex flex-1 flex-col items-center justify-center gap-0.5 text-[10px] font-medium text-muted-foreground transition-colors"
@@ -283,15 +321,18 @@ function BottomBar({ role, pathname, onMoreClick, currentLang }: BottomBarProps)
 // ── Owner "Mehr" bottom sheet ────────────────────────────────────────────────
 
 interface MoreSheetProps {
+  role: Role
   pathname: string
   onClose: () => void
   onLogout: () => void
   currentLang: Lang
 }
 
-function MoreSheet({ pathname, onClose, onLogout, currentLang }: MoreSheetProps) {
+function MoreSheet({ role, pathname, onClose, onLogout, currentLang }: MoreSheetProps) {
   const t = translations[currentLang].admin
-  const ownerMoreItems = getOwnerMoreItems(currentLang)
+  const moreItems = role === 'developer'
+    ? getDeveloperMoreItems(currentLang, role)
+    : getOwnerMoreItems(currentLang)
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -316,20 +357,25 @@ function MoreSheet({ pathname, onClose, onLogout, currentLang }: MoreSheetProps)
           </button>
         </div>
         <nav className="grid grid-cols-2 gap-1 p-3">
-          {ownerMoreItems.map(({ href, label, Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              onClick={onClose}
-              className={cn(
-                'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                isActive(href) ? 'bg-primary/10 text-primary' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
-              )}
-            >
-              <Icon size={16} />
-              {label}
-            </Link>
-          ))}
+          {moreItems.map(({ href, label, Icon }) => {
+            const isDevItem = href.startsWith('/admin/developer')
+            return (
+              <Link
+                key={href}
+                href={href}
+                onClick={onClose}
+                className={cn(
+                  'flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                  isActive(href)
+                    ? isDevItem ? 'bg-violet-500/10 text-violet-600' : 'bg-primary/10 text-primary'
+                    : isDevItem ? 'text-violet-500 hover:bg-violet-500/10 hover:text-violet-600' : 'text-muted-foreground hover:bg-muted hover:text-foreground',
+                )}
+              >
+                <Icon size={16} />
+                {label}
+              </Link>
+            )
+          })}
         </nav>
         <div className="border-t border-border p-3 space-y-2">
           <LanguageSwitcher currentLang={currentLang} variant="full" />
@@ -391,9 +437,10 @@ export function AdminNav({ role, userName, currentLang }: Props) {
         currentLang={currentLang}
       />
 
-      {/* Owner "Mehr" sheet */}
+      {/* Owner/Developer "Mehr" sheet */}
       {moreOpen && (
         <MoreSheet
+          role={role}
           pathname={pathname}
           onClose={() => setMoreOpen(false)}
           onLogout={handleLogout}

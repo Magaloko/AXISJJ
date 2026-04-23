@@ -1,6 +1,9 @@
 import type { Metadata } from 'next'
 import { Inter_Tight, JetBrains_Mono, Instrument_Serif } from 'next/font/google'
 import './globals.css'
+import gymConfig from '@/gym.config'
+import { themeToCssVars, isDarkTheme } from '@/lib/site-theme'
+import { getSiteTheme } from '@/lib/site-theme.server'
 
 const interTight = Inter_Tight({
   subsets: ['latin'],
@@ -26,12 +29,11 @@ const instrumentSerif = Instrument_Serif({
 
 export const metadata: Metadata = {
   title: {
-    default: 'AXIS Jiu-Jitsu Vienna — Brazilian Jiu-Jitsu in Wien',
-    template: '%s | AXIS JJ Vienna',
+    default: `${gymConfig.name} — Brazilian Jiu-Jitsu in Wien`,
+    template: `%s | ${gymConfig.name}`,
   },
-  description:
-    'Trainiere Brazilian Jiu-Jitsu in Wien bei Österreichs erstem tschetschenischen Schwarzgurt. Gi, No-Gi, Kids. Jetzt 1 Woche kostenlos testen.',
-  keywords: ['BJJ Wien', 'Brazilian Jiu-Jitsu Vienna', 'AXIS JJ', 'Grappling Wien'],
+  description: gymConfig.tagline,
+  keywords: ['BJJ Wien', 'Brazilian Jiu-Jitsu', gymConfig.name, 'Grappling Wien'],
   icons: {
     icon: [
       { url: '/images/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
@@ -42,24 +44,30 @@ export const metadata: Metadata = {
     apple: { url: '/images/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
   },
   openGraph: {
-    siteName: 'AXIS Jiu-Jitsu Vienna',
-    locale: 'de_AT',
+    siteName: gymConfig.name,
+    locale: gymConfig.defaultLanguage === 'de' ? 'de_AT' : 'en_US',
     type: 'website',
     images: [
       {
         url: '/images/logo-full1.png',
         width: 1632,
         height: 624,
-        alt: 'AXIS Jiu-Jitsu Vienna',
+        alt: gymConfig.name,
       },
     ],
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const theme = await getSiteTheme()
+  const dark = isDarkTheme(theme)
   return (
-    <html lang="de">
-      <body className={`${interTight.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable}`}>
+    <html lang={gymConfig.defaultLanguage} style={{ colorScheme: dark ? 'dark' : 'light' }}>
+      <body
+        className={`${interTight.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable}`}
+        data-theme={dark ? 'dark' : 'light'}
+        style={themeToCssVars(theme) as React.CSSProperties}
+      >
         {children}
       </body>
     </html>

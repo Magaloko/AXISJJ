@@ -19,6 +19,9 @@ export interface GymInfoUpdate {
   phone?: string | null
   email?: string | null
   website?: string | null
+  public_transport?: string | null
+  parking_info?: string | null
+  map_embed_url?: string | null
 }
 
 export async function updateGymInfo(data: GymInfoUpdate): Promise<{ success?: true; error?: string }> {
@@ -27,7 +30,8 @@ export async function updateGymInfo(data: GymInfoUpdate): Promise<{ success?: tr
   if (!data.name?.trim()) return { error: 'Name ist Pflicht.' }
 
   const supabase = await createClient()
-  const { error } = await supabase.from('gym_settings').update({
+  /* eslint-disable @typescript-eslint/no-explicit-any */
+  const { error } = await (supabase as any).from('gym_settings').update({
     name: data.name.trim(),
     address_line1: data.address_line1?.trim() || null,
     address_line2: data.address_line2?.trim() || null,
@@ -37,6 +41,9 @@ export async function updateGymInfo(data: GymInfoUpdate): Promise<{ success?: tr
     phone: data.phone?.trim() || null,
     email: data.email?.trim() || null,
     website: data.website?.trim() || null,
+    public_transport: data.public_transport?.trim() || null,
+    parking_info: data.parking_info?.trim() || null,
+    map_embed_url: data.map_embed_url?.trim() || null,
     updated_at: new Date().toISOString(),
   }).eq('id', 1)
   if (error) {

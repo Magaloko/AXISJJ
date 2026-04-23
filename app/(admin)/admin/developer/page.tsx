@@ -3,8 +3,10 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { isDeveloper, isOwnerLevel } from '@/lib/auth/roles'
 import { getAllModules } from '@/lib/dashboard-modules'
+import { getAllLandingSections } from '@/lib/landing-sections'
 import { ModuleToggleCard } from '@/components/admin/developer/ModuleToggleCard'
-import { Code2, Layers, Users, Shield } from 'lucide-react'
+import { LandingSectionToggleCard } from '@/components/admin/developer/LandingSectionToggleCard'
+import { Code2, Layers, Users, Shield, Globe } from 'lucide-react'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Developer Panel — AXIS' }
@@ -22,7 +24,10 @@ export default async function DeveloperPage() {
 
   if (!isOwnerLevel(profile?.role)) redirect('/admin/dashboard')
 
-  const modules = await getAllModules()
+  const [modules, landingSections] = await Promise.all([
+    getAllModules(),
+    getAllLandingSections(),
+  ])
 
   // Stats for the dev info card
   const { count: memberCount } = await supabase
@@ -41,6 +46,7 @@ export default async function DeveloperPage() {
     .eq('role', 'developer' as 'member' | 'coach' | 'owner')
 
   const enabledCount = modules.filter(m => m.enabled).length
+  const enabledSectionsCount = landingSections.filter(s => s.enabled).length
 
   return (
     <div className="p-6 sm:p-8">
@@ -86,6 +92,20 @@ export default async function DeveloperPage() {
         </div>
       </div>
 
+      {/* ── Landing Page Sections ── */}
+      <div className="mb-3 flex items-center gap-2">
+        <Globe size={16} className="text-primary" />
+        <h2 className="text-lg font-black text-foreground">Landing Page Sektionen</h2>
+        <span className="ml-auto text-xs text-muted-foreground">
+          {enabledSectionsCount}/{landingSections.length} aktiv · Änderungen gelten sofort
+        </span>
+      </div>
+      <div className="mb-8 grid gap-3 sm:grid-cols-2">
+        {landingSections.map(sec => (
+          <LandingSectionToggleCard key={sec.key} section={sec} />
+        ))}
+      </div>
+
       {/* ── Dashboard Modules ── */}
       <div className="mb-3 flex items-center gap-2">
         <Layers size={16} className="text-violet-500" />
@@ -106,8 +126,8 @@ export default async function DeveloperPage() {
         <ul className="space-y-1 text-sm text-muted-foreground">
           <li>• Rolle <code className="text-xs font-mono text-violet-600">developer</code> hat identische Rechte wie <code className="text-xs font-mono">owner</code> plus dieses Panel.</li>
           <li>• Rollen vergeben: <code className="text-xs font-mono">/admin/einstellungen</code> → Mitglied auswählen → Rolle ändern.</li>
-          <li>• Module-Änderungen werden sofort auf <code className="text-xs font-mono">/dashboard</code> invalidiert (revalidatePath).</li>
-          <li>• Ausgeschaltete Module verschwinden still — kein Fehler, kein leerer Block.</li>
+          <li>• Landing-Sektionen: <code className="text-xs font-mono">landing_sections</code> Tabelle; deaktivierte Sektionen werden auf <code className="text-xs font-mono">/</code> still ausgeblendet.</li>
+          <li>• Dashboard-Module: <code className="text-xs font-mono">dashboard_modules</code> Tabelle; ausgeschaltete Module verschwinden still.</li>
         </ul>
       </div>
     </div>

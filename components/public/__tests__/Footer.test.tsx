@@ -24,6 +24,9 @@ const mockSettings: GymSettings = {
   house_rules: null,
   cancellation_policy: null,
   pricing_info: null,
+  public_transport: null,
+  parking_info: null,
+  map_embed_url: null,
   updated_at: new Date().toISOString(),
 }
 
