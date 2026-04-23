@@ -18,10 +18,10 @@ export async function middleware(request: NextRequest) {
 
   // ── White-label: public-only mode guard ──────────────────────────────────
   if (gymConfig.mode === 'public-only') {
-    // Block all member-facing routes
+    // Block all member-facing routes → send to admin for owners
     const memberPaths = ['/dashboard', '/buchen', '/gurtel', '/konto', '/skills', '/update-password']
     if (memberPaths.some(p => pathname.startsWith(p))) {
-      return NextResponse.redirect(new URL('/', request.url))
+      return NextResponse.redirect(new URL('/admin/gym', request.url))
     }
 
     // Restrict admin to whitelist — /login stays accessible for owner
