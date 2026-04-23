@@ -17,6 +17,8 @@ export interface PublicSession {
 export interface PublicDaySchedule {
   dayLabel: string
   dayShort: string
+  dateLabel: string   // e.g. "27.04"
+  isoDate: string     // e.g. "2026-04-27"
   sessions: PublicSession[]
 }
 
@@ -96,10 +98,11 @@ export function ScheduleWidget({ schedule, lang }: Props) {
         <div className="hidden md:block">
           <div className="grid grid-cols-7 gap-3">
             {schedule.map(day => (
-              <div key={day.dayShort}>
+              <div key={day.isoDate}>
                 <div className="mb-3 border-b-2 border-primary pb-2 text-center">
                   <p className="text-xs font-black uppercase tracking-widest text-primary">{day.dayShort}</p>
                   <p className="mt-0.5 text-[10px] text-muted-foreground">{day.dayLabel}</p>
+                  <p className="mt-0.5 font-mono text-[10px] font-bold text-foreground">{day.dateLabel}</p>
                 </div>
                 {day.sessions.length === 0 ? (
                   <div className="flex h-20 items-center justify-center text-[10px] uppercase tracking-wider text-muted-foreground/40">
@@ -122,21 +125,25 @@ export function ScheduleWidget({ schedule, lang }: Props) {
           <div className="mb-5 flex gap-1.5 overflow-x-auto pb-1">
             {schedule.map((d, i) => (
               <button
-                key={d.dayShort}
+                key={d.isoDate}
                 onClick={() => setActiveDay(i)}
                 className={cn(
-                  'min-w-[44px] shrink-0 px-3 py-2 text-xs font-black uppercase tracking-wider transition-all',
+                  'min-w-[52px] shrink-0 px-3 py-2 text-xs font-black uppercase tracking-wider transition-all',
                   activeDay === i
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-card text-muted-foreground hover:text-foreground'
                 )}
               >
-                {d.dayShort}
+                <div>{d.dayShort}</div>
+                <div className="mt-0.5 font-mono text-[10px] opacity-80">{d.dateLabel}</div>
               </button>
             ))}
           </div>
           <p className="mb-3 text-sm font-bold uppercase tracking-widest text-foreground">
             {schedule[activeDay]?.dayLabel}
+            <span className="ml-2 font-mono text-xs font-normal text-muted-foreground">
+              {schedule[activeDay]?.dateLabel}
+            </span>
           </p>
           {(schedule[activeDay]?.sessions.length ?? 0) === 0 ? (
             <p className="text-sm text-muted-foreground">{ts.noTrainingDay}</p>
