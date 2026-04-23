@@ -1,21 +1,20 @@
 -- Site Theme: developer-editable colors, live on all pages (public + admin)
--- Stored in a JSONB column on gym_settings so it's one row, fast to load
 
 ALTER TABLE gym_settings
   ADD COLUMN IF NOT EXISTS theme JSONB;
 
--- Default theme for existing rows
+-- Default theme: dark mode (red/black brand)
 UPDATE gym_settings
 SET theme = COALESCE(theme, jsonb_build_object(
-  'primary',           '#e63946',
+  'primary',           '#e8000f',
   'primaryForeground', '#ffffff',
-  'secondary',         '#1a1a2e',
+  'secondary',         '#1a1a1a',
   'secondaryForeground','#ffffff',
-  'accent',            '#e63946',
+  'accent',            '#e8000f',
   'accentForeground',  '#ffffff',
-  'background',        '#fafaf8',
-  'foreground',        '#1a1a1a',
-  'card',              '#f4f2ef',
-  'border',            '#d9d6d1'
+  'background',        '#0a0a0a',
+  'foreground',        '#f5f5f5',
+  'card',              '#141414',
+  'border',            '#2a2a2a'
 ))
 WHERE id = 1;

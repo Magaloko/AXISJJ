@@ -3,8 +3,8 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { updateSiteTheme, resetSiteTheme } from '@/app/actions/site-theme'
-import { DEFAULT_THEME, type SiteTheme } from '@/lib/site-theme'
-import { Palette, RotateCcw, Check, Eye } from 'lucide-react'
+import { DEFAULT_THEME, DARK_THEME, LIGHT_THEME, type SiteTheme } from '@/lib/site-theme'
+import { Palette, RotateCcw, Check, Eye, Moon, Sun } from 'lucide-react'
 
 interface ThemeEditorProps {
   initial: SiteTheme
@@ -95,23 +95,35 @@ export function ThemeEditor({ initial }: ThemeEditorProps) {
 
         <div className="mb-4 flex flex-wrap gap-2">
           <button
+            onClick={() => { setTheme(DARK_THEME); setSaved(false) }}
+            className="inline-flex items-center gap-1.5 border border-border bg-background px-3 py-1.5 text-xs font-bold transition-colors hover:border-primary"
+          >
+            <Moon size={12} /> Dark Preset
+          </button>
+          <button
+            onClick={() => { setTheme(LIGHT_THEME); setSaved(false) }}
+            className="inline-flex items-center gap-1.5 border border-border bg-background px-3 py-1.5 text-xs font-bold transition-colors hover:border-primary"
+          >
+            <Sun size={12} /> Light Preset
+          </button>
+          <button
             onClick={applyFromLogo}
             className="inline-flex items-center gap-1.5 border border-border bg-background px-3 py-1.5 text-xs font-bold transition-colors hover:border-primary"
           >
-            <Palette size={12} /> Logo-Preset anwenden (Rot/Schwarz)
+            <Palette size={12} /> Logo-Farben (Rot/Schwarz)
           </button>
           <button
             onClick={reset}
             className="inline-flex items-center gap-1.5 border border-border bg-background px-3 py-1.5 text-xs font-bold transition-colors hover:border-primary"
           >
-            <RotateCcw size={12} /> Felder zurücksetzen
+            <RotateCcw size={12} /> Zurücksetzen
           </button>
           <button
             onClick={resetToDefaults}
             disabled={isPending}
             className="inline-flex items-center gap-1.5 border border-destructive bg-background px-3 py-1.5 text-xs font-bold text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-40"
           >
-            <RotateCcw size={12} /> Auf Standard zurücksetzen (live)
+            <RotateCcw size={12} /> Auf Dark-Default (live)
           </button>
         </div>
 

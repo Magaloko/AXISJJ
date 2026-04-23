@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Inter_Tight, JetBrains_Mono, Instrument_Serif } from 'next/font/google'
 import './globals.css'
 import gymConfig from '@/gym.config'
-import { themeToCssVars } from '@/lib/site-theme'
+import { themeToCssVars, isDarkTheme } from '@/lib/site-theme'
 import { getSiteTheme } from '@/lib/site-theme.server'
 
 const interTight = Inter_Tight({
@@ -60,10 +60,12 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const theme = await getSiteTheme()
+  const dark = isDarkTheme(theme)
   return (
-    <html lang={gymConfig.defaultLanguage}>
+    <html lang={gymConfig.defaultLanguage} style={{ colorScheme: dark ? 'dark' : 'light' }}>
       <body
         className={`${interTight.variable} ${jetbrainsMono.variable} ${instrumentSerif.variable}`}
+        data-theme={dark ? 'dark' : 'light'}
         style={themeToCssVars(theme) as React.CSSProperties}
       >
         {children}

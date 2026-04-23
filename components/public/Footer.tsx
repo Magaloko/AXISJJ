@@ -5,6 +5,7 @@ import { OpeningHoursDisplay } from './OpeningHoursDisplay'
 import { ContactCard } from './ContactCard'
 import { translations, type Lang } from '@/lib/i18n'
 import { TextHoverEffect } from '@/components/ui/hover-footer'
+import gymConfig from '@/gym.config'
 
 interface FooterProps {
   lang: Lang
@@ -24,8 +25,8 @@ export async function Footer({ lang }: FooterProps) {
 
           <div>
             <Image
-              src="/images/logo.png"
-              alt="AXIS JIU JITSU"
+              src={gymConfig.logo}
+              alt={gymConfig.name}
               width={56}
               height={56}
               className="mb-4 object-contain"

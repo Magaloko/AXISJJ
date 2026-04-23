@@ -53,7 +53,7 @@ export function NavBar({ currentLang }: NavBarProps) {
 
   return (
     <>
-      <nav className="fixed top-0 z-50 w-full border-b border-border bg-white/95 backdrop-blur-md">
+      <nav className="fixed top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur-md">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <Link href="/" aria-label={t.ariaHome} className="shrink-0">
             <Image
@@ -133,7 +133,7 @@ export function NavBar({ currentLang }: NavBarProps) {
       />
       <aside
         className={cn(
-          'fixed right-0 top-0 z-50 h-full w-[82%] max-w-sm bg-white shadow-2xl transition-transform duration-300 md:hidden',
+          'fixed right-0 top-0 z-50 h-full w-[82%] max-w-sm bg-card shadow-2xl transition-transform duration-300 md:hidden',
           open ? 'translate-x-0' : 'translate-x-full'
         )}
         aria-hidden={!open}
